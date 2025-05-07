@@ -134,3 +134,24 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Expo/React Native
+.expo/
+web-build/
+*.jks  # Android signing keys
+*.p8   # Apple auth keys
+*.p12  # Certificate files
+*.key  # Private keys
+*.mobileprovision  # iOS provisioning profiles
+*.orig.*
+metro.config.cache
+.expo-shared/
+
+# Firebase
+firebase.json
+.firebaserc
+
+# Additional React Native/Testing
+.rpt2_cache/  # React Native testing cache
+*.tsbuildinfo  # TypeScript build info (if using TypeScript later)
+*.tgz  # Packaged tarballs
