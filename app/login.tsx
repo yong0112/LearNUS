@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
-import { auth } from '../lib/firebase.ts';
+import { auth } from '../lib/firebase';
 
 export default function Login() {
   const [email, setEmail] = useState('');
