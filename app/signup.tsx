@@ -2,7 +2,7 @@ import { Link, useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import { auth, db } from '../lib/firebase';
 
 export default function Signup() {
@@ -14,7 +14,7 @@ export default function Signup() {
 
   const handleSignup = async () => {
     if (!email.endsWith('@u.nus.edu')) {
-      Alert.alert('Signup failed', 'Only NUS student emails are allowed.');
+      window.alert('Signup failed Only NUS student emails are allowed.');
       return;
     }
 
@@ -26,10 +26,10 @@ export default function Signup() {
         email: email,
         createdAt: new Date(),
       });
-      Alert.alert('Success', 'Account created successfully!');
+      window.alert('Success Account created successfully!');
       router.replace('/login');
     } catch (error: any) {
-      Alert.alert('Signup failed', error.message);
+      window.alert('Signup failed' + error.message);
     }
   };
 
