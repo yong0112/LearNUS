@@ -1,4 +1,4 @@
-import LoginScreen from '../login';
+import LoginScreen from './login';
 
 export default function HomeScreen() {
   return (
