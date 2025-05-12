@@ -51,9 +51,9 @@ export default function Signup() {
         <View style={{ flex: 1, height: 1, backgroundColor: '#ccc' }} />
       </View>
       <Text style={styles.dividerText}>
-        New to LearNUS?{' '}
+        Already on LearNUS?{' '}
         <Link href={'/login'} style={styles.link}>
-          <Text style={styles.link}>Join Now</Text>
+          <Text style={styles.link}>Sign in</Text>
         </Link>
       </Text>
     </View>
