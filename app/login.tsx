@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Link, useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
-import { Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import { auth } from '../lib/firebase';
 
 export default function Login() {
@@ -14,10 +14,10 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.alert('Success Logged in successfully!');
-      router.replace('/home'); 
+      Alert.alert('Success: Logged in successfully!');
+      router.replace('/(tabs)/home'); 
     } catch (error: any) {
-      window.alert('Login failed' + error.message);
+      Alert.alert('Login failed' + error.message);
     }
   };
 
