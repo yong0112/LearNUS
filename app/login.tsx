@@ -15,7 +15,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       window.alert('Success Logged in successfully!');
-      router.replace('/home'); 
+      router.replace('/(tabs)/home'); 
     } catch (error: any) {
       window.alert('Login failed' + error.message);
     }
