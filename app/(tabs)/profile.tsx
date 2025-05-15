@@ -1,5 +1,7 @@
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 export default function Profile() {
   const router = useRouter();
     
@@ -15,7 +17,15 @@ export default function Profile() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Profile</Text>
+      <View style={styles.circleBackground}/>
+
+      <View style={styles.header}>
+        <View style={{ width: 30 }}/>
+        <Text style={styles.headerText}>Profile</Text>
+        <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginHorizontal: 10 }} onPress={() => router.push('/+not-found')}>
+          <Ionicons name="settings" size={30} color="white" />
+        </TouchableOpacity>
+      </View>
 
       <Image
         source={require('../../assets/images/profile.png')}
@@ -44,41 +54,61 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     paddingBottom: 40,
   },
-  header: {
+  circleBackground: {
+    position: 'absolute',
+    top: -450, 
+    left: -100,
+    width: 600,
+    height: 600,
+    borderRadius: 300,
+    backgroundColor: '#FF8C00', // dark orange
+    zIndex: -1,
+  },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingBottom: 10,
+    flex: 1,
+    paddingTop: 10
+  },
+  headerText: {
     fontSize: 28,
     fontWeight: 'bold',
-    alignSelf: 'center',
-    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white'
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
     alignSelf: 'center',
+    marginTop: 20
   },
   name: {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: '600',
     alignSelf: 'center',
-    marginVertical: 10,
+    marginTop: 8,
+    marginBottom: 10
   },
   menu: {
-    marginTop: 30,
+    marginTop: 20,
   },
   menuItem: {
     backgroundColor: '#f2f2f2',
-    padding: 16,
-    marginBottom: 12,
+    padding: 10,
     borderRadius: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   menuText: {
-    fontSize: 16,
+    fontSize: 20,
+    fontWeight: '500',
   },
   arrow: {
     fontSize: 18,

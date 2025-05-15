@@ -1,11 +1,20 @@
-import { Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 
-const forum = () => {
+export default function Chat() {
   return (
-    <View>
-      <Text>Forum</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>Forum</Text>
     </View>
   )
 }
 
-export default forum
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: '600',
+  }
+})

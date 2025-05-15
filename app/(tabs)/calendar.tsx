@@ -1,11 +1,20 @@
-import { Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 
-const calendar = () => {
+export default function Chat() {
   return (
-    <View>
-      <Text>Calendar</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>Calendar</Text>
     </View>
   )
 }
 
-export default calendar
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: '600',
+  }
+})

@@ -12,7 +12,9 @@ export default function Home() {
         <Image source={require('../../assets/images/logo.jpg')} style={styles.image} />
         <Text style={styles.headerLear}>Lear</Text><Text style={styles.headerNUS}>NUS</Text>
         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
-          <Ionicons name="settings" size={30} color="black" />
+          <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => router.push('/+not-found')}>
+            <Ionicons name="settings" size={30} color="black" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -67,7 +69,7 @@ export default function Home() {
 
       <Text style={styles.explore}>
         Looking for tutor?
-        <TouchableOpacity style={{ marginLeft: 6 }}>
+        <TouchableOpacity style={{ marginLeft: 6 }} onPress={() => router.push('/+not-found')}>
             <AntDesign name={'rightcircle'} size={20} color={'black'} />
         </TouchableOpacity>
       </Text>
@@ -107,24 +109,24 @@ const styles = StyleSheet.create({
   headerNUS: { fontSize: 25, fontWeight: 'bold', color: 'orange' },
   tabBar: {
     paddingHorizontal: 0,
-    paddingVertical: 30
+    paddingTop: 10,
+    paddingBottom: 20,
   },
   tabButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f2f2f2',
-    borderRadius: 10,
+    borderRadius: 20,
     paddingHorizontal: 6,
     paddingVertical: 6,
     marginHorizontal: 6,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#ddd',
-    maxHeight: '5%',
   },
   buttonText: { marginLeft: 6, fontSize: 14, fontWeight: 'semibold' },
   reminder: { width: 350, height: 150, borderRadius: 10, backgroundColor: '#aaaaaa', justifyContent: 'center', alignItems:'center' },
   reminderText: { fontSize: 20, fontWeight: 'bold', color: 'black' },
-  explore: { fontSize: 20, fontWeight: 'bold', paddingTop: 30, marginRight: 10 },
+  explore: { fontSize: 20, fontWeight: 'bold', paddingTop: 10, marginRight: 10 },
   exploreButton: {
     width: 80,
     height: 75,
