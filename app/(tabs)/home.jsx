@@ -49,9 +49,9 @@ export default function Home() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabBar}>
-        <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/+not-found')}>
+        <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/tutor_post')}>
           <FontAwesome5 name="chalkboard-teacher" size={30} color="black" />
-          <Text style={styles.exploreButtonText}>Favourites</Text>
+          <Text style={styles.exploreButtonText}>Tutoring</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/+not-found')}>
           <Image source={require('../../assets/images/nusmods.png')} style={{ width: 50, height: 35 }} />
@@ -69,7 +69,7 @@ export default function Home() {
 
       <Text style={styles.explore}>
         Looking for tutor?
-        <TouchableOpacity style={{ marginLeft: 6 }} onPress={() => router.push('/+not-found')}>
+        <TouchableOpacity style={{ marginLeft: 6 }} onPress={() => router.push('/tutor_find')}>
             <AntDesign name={'rightcircle'} size={20} color={'black'} />
         </TouchableOpacity>
       </Text>
