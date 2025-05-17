@@ -20,11 +20,15 @@ export default function Profile() {
       <View style={styles.circleBackground}/>
 
       <View style={styles.header}>
-        <View style={{ width: 30 }}/>
-        <Text style={styles.headerText}>Profile</Text>
-        <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginHorizontal: 10 }} onPress={() => router.push('/+not-found')}>
-          <Ionicons name="settings" size={30} color="white" />
-        </TouchableOpacity>
+        <View style={{ width: 60 }} />
+        <View>
+          <Text style={styles.headerText}>Profile</Text>
+        </View>
+        <View style={{ width: 60 }}>
+          <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginHorizontal: 10 }} onPress={() => router.push('/+not-found')}>
+            <Ionicons name="settings" size={30} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Image
@@ -54,14 +58,14 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 40,
+    paddingVertical: 40,
   },
   circleBackground: {
     position: 'absolute',
     top: -450, 
-    left: -100,
-    width: 600,
-    height: 600,
+    left: -150,
+    width: 700,
+    height: 650,
     borderRadius: 300,
     backgroundColor: '#FF8C00', // dark orange
     zIndex: -1,
@@ -79,7 +83,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     alignItems: 'center',
     justifyContent: 'center',
-    color: 'white'
+    color: 'white',
   },
   avatar: {
     width: 100,
