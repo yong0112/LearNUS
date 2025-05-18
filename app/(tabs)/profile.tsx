@@ -1,12 +1,35 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { auth, db } from '../../lib/firebase';
 
 export default function Profile() {
   const router = useRouter();
+  const [userProfile, setUserProfile] = useState<any | undefined>(null);
+
+  const fetchData = async () => {
+    const user = auth.currentUser?.uid;
+    if (user !== undefined) {
+      const docRef = doc(db, "users", user);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        console.log("Document data: ", docSnap.data())
+        setUserProfile(docSnap.data())
+      } else {
+        console.log("No such document found!")
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, [])
     
   const menuItems = [
-    { label: 'Profile Details', route: '/profile/details' },
+    { label: 'Personal Details', route: '../details' },
     { label: 'Tutoring History', route: '/profile/history' },
     { label: 'Ratings & Reviews', route: '/profile/reviews' },
     { label: 'Achievements & Badges', route: '/profile/achievements' },
@@ -36,7 +59,7 @@ export default function Profile() {
         style={styles.avatar}
       />
 
-      <Text style={styles.name}>John</Text>
+      <Text style={styles.name}>{userProfile?.firstName}</Text>
 
       <View style={styles.menu}>
         {menuItems.map((item, index) => (
