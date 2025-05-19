@@ -48,7 +48,7 @@ export default function Details() {
 
       {/*Avatar*/}
       <View style={{ paddingVertical: 20, marginBottom: 40 }}>
-        <Image source={require('../assets/images/defaultProfile.jpg')} style={styles.avatar} />
+        <Image source={{uri: userProfile?.profilePicture}} style={styles.avatar} />
         <TouchableOpacity style={{ alignSelf: 'center', marginLeft: 100 }} onPress={handleChangeProfilePic}>
           <MaterialCommunityIcons name='progress-pencil' size={30}/>
         </TouchableOpacity>

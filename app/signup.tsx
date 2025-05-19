@@ -25,7 +25,9 @@ export default function Signup() {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        createdAt: new Date()
+        createdAt: new Date(),
+        profilePicture: "https://randomuser.me/api/portraits/lego/5.jpg",
+        ratings: null
       });
       Alert.alert('Success Account created successfully!');
       router.replace('/login');

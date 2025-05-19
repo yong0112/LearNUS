@@ -29,13 +29,13 @@ export default function Profile() {
   }, [])
     
   const menuItems = [
-    { label: 'Personal Details', route: '../details' },
-    { label: 'Tutoring History', route: '/profile/history' },
-    { label: 'Ratings & Reviews', route: '/profile/reviews' },
-    { label: 'Achievements & Badges', route: '/profile/achievements' },
-    { label: 'Payment Methods', route: '/profile/payments' },
-    { label: 'Security & Privacy', route: '/profile/security' },
-    { label: 'Contact Us', route: '/profile/contact' },
+    { label: 'Personal Details', route: '../profile/details' },
+    { label: 'Tutoring History', route: '../profile/history' },
+    { label: 'Ratings & Reviews', route: '../profile/ratings' },
+    { label: 'Achievements & Badges', route: '../profile/achievements' },
+    { label: 'Payment Methods', route: '../profile/payments' },
+    { label: 'Security & Privacy', route: '../profile/security' },
+    { label: 'Contact Us', route: '../profile/contact' },
   ];
 
   return (
@@ -55,7 +55,7 @@ export default function Profile() {
       </View>
 
       <Image
-        source={require('../../assets/images/profile.png')}
+        source={{ uri: userProfile?.profilePicture }}
         style={styles.avatar}
       />
 
