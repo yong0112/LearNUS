@@ -1,3 +1,4 @@
+// app/login.js
 import { useNavigation } from '@react-navigation/native';
 import { Link, useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
