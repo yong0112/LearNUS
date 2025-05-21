@@ -8,7 +8,7 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 export default function history() {
   const router = useRouter();
   const [classes, setClasses] = useState<any>([]);
-
+  
   const fetchData = async () => {
     const user = auth.currentUser?.uid;
     if (user !== undefined) {

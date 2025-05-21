@@ -163,21 +163,21 @@ export default function TutorPost() {
 const styles = StyleSheet.create({
     container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20, justifyContent: 'flex-start' },
     background: {
-    position: 'absolute',
-    top: -550, 
-    left: -150,
-    width: 700,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: '#ffc04d',
-    zIndex: -1,
-  },
+        position: 'absolute',
+        top: -550, 
+        left: -150,
+        width: 700,
+        height: 650,
+        borderRadius: 0,
+        backgroundColor: '#ffc04d',
+        zIndex: -1,
+    },
     headerText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'black'
+        fontSize: 28,
+        fontWeight: 'bold',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'black'
     },
     searchBar: {
         borderRadius: 20, 
