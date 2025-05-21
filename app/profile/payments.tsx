@@ -16,8 +16,9 @@ export default function payments() {
         <View style={{ width: 40 }}/>
       </View>
 
-      <View>
-        <Text></Text>
+      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}>
+        <Text style={styles.title}>🚧 Coming Soon</Text>
+        <Text style={styles.subtitle}>This feature is still under development.</Text>
       </View>
     </View>
   )
@@ -42,4 +43,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         color: 'black'
     },
+    title: {
+      fontSize: 24, fontWeight: 'bold', alignSelf: 'center', marginBottom: 10
+    },
+    subtitle: {
+      fontSize: 20, fontWeight: '500', alignSelf: 'center'
+    }
 })

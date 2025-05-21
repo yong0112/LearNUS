@@ -101,7 +101,7 @@ export default function ratings() {
         <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No reviews yet.</Text>
       ) : (
         reviews.map((review: { id: React.Key | null | undefined; rating: number; date: Date; comment: string; name: string; profilePicture: string }) => (
-          <View style={{ borderBottomWidth: 2, borderBottomColor: 'darkgray' }}>
+          <View key={review.id} style={{ borderBottomWidth: 2, borderBottomColor: 'darkgray' }}>
             <View style={styles.review}>
               <Image source={{ uri: review.profilePicture }} style={styles.avatar} />
               <Text style={{ fontSize: 18, fontWeight: '500', alignSelf: 'center' }}>{review.name}</Text>

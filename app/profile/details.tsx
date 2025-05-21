@@ -70,7 +70,7 @@ export default function Details() {
         </View>
         <View style={{ paddingBottom: 35 }}>
           <Text style={styles.label}>Email</Text>
-          <TouchableOpacity style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between', borderBottomColor: '#aaaaaa', borderBottomWidth: 2 }}onPress={handleChangeEmail}>
+          <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', borderBottomColor: '#aaaaaa', borderBottomWidth: 2 }} onPress={handleChangeEmail}>
             <Text style={{ fontSize: 16, marginHorizontal: 5, color: '#666666' }}>{userProfile?.email}</Text>
             <Octicons name='pencil' size={15} />
           </TouchableOpacity>
