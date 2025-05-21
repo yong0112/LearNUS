@@ -1,9 +1,66 @@
+import { auth, db } from '@/lib/firebase';
 import { AntDesign, FontAwesome5, Ionicons, MaterialIcons, Octicons, SimpleLineIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Home() {
   const router = useRouter();
+  const [tutors, setTutors] = useState<any>([]);
+
+  const fetchData = async () => {
+      const user = auth.currentUser?.uid;
+      if (user !== undefined) {
+        const tutorRef = collection(db, "tutors");
+        const tutorSnap = await getDocs(tutorRef);
+
+        const tutorList = await Promise.all(
+          tutorSnap.docs.map(async (docSnap) => {
+            const tutorInfo = docSnap.data();
+            const postingId = docSnap.id;
+            const tutorUid = tutorInfo.tutor;
+
+            let profilePictureUrl = '';
+            let tutorName = '';
+            let tutorRating = 0;
+            if (tutorUid) {
+              const userDocRef = doc(db, 'users', tutorUid);
+              const userDocSnap = await getDoc(userDocRef);
+              if (userDocSnap.exists()) {
+                profilePictureUrl = userDocSnap.data().profilePicture || '';
+                tutorName = userDocSnap.data().firstName || '';
+                tutorRating = userDocSnap.data().ratings || 0;
+              }
+            }
+
+            return {
+              id: postingId,
+              tutor: tutorInfo.tutor,
+              tutorName: tutorName,
+              tutorRating: tutorRating,
+              course: tutorInfo.course,
+              location: tutorInfo.location,
+              description: tutorInfo.description,
+              availability: tutorInfo.availability,
+              rate: tutorInfo.rate,
+              profilePicture: profilePictureUrl,
+            };
+          })
+        );
+
+        setTutors(tutorList)
+      }
+  }
+
+  useEffect(() => {
+      fetchData();
+  }, [])
+
+  const handleTutorProfile = () => {
+    console.log("Tutor profile")
+  }
+
 
   return (
     <View style={styles.container}>
@@ -75,26 +132,17 @@ export default function Home() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabBar}>
-        <TouchableOpacity style={styles.tutorProfile} onPress={() => router.push('/+not-found')}>
-            <Image source={require('../../assets/images/person.jpg')} style={{ width: 80, height: 100 }} />
-            <Text style={styles.exploreButtonText}>Name</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tutorProfile} onPress={() => router.push('/+not-found')}>
-            <Image source={require('../../assets/images/person.jpg')} style={{ width: 80, height: 100 }} />
-            <Text style={styles.exploreButtonText}>Name</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tutorProfile} onPress={() => router.push('/+not-found')}>
-            <Image source={require('../../assets/images/person.jpg')} style={{ width: 80, height: 100 }} />
-            <Text style={styles.exploreButtonText}>Name</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tutorProfile} onPress={() => router.push('/+not-found')}>
-            <Image source={require('../../assets/images/person.jpg')} style={{ width: 80, height: 100 }} />
-            <Text style={styles.exploreButtonText}>Name</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tutorProfile} onPress={() => router.push('/+not-found')}>
-            <Image source={require('../../assets/images/person.jpg')} style={{ width: 80, height: 100 }} />
-            <Text style={styles.exploreButtonText}>Name</Text>
-        </TouchableOpacity>
+        {tutors.length === 0 ? (
+          <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No tutors yet.</Text>
+        ) : (
+            tutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; rate: number, profilePicture: string }) => (
+                <TouchableOpacity key={tutor.id} style={styles.tutorProfile} onPress={handleTutorProfile}>
+                    <Image source={{ uri: tutor.profilePicture }} style={{ width: 80, height: 100, alignSelf: 'center' }} />
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{tutor.course}</Text>
+                    <Text style={{ fontSize: 16, fontWeight: '500', fontStyle: 'italic' }}>S${tutor.rate} hourly</Text>
+                </TouchableOpacity>
+            ))
+        )}
       </ScrollView>
     </View>
   );
@@ -136,12 +184,8 @@ const styles = StyleSheet.create({
   exploreButtonText : { marginTop: 10, fontSize: 16, fontWeight: 'semibold', textAlign: 'center' },
   tutorProfile: {
     width: 100,
-    height: 150,
+    height: 'auto',
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: '#ddd',
-    backgroundColor: 'grey',
     marginRight: 10,
   },
   image: { width: 50, height: 50, borderRadius: 10 },
