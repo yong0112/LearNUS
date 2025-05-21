@@ -30,7 +30,7 @@ export default function Signup() {
         ratings: null
       });
       Alert.alert('Success Account created successfully!');
-      router.replace('/login');
+      router.replace('/'); // Redirect to the home page after signup
     } catch (error: any) {
       Alert.alert('Signup failed' + error.message);
     }
