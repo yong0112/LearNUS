@@ -5,12 +5,13 @@ import { useState } from 'react';
 import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import { auth, db } from '../lib/firebase';
 
+
 export default function Signup() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
+  const router = useRouter();  
 
   const handleSignup = async () => {
     if (!email.endsWith('@u.nus.edu')) {
@@ -25,6 +26,8 @@ export default function Signup() {
         lastName: lastName,
         email: email,
         createdAt: new Date(),
+        profilePicture: "https://randomuser.me/api/portraits/lego/5.jpg",
+        ratings: null
       });
       Alert.alert('Success Account created successfully!');
       router.replace('/'); // Redirect to the home page after signup

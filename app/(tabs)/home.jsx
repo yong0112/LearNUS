@@ -1,7 +1,6 @@
 import { AntDesign, FontAwesome5, Ionicons, MaterialIcons, Octicons, SimpleLineIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Home() {
   const router = useRouter();
@@ -49,30 +48,28 @@ export default function Home() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabBar}>
-        <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/+not-found')}>
-          <FontAwesome5 name="chalkboard-teacher" size={30} color="black" />
-          <Text style={styles.exploreButtonText}>Favourites</Text>
+        <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/tutor_post')}>
+          <FontAwesome5 name="chalkboard-teacher" size={40} color="black" />
+          <Text style={styles.exploreButtonText}>Tutoring</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/+not-found')}>
-          <Image source={require('../../assets/images/nusmods.png')} style={{ width: 50, height: 35 }} />
+          <Image source={require('../../assets/images/nusmods.png')} style={{ width: 50, height: 45 }} />
           <Text style={styles.exploreButtonText}>NUSMods</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/+not-found')}>
-          <MaterialIcons name="wallet" size={35} color="black" />
+          <MaterialIcons name="wallet" size={45} color="black" />
           <Text style={styles.exploreButtonText}>Wallet</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/+not-found')}>
-          <SimpleLineIcons name="badge" size={30} color="black" />
+          <SimpleLineIcons name="badge" size={40} color="black" />
           <Text style={styles.exploreButtonText}>Badges</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      <Text style={styles.explore}>
-        Looking for tutor?
-        <TouchableOpacity style={{ marginLeft: 6 }} onPress={() => router.push('/+not-found')}>
-            <AntDesign name={'rightcircle'} size={20} color={'black'} />
-        </TouchableOpacity>
-      </Text>
+      <TouchableOpacity style={{ flexDirection: 'row', height: 40, alignItems: 'center' }} onPress={() => router.push('/tutor_find')}>
+          <Text style={styles.explore}>Looking for tutor?</Text>
+          <AntDesign name={'rightcircle'} size={20} color={'black'} />
+      </TouchableOpacity>
 
       <ScrollView 
         horizontal
@@ -104,7 +101,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, justifyContent: 'flex-start' },
+  container: { paddingHorizontal: 20, paddingVertical: 40, justifyContent: 'flex-start', flexDirection: 'column' },
   headerLear: { fontSize: 25, fontWeight: 'bold', marginLeft: 10 },
   headerNUS: { fontSize: 25, fontWeight: 'bold', color: 'orange' },
   tabBar: {
@@ -124,19 +121,19 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   buttonText: { marginLeft: 6, fontSize: 14, fontWeight: 'semibold' },
-  reminder: { width: 350, height: 150, borderRadius: 10, backgroundColor: '#aaaaaa', justifyContent: 'center', alignItems:'center' },
+  reminder: { width: 'auto', height: 150, borderRadius: 10, backgroundColor: '#aaaaaa', justifyContent: 'center', alignItems:'center', marginBottom: 30 },
   reminderText: { fontSize: 20, fontWeight: 'bold', color: 'black' },
-  explore: { fontSize: 20, fontWeight: 'bold', paddingTop: 10, marginRight: 10 },
+  explore: { fontSize: 24, fontWeight: 'bold', marginRight: 10 },
   exploreButton: {
-    width: 80,
+    width: 90,
     height: 75,
     flexDirection: 'column',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     borderColor: '#ddd',
     marginRight: 20,
   },
-  exploreButtonText : { marginTop: 10, fontSize: 14, fontWeight: 'semibold', textAlign: 'center' },
+  exploreButtonText : { marginTop: 10, fontSize: 16, fontWeight: 'semibold', textAlign: 'center' },
   tutorProfile: {
     width: 100,
     height: 150,
