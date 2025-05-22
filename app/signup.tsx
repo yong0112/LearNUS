@@ -24,16 +24,7 @@ export default function Signup() {
       const user = userCredential.user;
 
       //send verification email
-      try {
-      console.log('Attempting to send verification email to:', user.email);
       await sendEmailVerification(user);
-      console.log('Email sent successfully');
-      Alert.alert('Success', 'Verification email sent! Check your inbox and spam folder.');
-    } catch (error: any) {
-      console.error('Email sending failed:', error);
-      Alert.alert('Error', `Failed to send email: ${error.message}`);
-    }
-
 
       await setDoc(doc(db, 'users', userCredential.user.uid), {
         firstName: firstName,
@@ -70,8 +61,8 @@ export default function Signup() {
       <Text style={styles.headings}>Signing Up</Text>
       <TextInput placeholder="First Name" value={firstName} onChangeText={setFirstName} style={styles.input} />
       <TextInput placeholder="Last Name" value={lastName} onChangeText={setLastName} style={styles.input} />
-      <TextInput placeholder="eXXXXXXX@u.nus.edu" value={email} onChangeText={setEmail} autoCapitalize="none" style={styles.input} />
-      <TextInput placeholder="password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" style={styles.input} />
+      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
       <Button title="Create Account" onPress={handleSignup} color={'#000000'} />
        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
         <View style={{ flex: 1, height: 1, backgroundColor: '#ccc' }} />

@@ -53,9 +53,9 @@ export default function Login() {
       <Image source={require('../assets/images/logo.jpg')} style={styles.image} />
       <Text style={styles.title}>Welcome to LearNUS!</Text>
       <Text style={styles.headings}>Sign In</Text>
-      <Text style={styles.subheadings}>Login with your school email address</Text>
-      <TextInput placeholder="eXXXXXXX@u.nus.edu" value={email} onChangeText={setEmail} autoCapitalize="none" style={styles.input} />
-      <TextInput placeholder="password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+      <Text style={styles.subheadings}>Login with your personal email address</Text>
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" style={styles.input} />
+      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
       <Button title="Continue" onPress={handleLogin} color={'#000000'} />
       <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
         <View style={{ flex: 1, height: 1, backgroundColor: '#ccc' }} />
