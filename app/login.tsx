@@ -1,10 +1,11 @@
 // app/login.js
 import { useNavigation } from '@react-navigation/native';
 import { Link, useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
-import { auth } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,11 +15,36 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Check if the email is verified 
+      if (!user.emailVerified) {
+        Alert.alert('Login failed', 'Please verify your email before logging in.',
+          [
+            {
+              text: 'Send Again',
+              onPress: async () => {
+                await sendEmailVerification(user);
+                Alert.alert('Verification email sent. Please check your inbox.');
+              }
+            }
+          ]
+        );
+        return;
+      }
+
+      // Update firestore doc
+      await updateDoc(doc(db, 'users', user.uid), {
+        emailVerified: true,
+      });
+
+      // Alert for successful login and redirect to home page
       Alert.alert('Success: Logged in successfully!');
       router.replace('/(tabs)/home'); 
+
     } catch (error: any) {
-      Alert.alert('Login failed' + error.message);
+      Alert.alert('Login failed: ' + error.message);
     }
   };
 

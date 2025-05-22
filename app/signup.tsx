@@ -1,5 +1,5 @@
 import { Link, useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -14,25 +14,50 @@ export default function Signup() {
   const router = useRouter();  
 
   const handleSignup = async () => {
-    if (!email.endsWith('@u.nus.edu')) {
-      Alert.alert('Signup failed Only NUS student emails are allowed.');
-      return;
-    }
+    // if (!email.endsWith('@u.nus.edu')) {
+    //   Alert.alert('Signup failed Only NUS student emails are allowed.');
+    //   return;
+    // }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      //send verification email
+      try {
+      console.log('Attempting to send verification email to:', user.email);
+      await sendEmailVerification(user);
+      console.log('Email sent successfully');
+      Alert.alert('Success', 'Verification email sent! Check your inbox and spam folder.');
+    } catch (error: any) {
+      console.error('Email sending failed:', error);
+      Alert.alert('Error', `Failed to send email: ${error.message}`);
+    }
+
+
       await setDoc(doc(db, 'users', userCredential.user.uid), {
         firstName: firstName,
         lastName: lastName,
         email: email,
         createdAt: new Date(),
         profilePicture: "https://randomuser.me/api/portraits/lego/5.jpg",
-        ratings: null
+        ratings: null,
+        emailVerified: false
       });
-      Alert.alert('Success Account created successfully!');
-      router.replace('/'); // Redirect to the home page after signup
+      Alert.alert(
+        'Success: Account created successfully! Verification email sent.',
+        'Please verify your email before logging in.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              router.replace('/'); // Redirect to the login page after signup
+            },
+          },
+        ]
+      );
     } catch (error: any) {
-      Alert.alert('Signup failed' + error.message);
+      Alert.alert('Signup failed: ' + error.message);
     }
   };
 
