@@ -2,7 +2,7 @@ import { Link, useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { auth, db } from '../lib/firebase';
 
 
@@ -53,7 +53,14 @@ export default function Signup() {
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior= {Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset= {Platform.OS === 'ios' ? 0 : 20} 
+          enabled
+        >
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Image source={require('../assets/images/logo.jpg')} style={styles.image} />
         <Text style={styles.title}>Welcome to LearNUS!</Text>
@@ -75,12 +82,16 @@ export default function Signup() {
           <Text style={styles.link}>Sign in</Text>
         </Link>
       </Text>
-    </View>
+    </ScrollView>
+    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding :20 },
+  scrollContainer: { flexGrow: 1, justifyContent: 'center', paddingVertical: 20 },
+  // innerContainer: { flex: 1, justifyContent: 'center' },
   title: { fontSize: 25, fontWeight: 'bold', marginLeft: 10, marginTop: 50 },
   headings: { fontSize: 28, fontWeight: 'bold', marginTop: 80, marginBottom: 10},
   input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginVertical: 10, borderRadius: 5, opacity: 0.5 },

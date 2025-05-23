@@ -4,7 +4,7 @@ import { Link, useRouter } from 'expo-router';
 import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import { Alert, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { db, auth } from '../lib/firebase';
 
 export default function Login() {
@@ -49,7 +49,14 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior= {Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset= {Platform.OS === 'ios' ? 0 : 20} 
+      enabled
+    >
+    <View style={styles.innerContainer}>
       <Image source={require('../assets/images/logo.jpg')} style={styles.image} />
       <Text style={styles.title}>Welcome to LearNUS!</Text>
       <Text style={styles.headings}>Sign In</Text>
@@ -69,13 +76,16 @@ export default function Login() {
         </Link>
       </Text>
     </View>
+    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  title: { fontSize: 30, fontWeight: 'bold', marginBottom: 80, textAlign: 'center' },
-  headings: { fontSize: 24, fontWeight: 'bold', marginBottom:8, textAlign: 'center' },
+  innerContainer: { flex: 1, justifyContent: 'center' }, // Added style for innerContainer
+  title: { fontSize: 30, fontWeight: 'bold', marginBottom: 50, textAlign: 'center' },
+  headings: { fontSize: 24, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
   subheadings: { fontSize: 15, marginBottom: 20, textAlign: 'center' },
   input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginVertical: 10, borderRadius: 5, opacity: 0.5 },
   dividerText: { marginHorizontal: 10, color: '#666', textAlign: 'center', },
