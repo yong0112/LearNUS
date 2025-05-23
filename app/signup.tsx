@@ -19,6 +19,19 @@ export default function Signup() {
     //   return;
     // }
 
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
+
+    if (!trimmedFirstName) {
+      Alert.alert('Signup failed', 'Please enter your first name.');
+      return;
+    }
+
+    if (trimmedLastName === '') {
+      Alert.alert('Signup failed', 'Please enter your last name.');
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -27,8 +40,8 @@ export default function Signup() {
       await sendEmailVerification(user);
 
       await setDoc(doc(db, 'users', userCredential.user.uid), {
-        firstName: firstName,
-        lastName: lastName,
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
         email: email,
         createdAt: new Date(),
         profilePicture: "https://randomuser.me/api/portraits/lego/5.jpg",
@@ -48,7 +61,25 @@ export default function Signup() {
         ]
       );
     } catch (error: any) {
-      Alert.alert('Signup failed: ' + error.message);
+      // Handle different error codes during signup
+      let errorMessage = 'Unknown error occurred. Please try again.';
+      
+      if (error.code === 'auth/invalid-email' ) {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/missing-password' || error.code === 'auth/weak-password') {
+        errorMessage = 'Password must be at least 6 characters long.';
+        errorMessage = 'Invalid email or password.';
+      } else if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'Email already in use. Please use a different email.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many signup attempts. Please try again later.';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Signup failed', errorMessage);
     }
   };
 

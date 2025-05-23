@@ -44,7 +44,19 @@ export default function Login() {
       router.replace('/(tabs)/home'); 
 
     } catch (error: any) {
-      Alert.alert('Login failed: ' + error.message);
+      let errorMessage = 'Unknown error occurred. Please try again.';
+      
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/missing-password' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email or password.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many login attempts. Please try again later.';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Login Failed', errorMessage);
     }
   };
 
