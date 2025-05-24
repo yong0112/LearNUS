@@ -1,13 +1,17 @@
 import { auth, db } from '@/lib/firebase';
-import { AntDesign, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, Entypo, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+const screenHeight = Dimensions.get('window').height;
 
 export default function tutoring() {
     const router = useRouter();
     const [tutors, setTutors] = useState<any>([]);
+    const [selectedTutor, setSelectedTutor] = useState<any>(null);
+    const [modalVisible, setModalVisible] = useState(false);
 
     const handleFilter = () => {
         console.log("Filtering");
@@ -65,9 +69,23 @@ export default function tutoring() {
         fetchData();
     }, [])
 
-    const handleTutorProfile = () => {
-        console.log("Tutor profile")
+    const handleTutorProfile = (tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number; profilePicture: string; }) => {
+        setSelectedTutor(tutor)
+        setModalVisible(true)
     }
+
+    const closeModal = () => {
+        setSelectedTutor(null)
+        setModalVisible(false)
+    }
+
+    const handleBooking = () => {
+        console.log("Booking in progress")
+    }
+
+    const handleContact = () => {
+        console.log("Contact in progress")
+    } 
 
     return (
         <View style={styles.container}>
@@ -98,20 +116,74 @@ export default function tutoring() {
                 <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No tutors yet.</Text>
                 ) : (
                     tutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => (
-                        <TouchableOpacity key={tutor.id} style={styles.tutorCard} onPress={handleTutorProfile}>
-                            <ImageBackground source={{ uri: tutor.profilePicture }} style={styles.image}>
+                        <TouchableOpacity key={tutor.id} style={styles.tutorCard} onPress={() => handleTutorProfile(tutor)}>
+                            <Image source={{ uri: tutor.profilePicture }} style={styles.image} />
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorName}</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <AntDesign name='star' size={20} color={'black'} />
                                     <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorRating}</Text>
                                 </View>
-                            </ImageBackground>
+                            </View>
                             <Text style={{ fontSize: 18, fontWeight: '600' }}>{tutor.course} - {tutor.description}</Text>
                             <Text style={{ fontSize: 20, fontWeight: '700', fontStyle: 'italic' }}>S${tutor.rate} per hour</Text>
                         </TouchableOpacity>
                     ))
                 )}
             </ScrollView>
+
+            <Modal
+                animationType="slide"
+                transparent
+                visible={modalVisible}
+                onRequestClose={closeModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        {selectedTutor && (
+                        <>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignSelf: 'stretch', marginBottom: 30 }}>
+                                <View>
+                                    <TouchableOpacity onPress={closeModal}>
+                                        <AntDesign name='arrowleft' size={30} color={'orange'} />
+                                    </TouchableOpacity>
+                                </View>
+                                <View>
+                                    <TouchableOpacity>
+                                        <FontAwesome name='share' size={30} color={'orange'} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            <Image source={{ uri: selectedTutor.profilePicture }} style={styles.modalImage} />
+                            <Text style={{ fontSize: 28, fontWeight: '600', alignSelf: 'center' }}>{selectedTutor.tutorName}</Text>
+                            <Text style={{ fontSize: 24, fontWeight: '600', marginTop: 25 }}>{selectedTutor.course}</Text>
+                            <Text style={{ fontSize: 18, color: '#888888', marginTop: 10 }}>{selectedTutor.description}</Text>
+                            <Text style={{ fontSize: 22, fontWeight: '600', marginTop: 15 }}>Availability</Text>
+                            <Text style={{ fontSize: 18, color: '#888888', marginTop: 5 }}>{selectedTutor.availability}</Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', marginTop: 20, alignItems: 'center' }}>
+                                <View style={{ backgroundColor: 'lightgray', justifyContent: 'center', alignItems: 'center', width: 50, height: 50 }}>
+                                    <AntDesign name='star' size={30} color={'yellow'} />
+                                </View>
+                                <Text style={{ fontSize: 20, color: 'gray', marginHorizontal: 10 }}>{selectedTutor.tutorRating}/5.0 stars</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-start', marginTop: 20, alignItems: 'center' }}>
+                                <View style={{ backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center', width: 50, height: 50 }}>
+                                    <FontAwesome name='dollar' size={30} color={'black'} />
+                                </View>
+                                <Text style={{ fontSize: 20, color: 'gray', marginHorizontal: 10 }}>{selectedTutor.rate} per hour</Text>
+                            </View>
+                            <TouchableOpacity style={{ marginTop: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: 'orange', alignSelf: 'stretch' }} onPress={handleBooking}>
+                                <Text style={{ marginHorizontal: 4, fontSize: 28, fontWeight: '600', marginBottom: 2, color: 'white' }}>Book now!</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{ marginTop: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white', alignSelf: 'stretch', flexDirection: 'row', borderWidth: 3 }} onPress={handleContact}>
+                                <Entypo name='old-phone' size={25} color={'black'} />
+                                <Text style={{ marginHorizontal: 4, fontSize: 28, fontWeight: '600', marginBottom: 2, color: 'black' }}>Contact me!</Text>
+                            </TouchableOpacity>
+                        </>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 }
@@ -153,5 +225,31 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
         borderBottomColor: '#444444',
         height: 150
-    }
+    },
+    modalOverlay: {
+        padding: 20,
+        alignItems: 'center',
+        flex: 1
+    },
+    modalContent: {
+        width: '97%',
+        height: screenHeight * 0.95,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 15,
+        alignItems: 'flex-start',
+        overflow: 'hidden',
+        elevation: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.8,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 8,
+        alignSelf: 'center'
+    },
+    modalImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 50,
+        alignSelf: 'center'
+    },
 })
