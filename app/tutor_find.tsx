@@ -3,7 +3,7 @@ import { AntDesign, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function tutoring() {
     const router = useRouter();
@@ -99,13 +99,14 @@ export default function tutoring() {
                 ) : (
                     tutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => (
                         <TouchableOpacity key={tutor.id} style={styles.tutorCard} onPress={handleTutorProfile}>
-                            <ImageBackground source={{ uri: tutor.profilePicture }} style={styles.image}>
+                            <Image source={{ uri: tutor.profilePicture }} style={styles.image} />
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorName}</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <AntDesign name='star' size={20} color={'black'} />
                                     <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorRating}</Text>
                                 </View>
-                            </ImageBackground>
+                            </View>
                             <Text style={{ fontSize: 18, fontWeight: '600' }}>{tutor.course} - {tutor.description}</Text>
                             <Text style={{ fontSize: 20, fontWeight: '700', fontStyle: 'italic' }}>S${tutor.rate} per hour</Text>
                         </TouchableOpacity>

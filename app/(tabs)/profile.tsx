@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { getAuth, signOut } from '@firebase/auth';
 import { useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Menu, MenuOption, MenuOptions, MenuProvider, MenuTrigger } from 'react-native-popup-menu';
 import { auth, db } from '../../lib/firebase';
 
 export default function Profile() {
@@ -27,6 +29,33 @@ export default function Profile() {
   useEffect(() => {
     fetchData();
   }, [])
+
+  const handleSettings = (value: string) => {
+    switch (value) {
+      case 'about':
+        Alert.alert("Welcome to LearNUS. That's it!")
+        break;
+      case 'help':
+        router.push('../profile/contact')
+        break;
+      case 'logout':
+        logoutUser();
+        break;
+      default:
+        console.warn('Unknown menu option:', value);
+    }
+  }
+
+  const logoutUser = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        router.replace('/login')
+      })
+      .catch((error) => {
+        console.error('Logout error:', error);
+      });
+  };
     
   const menuItems = [
     { label: 'Personal Details', route: '../profile/details' },
@@ -39,43 +68,59 @@ export default function Profile() {
   ];
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.circleBackground}/>
+    <MenuProvider>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.circleBackground}/>
 
-      <View style={styles.header}>
-        <View style={{ width: 60 }} />
-        <View>
-          <Text style={styles.headerText}>Profile</Text>
-        </View>
-        <View style={{ width: 60 }}>
-          <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginHorizontal: 10 }} onPress={() => router.push('/+not-found')}>
-            <Ionicons name="settings" size={30} color="white" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <Image
-        source={{ uri: userProfile?.profilePicture }}
-        style={styles.avatar}
-      />
-
-      <Text style={styles.name}>{userProfile?.firstName}</Text>
-
-      <View style={styles.menu}>
-        {menuItems.map((item, index) => (
-          <View key={index}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => router.push(item.route as any)}
-            >
-              <Text style={styles.menuText}>{item.label}</Text>
-            </TouchableOpacity>
-
-            {index < menuItems.length - 1 && <View style={styles.divider} />}
+        <View style={styles.header}>
+          <View style={{ width: 60 }} />
+          <View>
+            <Text style={styles.headerText}>Profile</Text>
           </View>
-        ))}
-      </View>
-    </ScrollView>
+          <View style={{ width: 60, alignItems: 'flex-end', paddingRight: 10 }}>
+            <Menu onSelect={handleSettings}>
+              <MenuTrigger>
+                <Ionicons name="settings" size={30} color="white" />
+              </MenuTrigger>
+              <MenuOptions customStyles={{
+                optionsContainer: {
+                  padding: 10,
+                  borderRadius: 6,
+                  backgroundColor: 'white',
+                  right: 0
+                },
+              }}>
+                <MenuOption value="about" text="About" />
+                <MenuOption value="help" text="Help / Support" />
+                <MenuOption value="logout" text="Logout" />
+              </MenuOptions>
+            </Menu>
+          </View>
+        </View>
+
+        <Image
+          source={{ uri: userProfile?.profilePicture }}
+          style={styles.avatar}
+        />
+
+        <Text style={styles.name}>{userProfile?.firstName}</Text>
+
+        <View style={styles.menu}>
+          {menuItems.map((item, index) => (
+            <View key={index}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => router.push(item.route as any)}
+              >
+                <Text style={styles.menuText}>{item.label}</Text>
+              </TouchableOpacity>
+
+              {index < menuItems.length - 1 && <View style={styles.divider} />}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </MenuProvider>
   );
 }
 
