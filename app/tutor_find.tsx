@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -14,10 +15,9 @@ export default function tutoring() {
     const [filteredTutors, setFilteredTutors] = useState<any>([]);
     const [selectedTutor, setSelectedTutor] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [filtering, setFiltering] = useState(false);
     const { location, ratings, minRate, maxRate} = useLocalSearchParams();
 
-    const searchTutors = filteredTutors.filter((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) =>
+    const displayedTutors = filteredTutors.filter((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) =>
         tutor.tutorName.toLowerCase().includes(searchText.toLowerCase()) || 
         tutor.course.toLowerCase().includes(searchText.toLowerCase())
     )
@@ -26,9 +26,23 @@ export default function tutoring() {
         router.push('/tutor_find_filter')
     }
 
-    const handleSort = () => {
-        console.log("Sorting");
+    const handleSort = (option: string) => {
+        switch (option) {
+            case 'rating-asc':
+                sortTutors('rating', 'asc');
+                break;
+            case 'rating-desc':
+                sortTutors('rating', 'desc');
+                break;
+            case 'rate-asc':
+                sortTutors('rate', 'asc');
+                break;
+            case 'rate-desc':
+                sortTutors('rate', 'desc');
+                break;
+        }
     }
+    
 
     const fetchData = async () => {
         const user = auth.currentUser?.uid;
@@ -99,6 +113,32 @@ export default function tutoring() {
         setFilteredTutors(filtered);
     }, [location, ratings, minRate, maxRate, tutors])
 
+    const sortTutors = (criteria: 'rating' | 'rate', order: 'asc' | 'desc') => {
+        const sorted = [...tutors].sort((x: { tutorRating: string; rate: string | number; }, y: { tutorRating: string; rate: string | number; }) => {
+            let xValue: number | string;
+            let yValue: number | string;
+
+            switch (criteria) {
+                case 'rating':
+                    xValue = parseFloat(x.tutorRating);
+                    yValue = parseFloat(y.tutorRating);
+                    break;
+                case 'rate':
+                    xValue = x.rate;
+                    yValue = y.rate;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (xValue < yValue) return order === 'asc' ? -1 : 1;
+            if (xValue > yValue) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        setTutors(sorted);
+    };
+
     const handleTutorProfile = (tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number; profilePicture: string; }) => {
         setSelectedTutor(tutor)
         setModalVisible(true)
@@ -125,7 +165,7 @@ export default function tutoring() {
                 <View style={styles.searchBar}>
                     <Ionicons name='search-sharp' size={30} color='#ffc04d' />
                     <TextInput 
-                    style={{ color: '#888888', fontSize: 17, marginLeft: 8 }} 
+                    style={{ color: '#888888', fontSize: 17, marginLeft: 5 }} 
                     placeholder='Search by tutors name or course code'
                     value={searchText}
                     onChangeText={setSearchText}/>
@@ -138,29 +178,46 @@ export default function tutoring() {
                     <MaterialCommunityIcons name="filter-outline" size={20} color={'black'} />
                     <Text style={styles.buttonText}>Filter</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.filterButton} onPress={handleSort}>
-                    <MaterialCommunityIcons name="sort" size={20} color="black" />
-                    <Text style={styles.buttonText}>Sort</Text>
-                    <FontAwesome name="angle-down" size={20} color="#9ca3af" />
-                </TouchableOpacity>
+                
+                <Menu onSelect={handleSort}>
+                    <MenuTrigger style={styles.filterButton}>
+                        <MaterialCommunityIcons name="sort" size={20} color="black" />
+                        <Text style={styles.buttonText}>Sort</Text>
+                        <FontAwesome name="angle-down" size={20} color="#9ca3af" />
+                    </MenuTrigger>
+                    <MenuOptions 
+                    customStyles={{
+                        optionsContainer: {
+                            width: 180,
+                            borderRadius: 6,
+                            backgroundColor: 'white',
+                            right: 0,
+                        },
+                    }}>
+                        <MenuOption value='rating-asc' text='Rating (Low to High)' />
+                        <MenuOption value='rating-desc' text='Rating (High to Low)' />
+                        <MenuOption value='rate-asc' text='Hourly Rate (Cheap to Expensive)' />
+                        <MenuOption value='rate-desc' text='Hourly Rate (Expensiveto Cheap)' />
+                    </MenuOptions>
+                </Menu>
             </View>
 
             <ScrollView contentContainerStyle={{ padding: 16 }}>
-                {searchTutors.length === 0 ? (
+                {displayedTutors.length === 0 ? (
                 <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No tutors yet.</Text>
                 ) : (
-                    searchTutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => (
+                    displayedTutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => (
                         <TouchableOpacity key={tutor.id} style={styles.tutorCard} onPress={() => handleTutorProfile(tutor)}>
                             <Image source={{ uri: tutor.profilePicture }} style={styles.image} />
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorName}</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <AntDesign name='star' size={20} color={'black'} />
+                                    <AntDesign name='star' size={20} color={'yellow'} />
                                     <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorRating}</Text>
                                 </View>
                             </View>
-                            <Text style={{ fontSize: 18, fontWeight: '600' }}>{tutor.course} - {tutor.description}</Text>
-                            <Text style={{ fontSize: 20, fontWeight: '700', fontStyle: 'italic' }}>S${tutor.rate} per hour</Text>
+                            <Text style={{ fontSize: 18, fontWeight: '600', color: '#888888' }}>{tutor.course} - {tutor.description}</Text>
+                            <Text style={{ fontSize: 20, fontWeight: '700', fontStyle: 'italic', color: '#444444' }}>S${tutor.rate} per hour</Text>
                         </TouchableOpacity>
                     ))
                 )}
