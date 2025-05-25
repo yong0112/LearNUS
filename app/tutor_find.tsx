@@ -1,6 +1,6 @@
 import { auth, db } from '@/lib/firebase';
 import { AntDesign, Entypo, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -9,12 +9,21 @@ const screenHeight = Dimensions.get('window').height;
 
 export default function tutoring() {
     const router = useRouter();
+    const [searchText, setSearchText] = useState('');
     const [tutors, setTutors] = useState<any>([]);
+    const [filteredTutors, setFilteredTutors] = useState<any>([]);
     const [selectedTutor, setSelectedTutor] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [filtering, setFiltering] = useState(false);
+    const { location, ratings, minRate, maxRate} = useLocalSearchParams();
+
+    const searchTutors = filteredTutors.filter((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) =>
+        tutor.tutorName.toLowerCase().includes(searchText.toLowerCase()) || 
+        tutor.course.toLowerCase().includes(searchText.toLowerCase())
+    )
 
     const handleFilter = () => {
-        console.log("Filtering");
+        router.push('/tutor_find_filter')
     }
 
     const handleSort = () => {
@@ -62,12 +71,33 @@ export default function tutoring() {
           );
     
           setTutors(tutorList)
+          setFilteredTutors(tutorList)
         }
     }
-    
+
     useEffect(() => {
         fetchData();
     }, [])
+    
+    useEffect(() => {
+        const filtered = tutors.filter((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => {
+            const locationValue = location ?? 'Any'; 
+
+            const locationMatch = locationValue === 'Any' 
+                ? true 
+                : (typeof locationValue === 'string' 
+                ? tutor.location.toLowerCase().includes(locationValue.toLowerCase()) 
+                : tutor.location.toLowerCase().includes(locationValue[0].toLowerCase()));
+
+            return (
+            (locationMatch) &&
+            (!ratings || parseFloat(tutor.tutorRating as string) >= Number(parseFloat(ratings as string))) &&
+            (!minRate || tutor.rate >= Number(parseInt(minRate as string))) &&
+            (!maxRate || tutor.rate <= Number(parseInt(maxRate as string)))
+            );
+        });
+        setFilteredTutors(filtered);
+    }, [location, ratings, minRate, maxRate, tutors])
 
     const handleTutorProfile = (tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number; profilePicture: string; }) => {
         setSelectedTutor(tutor)
@@ -89,19 +119,23 @@ export default function tutoring() {
 
     return (
         <View style={styles.container}>
-            {/*Header*/}
+            {/*Search Bar*/}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Ionicons name='arrow-back-circle' size={40} color='#ffc04d' onPress={() => router.push('/(tabs)/home')} />
                 <View style={styles.searchBar}>
                     <Ionicons name='search-sharp' size={30} color='#ffc04d' />
-                    <TextInput style={{ flex: 1, color: '#888888', fontSize: 17, marginLeft: 10 }} placeholder='Search'/>
+                    <TextInput 
+                    style={{ color: '#888888', fontSize: 17, marginLeft: 8 }} 
+                    placeholder='Search by tutors name or course code'
+                    value={searchText}
+                    onChangeText={setSearchText}/>
                 </View>
             </View>
 
-            {/*Search*/}
+            {/*Filter and Sort*/}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 12,  }}>
                 <TouchableOpacity style={styles.filterButton} onPress={handleFilter}>
-                    <MaterialCommunityIcons name="filter-outline" size={20} color="black" />
+                    <MaterialCommunityIcons name="filter-outline" size={20} color={'black'} />
                     <Text style={styles.buttonText}>Filter</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.filterButton} onPress={handleSort}>
@@ -112,10 +146,10 @@ export default function tutoring() {
             </View>
 
             <ScrollView contentContainerStyle={{ padding: 16 }}>
-                {tutors.length === 0 ? (
+                {searchTutors.length === 0 ? (
                 <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No tutors yet.</Text>
                 ) : (
-                    tutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => (
+                    searchTutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => (
                         <TouchableOpacity key={tutor.id} style={styles.tutorCard} onPress={() => handleTutorProfile(tutor)}>
                             <Image source={{ uri: tutor.profilePicture }} style={styles.image} />
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -209,7 +243,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginHorizontal: 6
     },
+    filterSelectedButton: {
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        flexDirection: 'row', 
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 6,
+        backgroundColor: 'orange'
+    },
     buttonText: { marginHorizontal: 4, fontSize: 14, fontWeight: '400', marginBottom: 2 },
+    buttonSelectedText: { marginHorizontal: 4, fontSize: 14, fontWeight: '400', marginBottom: 2, color: 'white' },
     tutorCard: {
         marginBottom: 20,
         flexDirection: 'column',
