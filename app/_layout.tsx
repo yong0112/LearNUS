@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { MenuProvider } from 'react-native-popup-menu';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -20,11 +21,11 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <MenuProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{headerShown: false}}/>
         <StatusBar style="auto" />
       </ThemeProvider>
-    </GestureHandlerRootView>
+    </MenuProvider>
   );
 }
