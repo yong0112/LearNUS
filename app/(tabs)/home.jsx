@@ -1,9 +1,85 @@
 import { AntDesign, FontAwesome5, Ionicons, MaterialIcons, Octicons, SimpleLineIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 export default function Home() {
   const router = useRouter();
+  const [tutors, setTutors] = useState<any>([]);
+
+  const fetchData = async () => {
+      const user = auth.currentUser?.uid;
+      if (user !== undefined) {
+        const tutorRef = collection(db, "tutors");
+        const tutorSnap = await getDocs(tutorRef);
+
+        const tutorList = await Promise.all(
+          tutorSnap.docs.map(async (docSnap) => {
+            const tutorInfo = docSnap.data();
+            const postingId = docSnap.id;
+            const tutorUid = tutorInfo.tutor;
+
+            let profilePictureUrl = '';
+            let tutorName = '';
+            let tutorRating = 0;
+            if (tutorUid) {
+              const userDocRef = doc(db, 'users', tutorUid);
+              const userDocSnap = await getDoc(userDocRef);
+              if (userDocSnap.exists()) {
+                profilePictureUrl = userDocSnap.data().profilePicture || '';
+                tutorName = userDocSnap.data().firstName || '';
+                tutorRating = userDocSnap.data().ratings || 0;
+              }
+            }
+
+            return {
+              id: postingId,
+              tutor: tutorInfo.tutor,
+              tutorName: tutorName,
+              tutorRating: tutorRating,
+              course: tutorInfo.course,
+              location: tutorInfo.location,
+              description: tutorInfo.description,
+              availability: tutorInfo.availability,
+              rate: tutorInfo.rate,
+              profilePicture: profilePictureUrl,
+            };
+          })
+        );
+
+        setTutors(tutorList)
+      }
+  }
+
+  useEffect(() => {
+      fetchData();
+  }, [])
+
+  const handleTutorProfile = () => {
+    console.log("Tutor profile")
+  }
+
+  const handleSettings = (option: string) => {
+    switch (option) {
+      case 'about':
+        Alert.alert("Welcome to LearNUS! That's it haha.");
+        break;
+      case 'help':
+        router.push('/profile/contact');
+        break;
+      case 'logout':
+        logoutUser();
+        break;
+    }
+  }
+
+  const logoutUser = async () => {
+    await AsyncStorage.removeItem('authToken');
+    router.replace('/login');
+  };
 
   return (
     <View style={styles.container}>
@@ -11,9 +87,25 @@ export default function Home() {
         <Image source={require('../../assets/images/logo.jpg')} style={styles.image} />
         <Text style={styles.headerLear}>Lear</Text><Text style={styles.headerNUS}>NUS</Text>
         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
-          <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => router.push('/+not-found')}>
-            <Ionicons name="settings" size={30} color="black" />
-          </TouchableOpacity>
+          <Menu onSelect={handleSettings}>
+            <MenuTrigger>
+              <Ionicons name="settings-outline" size={30} color="black" />
+            </MenuTrigger>
+            <MenuOptions
+              customStyles={{
+                optionsContainer: {
+                  width: 180,
+                  borderRadius: 6,
+                  backgroundColor: 'white',
+                  right: 0,
+                },
+              }}
+            >
+              <MenuOption value="about" text="About Us" />
+              <MenuOption value="help" text="Help / Support" />
+              <MenuOption value="logout" text="Logout" />
+            </MenuOptions>
+        </Menu>
         </View>
       </View>
 

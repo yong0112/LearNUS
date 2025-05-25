@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 import { auth, db } from '../../lib/firebase';
 
 export default function Profile() {
@@ -27,6 +29,25 @@ export default function Profile() {
   useEffect(() => {
     fetchData();
   }, [])
+
+  const handleSettings = (option: string) => {
+    switch (option) {
+      case 'about':
+        Alert.alert("Welcome to LearNUS! That's it haha.");
+        break;
+      case 'help':
+        router.push('/profile/contact');
+        break;
+      case 'logout':
+        logoutUser();
+        break;
+    }
+  }
+
+  const logoutUser = async () => {
+    await AsyncStorage.removeItem('authToken');
+    router.replace('/login');
+  };
     
   const menuItems = [
     { label: 'Personal Details', route: '../profile/details' },
@@ -48,9 +69,25 @@ export default function Profile() {
           <Text style={styles.headerText}>Profile</Text>
         </View>
         <View style={{ width: 60 }}>
-          <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginHorizontal: 10 }} onPress={() => router.push('/+not-found')}>
-            <Ionicons name="settings" size={30} color="white" />
-          </TouchableOpacity>
+          <Menu onSelect={handleSettings}>
+            <MenuTrigger>
+              <Ionicons name="settings" size={30} color="white" />
+            </MenuTrigger>
+            <MenuOptions
+              customStyles={{
+                optionsContainer: {
+                  width: 180,
+                  borderRadius: 6,
+                  backgroundColor: 'white',
+                  right: 0,
+                },
+              }}
+            >
+              <MenuOption value="about" text="About Us" />
+              <MenuOption value="help" text="Help / Support" />
+              <MenuOption value="logout" text="Logout" />
+            </MenuOptions>
+          </Menu>
         </View>
       </View>
 

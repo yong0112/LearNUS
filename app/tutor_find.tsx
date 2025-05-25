@@ -2,6 +2,7 @@ import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icon
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 export default function tutoring() {
     const router = useRouter();
@@ -29,11 +30,28 @@ export default function tutoring() {
                     <MaterialCommunityIcons name="filter-outline" size={20} color="black" />
                     <Text style={styles.buttonText}>Filter</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.filterButton} onPress={handleSort}>
-                    <MaterialCommunityIcons name="sort" size={20} color="black" />
-                    <Text style={styles.buttonText}>Sort</Text>
-                    <FontAwesome name="angle-down" size={20} color="#9ca3af" />
-                </TouchableOpacity>
+                
+                <Menu onSelect={handleSort}>
+                    <MenuTrigger style={styles.filterButton}>
+                        <MaterialCommunityIcons name="sort" size={20} color="black" />
+                        <Text style={styles.buttonText}>Sort</Text>
+                        <FontAwesome name="angle-down" size={20} color="#9ca3af" />
+                    </MenuTrigger>
+                    <MenuOptions 
+                    customStyles={{
+                        optionsContainer: {
+                            width: 220,
+                            borderRadius: 6,
+                            backgroundColor: 'white',
+                            right: 0,
+                        },
+                    }}>
+                        <MenuOption value='rating-asc' text='Rating (Low to High)' />
+                        <MenuOption value='rating-desc' text='Rating (High to Low)' />
+                        <MenuOption value='rate-asc' text='Hourly Rate (Cheap to Expensive)' />
+                        <MenuOption value='rate-desc' text='Hourly Rate (Expensive to Cheap)' />
+                    </MenuOptions>
+                </Menu>
             </View>
         </View>
     )
