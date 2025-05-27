@@ -1,75 +1,58 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { Rating } from 'react-native-ratings';
-import { auth, db } from '../../lib/firebase';
+import { auth } from '../../lib/firebase';
 
 export default function ratings() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
-  const [reviews, setReviews] = useState<any | undefined>(null);
+  const [reviews, setReviews] = useState<any | undefined>([]);
+  const [error, setError] = useState(null);
   
-  const fetchData = async () => {
-    const user = auth.currentUser?.uid;
-    if (user !== undefined) {
-      const docRef = doc(db, "users", user);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        console.log("Document data: ", docSnap.data())
-        setUserProfile(docSnap.data())
-      } else {
-        console.log("No such document found!")
-      }
-    }
-  }
-
-  const fetchReviews = async () => {
-    const user = auth.currentUser?.uid;
-    if (user !== undefined) { 
-      const reviewRef = collection(db, "users", user, "reviews");
-      const reviewSnap = await getDocs(reviewRef);
-
-      const reviewList = await Promise.all(
-        reviewSnap.docs.map(async (docSnap) => {
-          const reviewInfo = docSnap.data();
-          const reviewId = docSnap.id;
-          const personUid = reviewInfo.people;
-
-          let profilePictureUrl = '';
-          let name = '';
-          if (personUid) {
-            const userDocRef = doc(db, 'users', personUid);
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists()) {
-              profilePictureUrl = userDocSnap.data().profilePicture || '';
-              name = userDocSnap.data().firstName +  userDocSnap.data().lastName || '';
-            }
-          }
-
-          return {
-            id: reviewId,
-            comment: reviewInfo.comment,
-            date: reviewInfo.date.toDate(),
-            name: name,
-            rating: reviewInfo.rating,
-            profilePicture: profilePictureUrl,
-          };
-        })
-      );
-
-      setReviews(reviewList)
-    }
-  }
-
   useEffect(() => {
-    Promise.all([fetchData(), fetchReviews()])
-      .then(() => console.log("Done"))
-      .catch((error) => console.error('Error fetching data: ', error))
-  }, [])
+      const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+        if (currentUser) {
+          setUserProfile(null); 
+          setReviews([]);
+          fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}`)
+            .then((res) => {
+              if (!res.ok) throw new Error("Failed to fetch user profile");
+              return res.json();
+            })
+            .then((data) => {
+              console.log("User profile:", data);
+              setUserProfile(data);
+            })
+            .catch((err) => {
+              console.error(err);
+              setError(err.message);
+            })
+            .then(() => {
+              fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}/reviews`)
+                .then((res) => {
+                  if (!res.ok) throw new Error("Failed to fetch user reviews");
+                  return res.json();
+                })
+                .then((data) => {
+                  console.log("User reviews:", data);
+                  setReviews(data);
+                })
+                .catch((err) => {
+                  console.error(err);
+                  setError(err.message);
+                })
+            })
+        } else {
+          setUserProfile(null);
+          setReviews([]);
+        }
+      });
+  
+      return () => unsubscribe();
+    }, [])
 
   return (
     <View style={styles.container}>

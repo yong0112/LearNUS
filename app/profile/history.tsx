@@ -1,54 +1,51 @@
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function history() {
   const router = useRouter();
   const [classes, setClasses] = useState<any>([]);
-  
-  const fetchData = async () => {
-    const user = auth.currentUser?.uid;
-    if (user !== undefined) {
-      const classRef = collection(db, "users", user, "classes");
-      const classSnap = await getDocs(classRef);
-
-      const classList = await Promise.all(
-        classSnap.docs.map(async (docSnap) => {
-          const classInfo = docSnap.data();
-          const classId = docSnap.id;
-          const personUid = classInfo.people;
-
-          let profilePictureUrl = '';
-          if (personUid) {
-            const userDocRef = doc(db, 'users', personUid);
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists()) {
-              profilePictureUrl = userDocSnap.data().profilePicture || '';
-            }
-          }
-
-          return {
-            id: classId,
-            role: classInfo.role,
-            course: classInfo.course,
-            people: personUid,
-            startTime: classInfo.startTime,
-            profilePicture: profilePictureUrl,
-          };
-        })
-      );
-
-      setClasses(classList)
-    }
-  }
+  const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setClasses([]); 
+        fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}/classes`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch user classes");
+            return res.json();
+          })
+          .then(async (data) => {
+            console.log("User classes:", data);
+            setClasses(data);
+            const pics: Record<string, string> = {};
+            await Promise.all(data.map(async (cls: any) => {
+              try {
+                const res = await fetch(`http://192.168.0.104:5000/api/users/${cls.people}`);
+                if (!res.ok) throw new Error("Failed to fetch user profile");
+                const userData = await res.json();
+                pics[cls.people] = userData.profilePicture;
+              } catch (err) {
+                console.error(err);
+              }
+            }));
+            setProfiles(pics);
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(err.message);
+          });
+      } else {
+        setClasses([]);
+      }
+    });
+
+    return () => unsubscribe();
   }, [])
-  
 
   const handleTutorProfile = () => {
     console.log("Press me")
@@ -69,13 +66,13 @@ export default function history() {
       {classes.length === 0 ? (
         <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No classes yet.</Text>
       ) : (
-        classes.map((cls: { id: React.Key | null | undefined; course: string; role: string; startTime: string; profilePicture: string }) => (
+        classes.map((cls: { id: React.Key | null | undefined; course: string; role: string; startTime: string; people: string }) => (
           <TouchableOpacity key={cls.id} style={styles.classCard} onPress={handleTutorProfile}>
             <View style={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
               <Text style={styles.subject}>{cls.course} ({cls.role})</Text>
               <Text style={{ fontSize: 18 }}>{cls.startTime}</Text>
             </View> 
-            <Image source={{ uri: cls.profilePicture }} style={styles.avatar} />
+            <Image source={{ uri: profiles[cls.people] }} style={styles.avatar} />
           </TouchableOpacity>
         ))
       )}

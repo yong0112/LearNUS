@@ -188,7 +188,7 @@ export default function tutoring() {
                     <MenuOptions 
                     customStyles={{
                         optionsContainer: {
-                            width: 180,
+                            width: 220,
                             borderRadius: 6,
                             backgroundColor: 'white',
                             right: 0,
@@ -197,7 +197,7 @@ export default function tutoring() {
                         <MenuOption value='rating-asc' text='Rating (Low to High)' />
                         <MenuOption value='rating-desc' text='Rating (High to Low)' />
                         <MenuOption value='rate-asc' text='Hourly Rate (Cheap to Expensive)' />
-                        <MenuOption value='rate-desc' text='Hourly Rate (Expensiveto Cheap)' />
+                        <MenuOption value='rate-desc' text='Hourly Rate (Expensive to Cheap)' />
                     </MenuOptions>
                 </Menu>
             </View>

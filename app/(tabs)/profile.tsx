@@ -1,60 +1,58 @@
 import { Ionicons } from '@expo/vector-icons';
-import { getAuth, signOut } from '@firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Menu, MenuOption, MenuOptions, MenuProvider, MenuTrigger } from 'react-native-popup-menu';
-import { auth, db } from '../../lib/firebase';
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
+import { auth } from '../../lib/firebase';
 
 export default function Profile() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
-
-  const fetchData = async () => {
-    const user = auth.currentUser?.uid;
-    if (user !== undefined) {
-      const docRef = doc(db, "users", user);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        console.log("Document data: ", docSnap.data())
-        setUserProfile(docSnap.data())
-      } else {
-        console.log("No such document found!")
-      }
-    }
-  }
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUserProfile(null); 
+        fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch user profile");
+            return res.json();
+          })
+          .then((data) => {
+            console.log("User profile data:", data);
+            setUserProfile(data);
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(err.message);
+          });
+      } else {
+        setUserProfile(null);
+      }
+    });
+
+    return () => unsubscribe();
   }, [])
 
-  const handleSettings = (value: string) => {
-    switch (value) {
+  const handleSettings = (option: string) => {
+    switch (option) {
       case 'about':
-        Alert.alert("Welcome to LearNUS. That's it!")
+        Alert.alert("Welcome to LearNUS! That's it haha.");
         break;
       case 'help':
-        router.push('../profile/contact')
+        router.push('/profile/contact');
         break;
       case 'logout':
         logoutUser();
         break;
-      default:
-        console.warn('Unknown menu option:', value);
     }
   }
 
-  const logoutUser = () => {
-    const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        router.replace('/login')
-      })
-      .catch((error) => {
-        console.error('Logout error:', error);
-      });
+  const logoutUser = async () => {
+    await AsyncStorage.removeItem('authToken');
+    router.replace('/login');
   };
     
   const menuItems = [
@@ -72,48 +70,49 @@ export default function Profile() {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.circleBackground}/>
 
-        <View style={styles.header}>
-          <View style={{ width: 60 }} />
-          <View>
-            <Text style={styles.headerText}>Profile</Text>
-          </View>
-          <View style={{ width: 60, alignItems: 'flex-end', paddingRight: 10 }}>
-            <Menu onSelect={handleSettings}>
-              <MenuTrigger>
-                <Ionicons name="settings" size={30} color="white" />
-              </MenuTrigger>
-              <MenuOptions customStyles={{
-                optionsContainer: {
-                  padding: 10,
-                  borderRadius: 6,
-                  backgroundColor: 'white',
-                  right: 0
-                },
-              }}>
-                <MenuOption value="about" text="About" />
-                <MenuOption value="help" text="Help / Support" />
-                <MenuOption value="logout" text="Logout" />
-              </MenuOptions>
-            </Menu>
-          </View>
+      <View style={styles.header}>
+        <View style={{ width: 60 }} />
+        <View>
+          <Text style={styles.headerText}>Profile</Text>
         </View>
+        <View style={{ width: 60, alignItems: 'flex-end', paddingRight: 10 }}>
+          <Menu onSelect={handleSettings}>
+            <MenuTrigger>
+              <Ionicons name="settings" size={30} color="white" />
+            </MenuTrigger>
+            <MenuOptions customStyles={{
+              optionsContainer: {
+                padding: 10,
+                borderRadius: 6,
+                backgroundColor: 'white',
+                right: 0
+              },
+            }}>
+              <MenuOption value="about" text="About" />
+              <MenuOption value="help" text="Help / Support" />
+              <MenuOption value="logout" text="Logout" />
+            </MenuOptions>
+          </Menu>
+        </View>
+      </View>
 
-        <Image
+      <View style={{ flexDirection: 'column' }}>
+         <Image
           source={{ uri: userProfile?.profilePicture }}
           style={styles.avatar}
         />
-
         <Text style={styles.name}>{userProfile?.firstName}</Text>
-
-        <View style={styles.menu}>
-          {menuItems.map((item, index) => (
-            <View key={index}>
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={() => router.push(item.route as any)}
-              >
-                <Text style={styles.menuText}>{item.label}</Text>
-              </TouchableOpacity>
+      </View>
+      
+      <View style={styles.menu}>
+        {menuItems.map((item, index) => (
+          <View key={index}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push(item.route as any)}
+            >
+              <Text style={styles.menuText}>{item.label}</Text>
+            </TouchableOpacity>
 
               {index < menuItems.length - 1 && <View style={styles.divider} />}
             </View>
