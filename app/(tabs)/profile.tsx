@@ -66,8 +66,9 @@ export default function Profile() {
   ];
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.circleBackground}/>
+    <MenuProvider>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.circleBackground}/>
 
       <View style={styles.header}>
         <View style={{ width: 60 }} />
@@ -113,11 +114,12 @@ export default function Profile() {
               <Text style={styles.menuText}>{item.label}</Text>
             </TouchableOpacity>
 
-            {index < menuItems.length - 1 && <View style={styles.divider} />}
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+              {index < menuItems.length - 1 && <View style={styles.divider} />}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </MenuProvider>
   );
 }
 
