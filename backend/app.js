@@ -10,6 +10,10 @@ app.use(express.json());
 
 const userRoutes = require("./routes/users");
 app.use("/api/users", userRoutes);
+const classesRoutes = require("./routes/classes");
+app.use("/api/users", classesRoutes);
+const reviewsRoutes = require("./routes/reviews");
+app.use("/api/users", reviewsRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is working~~");

@@ -1,31 +1,37 @@
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Details() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
-  
-  const fetchData = async () => {
-    const user = auth.currentUser?.uid;
-    if (user !== undefined) {
-      const docRef = doc(db, "users", user);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        console.log("Document data: ", docSnap.data())
-        setUserProfile(docSnap.data())
-      } else {
-        console.log("No such document found!")
-      }
-    }
-  }
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUserProfile(null); 
+        fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch user profile");
+            return res.json();
+          })
+          .then((data) => {
+            console.log("User profile data:", data);
+            setUserProfile(data);
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(err.message);
+          });
+      } else {
+        setUserProfile(null);
+      }
+    });
+
+    return () => unsubscribe();
   }, [])
 
   const handleChangeEmail = () => {
