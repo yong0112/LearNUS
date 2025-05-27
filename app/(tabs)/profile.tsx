@@ -1,33 +1,39 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
-import { auth, db } from '../../lib/firebase';
+import { auth } from '../../lib/firebase';
 
 export default function Profile() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
-
-  const fetchData = async () => {
-    const user = auth.currentUser?.uid;
-    if (user !== undefined) {
-      const docRef = doc(db, "users", user);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        console.log("Document data: ", docSnap.data())
-        setUserProfile(docSnap.data())
-      } else {
-        console.log("No such document found!")
-      }
-    }
-  }
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUserProfile(null); 
+        fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch user profile");
+            return res.json();
+          })
+          .then((data) => {
+            console.log("User profile data:", data);
+            setUserProfile(data);
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(err.message);
+          });
+      } else {
+        setUserProfile(null);
+      }
+    });
+
+    return () => unsubscribe();
   }, [])
 
   const handleSettings = (option: string) => {
@@ -68,22 +74,20 @@ export default function Profile() {
         <View>
           <Text style={styles.headerText}>Profile</Text>
         </View>
-        <View style={{ width: 60 }}>
+        <View style={{ width: 60, alignItems: 'flex-end', paddingRight: 10 }}>
           <Menu onSelect={handleSettings}>
             <MenuTrigger>
               <Ionicons name="settings" size={30} color="white" />
             </MenuTrigger>
-            <MenuOptions
-              customStyles={{
-                optionsContainer: {
-                  width: 180,
-                  borderRadius: 6,
-                  backgroundColor: 'white',
-                  right: 0,
-                },
-              }}
-            >
-              <MenuOption value="about" text="About Us" />
+            <MenuOptions customStyles={{
+              optionsContainer: {
+                padding: 10,
+                borderRadius: 6,
+                backgroundColor: 'white',
+                right: 0
+              },
+            }}>
+              <MenuOption value="about" text="About" />
               <MenuOption value="help" text="Help / Support" />
               <MenuOption value="logout" text="Logout" />
             </MenuOptions>
@@ -91,13 +95,14 @@ export default function Profile() {
         </View>
       </View>
 
-      <Image
-        source={{ uri: userProfile?.profilePicture }}
-        style={styles.avatar}
-      />
-
-      <Text style={styles.name}>{userProfile?.firstName}</Text>
-
+      <View style={{ flexDirection: 'column' }}>
+         <Image
+          source={{ uri: userProfile?.profilePicture }}
+          style={styles.avatar}
+        />
+        <Text style={styles.name}>{userProfile?.firstName}</Text>
+      </View>
+      
       <View style={styles.menu}>
         {menuItems.map((item, index) => (
           <View key={index}>
