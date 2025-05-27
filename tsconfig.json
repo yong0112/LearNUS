@@ -17,5 +17,5 @@
     "**/*.jsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/(tabs)/home.tsx"  ]
+, "app/(tabs)/home.tsx", "backend/config/firebase.js"  ]
 }
