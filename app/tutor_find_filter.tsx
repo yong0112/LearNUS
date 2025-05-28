@@ -1,34 +1,44 @@
 import { Ionicons } from '@expo/vector-icons';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
 
+type locationOption = {
+    label: string,
+    value: string
+}
+
 export default function TutorFilter() {
     const router = useRouter();
-    const [location, setLocation] = useState('');
-    const [ratings, setRatings] = useState<number>();
+    const [locationOption, setLocationOption] =  useState<locationOption[]>([]);
+    const [selectedLocation, setSelectedLocation] = useState('');
+    const [ratings, setRatings] = useState<number[]>();
     const [rate, setRate] = useState([0, 100]);
 
-    const locationOption = [
-        { label: 'Physical', value: 'Physical' },
-        { label: 'Online', value: 'Online' },
-        { label: 'Any', value: 'Any' }
-    ]
-
-    const ratingOption = [
-        { label: 1.0, value: '1.0' },
-        { label: 2.0, value: '2.0' },
-        { label: 3.0, value: '3.0' },
-        { label: 4.0, value: '4.0' },
-        { label: 5.0, value: '5.0' },
-    ]
+    useEffect(() => {
+        const fetchConstants = async () => {
+            fetch("http://192.168.0.104:5000/api/constants")
+            .then((res) => {
+              if (!res.ok) throw new Error("Failed to fetch constants");
+              return res.json();
+            })
+            .then((data) => {
+                console.log(data.FORMATS);
+                setLocationOption(data.FORMATS);
+            })
+            .catch((err) => {
+                console.error(err)
+            })
+        }
+        fetchConstants();
+    }, [])
 
     const handleClearing = () => {
-        setLocation('')
-        setRatings(-1)
+        setSelectedLocation('')
+        setRatings([-1])
         setRate([0, 100])
     }
 
@@ -36,7 +46,7 @@ export default function TutorFilter() {
         router.push({
             pathname: '/tutor_find',
             params: {
-                location: location,
+                location: selectedLocation,
                 ratings: ratings,
                 minRate: rate[0],
                 maxRate: rate[1]
@@ -60,8 +70,8 @@ export default function TutorFilter() {
                     <Text style={styles.title}>Location</Text>
                     <View style={styles.optionContainer}>
                         {locationOption.map((option) => (
-                            <TouchableOpacity key={option.label} style={[styles.optionBox, location == option.value && styles.optionBoxSelected]} onPress={() => setLocation(option.label)}>
-                                <Text style={[styles.optionText, location == option.value && styles.optionTextSelected]}>{option.value}</Text>
+                            <TouchableOpacity key={option.value} style={[styles.optionBox, selectedLocation == option.value && styles.optionBoxSelected]} onPress={() => setSelectedLocation(option.value)}>
+                                <Text style={[styles.optionText, selectedLocation == option.value && styles.optionTextSelected]}>{option.label}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -69,13 +79,25 @@ export default function TutorFilter() {
 
                 {/**Ratings */}
                 <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-                    <Text style={styles.title}>Ratings (Minimum)</Text>
-                    <View style={styles.optionContainer}>
-                        {ratingOption.map((star) => (
-                            <TouchableOpacity key={star.label} style={[styles.optionBox, ratings == star.label && styles.optionBoxSelected]} onPress={() => setRatings(star.label)}>
-                                <Text style={[styles.optionText, ratings == star.label && styles.optionTextSelected]}>{star.value}</Text>
-                            </TouchableOpacity>
-                        ))}
+                    <Text style={styles.title}>Ratings</Text>
+                    <MultiSlider
+                        values={ratings}
+                        sliderLength={screenWidth * 0.8}
+                        onValuesChange={setRatings}
+                        min={0}
+                        max={5.0}
+                        step={0.1}
+                        selectedStyle={{ backgroundColor: 'orange' }}
+                        unselectedStyle={{ backgroundColor: '#e0e0e0' }}
+                        markerStyle={{
+                            backgroundColor: 'orange',
+                            height: 24,
+                            width: 24,
+                        }}
+                    />
+
+                    <View style={{ padding: 20, justifyContent: 'flex-start' }}>
+                        <Text style={{ fontSize: 18, fontWeight: '600' }}>Rating above {ratings ? ratings[0].toFixed(1) : '0.0'}</Text>
                     </View>
                 </View>
 
