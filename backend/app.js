@@ -14,6 +14,12 @@ const classesRoutes = require("./routes/classes");
 app.use("/api/users", classesRoutes);
 const reviewsRoutes = require("./routes/reviews");
 app.use("/api/users", reviewsRoutes);
+const tutorRoutes = require("./routes/tutors");
+app.use("/api/tutors", tutorRoutes);
+const constantRoutes = require("./routes/constants");
+app.use("/api/constants", constantRoutes);
+const coursesRoutes = require("./routes/courses");
+app.use("/api/courses", coursesRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is working~~");

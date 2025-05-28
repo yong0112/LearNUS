@@ -66,60 +66,58 @@ export default function Profile() {
   ];
 
   return (
-    <MenuProvider>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.circleBackground}/>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.circleBackground}/>
 
-      <View style={styles.header}>
-        <View style={{ width: 60 }} />
-        <View>
-          <Text style={styles.headerText}>Profile</Text>
-        </View>
-        <View style={{ width: 60, alignItems: 'flex-end', paddingRight: 10 }}>
-          <Menu onSelect={handleSettings}>
-            <MenuTrigger>
-              <Ionicons name="settings" size={30} color="white" />
-            </MenuTrigger>
-            <MenuOptions customStyles={{
-              optionsContainer: {
-                padding: 10,
-                borderRadius: 6,
-                backgroundColor: 'white',
-                right: 0
-              },
-            }}>
-              <MenuOption value="about" text="About" />
-              <MenuOption value="help" text="Help / Support" />
-              <MenuOption value="logout" text="Logout" />
-            </MenuOptions>
-          </Menu>
-        </View>
+    <View style={styles.header}>
+      <View style={{ width: 60 }} />
+      <View>
+        <Text style={styles.headerText}>Profile</Text>
       </View>
-
-      <View style={{ flexDirection: 'column' }}>
-         <Image
-          source={{ uri: userProfile?.profilePicture }}
-          style={styles.avatar}
-        />
-        <Text style={styles.name}>{userProfile?.firstName}</Text>
+      <View style={{ width: 60, alignItems: 'flex-end', paddingRight: 10 }}>
+        <Menu onSelect={handleSettings}>
+          <MenuTrigger>
+            <Ionicons name="settings" size={30} color="white" />
+          </MenuTrigger>
+          <MenuOptions customStyles={{
+            optionsContainer: {
+              padding: 10,
+              borderRadius: 6,
+              backgroundColor: 'white',
+              right: 0
+            },
+          }}>
+            <MenuOption value="about" text="About" />
+            <MenuOption value="help" text="Help / Support" />
+            <MenuOption value="logout" text="Logout" />
+          </MenuOptions>
+        </Menu>
       </View>
-      
-      <View style={styles.menu}>
-        {menuItems.map((item, index) => (
-          <View key={index}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => router.push(item.route as any)}
-            >
-              <Text style={styles.menuText}>{item.label}</Text>
-            </TouchableOpacity>
+    </View>
 
-              {index < menuItems.length - 1 && <View style={styles.divider} />}
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-    </MenuProvider>
+    <View style={{ flexDirection: 'column' }}>
+        <Image
+        source={{ uri: userProfile?.profilePicture }}
+        style={styles.avatar}
+      />
+      <Text style={styles.name}>{userProfile?.firstName}</Text>
+    </View>
+    
+    <View style={styles.menu}>
+      {menuItems.map((item, index) => (
+        <View key={index}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => router.push(item.route as any)}
+          >
+            <Text style={styles.menuText}>{item.label}</Text>
+          </TouchableOpacity>
+
+            {index < menuItems.length - 1 && <View style={styles.divider} />}
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 

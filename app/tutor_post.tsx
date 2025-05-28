@@ -1,47 +1,113 @@
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { addDoc, collection } from 'firebase/firestore';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 
+type courseOption = {
+    label: string,
+    value: string
+}
+
+type locationOption = {
+    label: string,
+    value: string
+}
+
 export default function TutorPost() {
     const router = useRouter();
-    const [course, setCourse] = useState('');
-    const [location, setLocation] = useState('');
+    const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
+    const [selectedCourse, setSelectedCourse] = useState('');
+    const [locationOptions, setLocationOptions] = useState<locationOption[]>([]);
+    const [selectedLocation, setSelectedLocation] = useState('');
     const [description, setDescription] = useState('');
     const [availability, setAvailability] = useState('');
     const [rate, setRate] = useState<number>();
 
-    const courseCode = [
-        { label: 'CS1101S', value: 'CS1101S' },
-        { label: 'CS1231S', value: 'CS1231S' },
-        { label: 'CS2030S', value: 'CS2030S' },
-        { label: 'CS2040S', value: 'CS2040S' },
-        { label: 'MA1521', value: 'MA1521' },
-        { label: 'MA1522', value: 'MA1522' },
-        { label: 'ST2334', value: 'ST2334' },
-        { label: 'GEC1015', value: 'GEC1015' },
-    ];
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
+                    .then((res) => {
+                        if (!res.ok) throw new Error("Failed to fetch local courses");
+                        return res.json();
+                    })
+                    .then((data) => {
+                        return data.map((course: { moduleCode: string; title: string; semesters: number[] }) => ({
+                            label: `${course.moduleCode} - ${course.title}`,
+                            value: course.moduleCode
+                        }))
+                    })
+                    .then((data) => {
+                        setCourseOptions(data);
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                    })
+            } catch (error) {
+                console.warn("Using local data due to error: ", error);
+                fetch("http://192.168.0.104:5000/api/courses")
+                    .then((res) => {
+                        if (!res.ok) throw new Error("Failed to fetch local courses");
+                        return res.json();
+                    })
+                    .then((data) => {
+                        return data.map((course: { moduleCode: string; title: string; semesters: number[] }) => ({
+                            label: `${course.moduleCode} - ${course.title}`,
+                            value: course.moduleCode
+                        }))
+                    })
+                    .then((data) => {
+                        setCourseOptions(data);
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                    })
+            }
+        }
 
-    const locationOption = [
-        { label: 'Physical', value: 'Physical' },
-        { label: 'Online', value: 'Online' },
-    ]
+        const fetchConstants = async () => {
+            fetch("http://192.168.0.104:5000/api/constants")
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to fetch constants");
+                return res.json();
+            })
+            .then((data) => {
+                setLocationOptions(data.FORMATS);
+            })
+            .catch((err) => {
+                console.error(err)
+            })
+        }
 
+        fetchCourses();
+        fetchConstants();
+    }, [])
+    
 
     const handlePosting = async () => {
         try {
-            const user = auth.currentUser;
-            await addDoc(collection(db, 'tutors'), {
-                tutor: user?.uid,
-                course: course,
-                location: location,
-                description: description,
-                availability: availability,
-                rate: rate
-            });
+            const currUser = auth.currentUser;
+            const response = await fetch("http://192.168.0.104:5000/api/tutors", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    tutor: currUser?.uid,
+                    course: selectedCourse,
+                    location: selectedLocation,
+                    description: description,
+                    availability: availability,
+                    rate: rate
+                })
+            })
+
+            const result = response.json();
+            if (!response.ok) {
+                return console.error(result);
+            }
             Alert.alert('Tutor post created successfully!');
             router.replace('/(tabs)/home');
         } catch (error: any) {
@@ -67,14 +133,14 @@ export default function TutorPost() {
                             style={styles.dropdown}
                             placeholderStyle={styles.placeholderStyle}
                             selectedTextStyle={styles.selectedTextStyle}
-                            data={courseCode}
+                            data={courseOptions}
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
-                            placeholder={"Course code"}
-                            value={course}
+                            placeholder={"Select a course"}
+                            value={selectedCourse}
                             onChange={item => {
-                                setCourse(item.value);
+                                setSelectedCourse(item.value);
                             }}
                             renderLeftIcon={() => (
                             <Ionicons
@@ -83,6 +149,8 @@ export default function TutorPost() {
                                 size={30}
                             />
                             )}
+                            search
+                            searchPlaceholder='Search course'
                         />
                     </View>
                 </View>
@@ -93,14 +161,14 @@ export default function TutorPost() {
                             style={styles.dropdown}
                             placeholderStyle={styles.placeholderStyle}
                             selectedTextStyle={styles.selectedTextStyle}
-                            data={locationOption}
+                            data={locationOptions}
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
                             placeholder={"Physical / Online"}
-                            value={location}
+                            value={selectedLocation}
                             onChange={item => {
-                                setLocation(item.value);
+                                setSelectedLocation(item.value);
                             }}
                             renderLeftIcon={() => (
                             <Ionicons
