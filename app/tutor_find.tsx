@@ -1,7 +1,6 @@
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { AntDesign, Entypo, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
@@ -12,15 +11,23 @@ export default function tutoring() {
     const router = useRouter();
     const [searchText, setSearchText] = useState('');
     const [tutors, setTutors] = useState<any>([]);
+    const [tutorProfile, setTutorProfiles] = useState<Record<string, any | undefined>>({});
+    const [error, setError] = useState(null);
     const [filteredTutors, setFilteredTutors] = useState<any>([]);
     const [selectedTutor, setSelectedTutor] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const { location, ratings, minRate, maxRate} = useLocalSearchParams();
 
-    const displayedTutors = filteredTutors.filter((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) =>
-        tutor.tutorName.toLowerCase().includes(searchText.toLowerCase()) || 
-        tutor.course.toLowerCase().includes(searchText.toLowerCase())
-    )
+    const displayedTutors = filteredTutors.filter((tutor: { id: React.Key | null | undefined; tutor: string; course: string; location: string; description: string; availability: string; rate: number }) => {
+        const profile = tutorProfile[tutor.tutor];
+        if (!profile) return null;
+
+        return (
+            profile.firstName.toLowerCase().includes(searchText.toLowerCase()) || 
+            profile.lastName.toLowerCase().includes(searchText.toLowerCase()) ||
+            tutor.course.toLowerCase().includes(searchText.toLowerCase())
+        )
+    })
 
     const handleFilter = () => {
         router.push('/tutor_find_filter')
@@ -43,59 +50,52 @@ export default function tutoring() {
         }
     }
     
-
-    const fetchData = async () => {
-        const user = auth.currentUser?.uid;
-        if (user !== undefined) {
-          const tutorRef = collection(db, "tutors");
-          const tutorSnap = await getDocs(tutorRef);
-    
-          const tutorList = await Promise.all(
-            tutorSnap.docs.map(async (docSnap) => {
-              const tutorInfo = docSnap.data();
-              const postingId = docSnap.id;
-              const tutorUid = tutorInfo.tutor;
-    
-              let profilePictureUrl = '';
-              let tutorName = '';
-              let tutorRating = 0;
-              if (tutorUid) {
-                const userDocRef = doc(db, 'users', tutorUid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                  profilePictureUrl = userDocSnap.data().profilePicture || '';
-                  tutorName = userDocSnap.data().firstName || '';
-                  tutorRating = userDocSnap.data().ratings || 0;
-                }
-              }
-    
-              return {
-                id: postingId,
-                tutor: tutorInfo.tutor,
-                tutorName: tutorName,
-                tutorRating: tutorRating,
-                course: tutorInfo.course,
-                location: tutorInfo.location,
-                description: tutorInfo.description,
-                availability: tutorInfo.availability,
-                rate: tutorInfo.rate,
-                profilePicture: profilePictureUrl,
-              };
-            })
-          );
-    
-          setTutors(tutorList)
-          setFilteredTutors(tutorList)
-        }
-    }
-
     useEffect(() => {
-        fetchData();
+      const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+        if (currentUser) {
+          setTutors([]); 
+          setFilteredTutors([]);
+          fetch(`http://192.168.0.104:5000/api/tutors`)
+            .then((res) => {
+              if (!res.ok) throw new Error("Failed to fetch tutors");
+              return res.json();
+            })
+            .then(async (data) => {
+              console.log("Tutors:", data);
+              setTutors(data);
+              const tutorProfile: Record<string, any | undefined> = {};
+              await Promise.all(data.map(async (cls: any) => {
+                try {
+                  const res = await fetch(`http://192.168.0.104:5000/api/users/${cls.tutor}`);
+                  if (!res.ok) throw new Error("Failed to fetch tutor");
+                  const userData = await res.json();
+                  tutorProfile[cls.tutor] = userData;
+                } catch (err) {
+                  console.error(err);
+                }
+              }));
+              setTutorProfiles(tutorProfile);
+            })
+            .catch((err) => {
+              console.error(err);
+              setError(err.message);
+            });
+        } else {
+          setTutors([]);
+          setFilteredTutors([]);
+        }
+      });
+  
+      return () => unsubscribe();
     }, [])
     
     useEffect(() => {
-        const filtered = tutors.filter((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => {
+        if (!tutors.length || Object.keys(tutorProfile).length === 0) return;
+
+        const filtered = tutors.filter((tutor: { id: React.Key | null | undefined; tutor: string; course: string; location: string; description: string; availability: string; rate: number }) => {
             const locationValue = location ?? 'Any'; 
+            const profile = tutorProfile[tutor.tutor];
+            if (!profile) return null;
 
             const locationMatch = locationValue === 'Any' 
                 ? true 
@@ -105,23 +105,23 @@ export default function tutoring() {
 
             return (
             (locationMatch) &&
-            (!ratings || parseFloat(tutor.tutorRating as string) >= Number(parseFloat(ratings as string))) &&
+            (!ratings || parseFloat(profile.ratings as string) >= Number(parseFloat(ratings as string))) &&
             (!minRate || tutor.rate >= Number(parseInt(minRate as string))) &&
             (!maxRate || tutor.rate <= Number(parseInt(maxRate as string)))
             );
         });
         setFilteredTutors(filtered);
-    }, [location, ratings, minRate, maxRate, tutors])
+    }, [location, ratings, minRate, maxRate, tutors, tutorProfile])
 
     const sortTutors = (criteria: 'rating' | 'rate', order: 'asc' | 'desc') => {
-        const sorted = [...tutors].sort((x: { tutorRating: string; rate: string | number; }, y: { tutorRating: string; rate: string | number; }) => {
+        const sorted = [...tutors].sort((x: { tutor: string; rate: string | number; }, y: { tutor: string; rate: string | number; }) => {
             let xValue: number | string;
             let yValue: number | string;
 
             switch (criteria) {
                 case 'rating':
-                    xValue = parseFloat(x.tutorRating);
-                    yValue = parseFloat(y.tutorRating);
+                    xValue = parseFloat(tutorProfile[x.tutor]?.ratings);
+                    yValue = parseFloat(tutorProfile[y.tutor]?.ratings);
                     break;
                 case 'rate':
                     xValue = x.rate;
@@ -139,7 +139,7 @@ export default function tutoring() {
         setTutors(sorted);
     };
 
-    const handleTutorProfile = (tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number; profilePicture: string; }) => {
+    const handleTutorProfile = (tutor: { id: React.Key | null | undefined; tutor: string; course: string; location: string; description: string; availability: string; rate: number; }) => {
         setSelectedTutor(tutor)
         setModalVisible(true)
     }
@@ -206,20 +206,29 @@ export default function tutoring() {
                 {displayedTutors.length === 0 ? (
                 <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No tutors yet.</Text>
                 ) : (
-                    displayedTutors.map((tutor: { id: React.Key | null | undefined; tutorName: string; tutorRating: string; course: string; location: string; description: string; availability: string; rate: number, profilePicture: string }) => (
-                        <TouchableOpacity key={tutor.id} style={styles.tutorCard} onPress={() => handleTutorProfile(tutor)}>
-                            <Image source={{ uri: tutor.profilePicture }} style={styles.image} />
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorName}</Text>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <AntDesign name='star' size={20} color={'yellow'} />
-                                    <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutor.tutorRating}</Text>
+                    displayedTutors.map((tutor: { id: React.Key | null | undefined; tutor: string; course: string; location: string; description: string; availability: string; rate: number }) => {
+                        const profile = tutorProfile[tutor.tutor];
+                        if (!profile) return null;
+
+                        return (
+                            <TouchableOpacity key={tutor.id} style={styles.tutorCard} onPress={() => handleTutorProfile(tutor)}>
+                                {tutorProfile[tutor.tutor]?.profilePicture ? (
+                                <Image source={{ uri: tutorProfile[tutor.tutor].profilePicture }} style={styles.image} />
+                                ) : (
+                                <Image source={require("../assets/images/person.jpg")} style={styles.image} />
+                                )}
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutorProfile[tutor.tutor].firstName}</Text>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <AntDesign name='star' size={20} color={'yellow'} />
+                                        <Text style={{ fontSize: 24, fontWeight: '800' }}>{tutorProfile[tutor.tutor].ratings}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                            <Text style={{ fontSize: 18, fontWeight: '600', color: '#888888' }}>{tutor.course} - {tutor.description}</Text>
-                            <Text style={{ fontSize: 20, fontWeight: '700', fontStyle: 'italic', color: '#444444' }}>S${tutor.rate} per hour</Text>
-                        </TouchableOpacity>
-                    ))
+                                <Text style={{ fontSize: 18, fontWeight: '600', color: '#888888' }}>{tutor.course} - {tutor.description}</Text>
+                                <Text style={{ fontSize: 20, fontWeight: '700', fontStyle: 'italic', color: '#444444' }}>S${tutor.rate} per hour</Text>
+                            </TouchableOpacity>
+                        );
+                    })
                 )}
             </ScrollView>
 
@@ -245,8 +254,8 @@ export default function tutoring() {
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                            <Image source={{ uri: selectedTutor.profilePicture }} style={styles.modalImage} />
-                            <Text style={{ fontSize: 28, fontWeight: '600', alignSelf: 'center' }}>{selectedTutor.tutorName}</Text>
+                            <Image source={{ uri: tutorProfile[selectedTutor.tutor].profilePicture }} style={styles.modalImage} />
+                            <Text style={{ fontSize: 28, fontWeight: '600', alignSelf: 'center' }}>{tutorProfile[selectedTutor.tutor].firstName} {tutorProfile[selectedTutor.tutor].lastName}</Text>
                             <Text style={{ fontSize: 24, fontWeight: '600', marginTop: 25 }}>{selectedTutor.course}</Text>
                             <Text style={{ fontSize: 18, color: '#888888', marginTop: 10 }}>{selectedTutor.description}</Text>
                             <Text style={{ fontSize: 22, fontWeight: '600', marginTop: 15 }}>Availability</Text>
@@ -255,7 +264,7 @@ export default function tutoring() {
                                 <View style={{ backgroundColor: 'lightgray', justifyContent: 'center', alignItems: 'center', width: 50, height: 50 }}>
                                     <AntDesign name='star' size={30} color={'yellow'} />
                                 </View>
-                                <Text style={{ fontSize: 20, color: 'gray', marginHorizontal: 10 }}>{selectedTutor.tutorRating}/5.0 stars</Text>
+                                <Text style={{ fontSize: 20, color: 'gray', marginHorizontal: 10 }}>{tutorProfile[selectedTutor.tutor].ratings}/5.0 stars</Text>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', marginTop: 20, alignItems: 'center' }}>
                                 <View style={{ backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center', width: 50, height: 50 }}>
