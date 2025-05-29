@@ -8,8 +8,7 @@
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
-    "format": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "format": "prettier --check ."
   },
   "keywords": [],
   "author": "",

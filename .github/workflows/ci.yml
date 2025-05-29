@@ -41,5 +41,6 @@ jobs:
         working-directory: ${{ matrix.project }}
 
       - name: Run TypeScript type check
+        if: matrix.project == 'frontend'
         run: npm run typecheck
         working-directory: ${{ matrix.project }}
