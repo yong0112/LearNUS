@@ -1,8 +1,15 @@
-import { auth } from '@/lib/firebase';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { auth } from "@/lib/firebase";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function history() {
   const router = useRouter();
@@ -13,7 +20,7 @@ export default function history() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        setClasses([]); 
+        setClasses([]);
         fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}/classes`)
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch user classes");
@@ -23,16 +30,20 @@ export default function history() {
             console.log("User classes:", data);
             setClasses(data);
             const pics: Record<string, string> = {};
-            await Promise.all(data.map(async (cls: any) => {
-              try {
-                const res = await fetch(`http://192.168.0.104:5000/api/users/${cls.people}`);
-                if (!res.ok) throw new Error("Failed to fetch user profile");
-                const userData = await res.json();
-                pics[cls.people] = userData.profilePicture;
-              } catch (err) {
-                console.error(err);
-              }
-            }));
+            await Promise.all(
+              data.map(async (cls: any) => {
+                try {
+                  const res = await fetch(
+                    `http://192.168.0.104:5000/api/users/${cls.people}`,
+                  );
+                  if (!res.ok) throw new Error("Failed to fetch user profile");
+                  const userData = await res.json();
+                  pics[cls.people] = userData.profilePicture;
+                } catch (err) {
+                  console.error(err);
+                }
+              }),
+            );
             setProfiles(pics);
           })
           .catch((err) => {
@@ -45,78 +56,116 @@ export default function history() {
     });
 
     return () => unsubscribe();
-  }, [])
+  }, []);
 
   const handleTutorProfile = () => {
-    console.log("Press me")
-  }
+    console.log("Press me");
+  };
 
   return (
     <View style={styles.container}>
       {/*Header*/}
       <View style={styles.background} />
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20   }}>
-        <Ionicons name='arrow-back-circle' size={40} color='white' onPress={() => router.push('/(tabs)/profile')} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 20,
+        }}
+      >
+        <Ionicons
+          name="arrow-back-circle"
+          size={40}
+          color="white"
+          onPress={() => router.push("/(tabs)/profile")}
+        />
         <Text style={styles.headerText}>Tutoring History</Text>
-        <View style={{ width: 40 }}/>
+        <View style={{ width: 40 }} />
       </View>
 
       {/*List*/}
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-      {classes.length === 0 ? (
-        <Text style={{ fontSize: 24, fontWeight: 'bold', alignSelf: 'center' }}>No classes yet.</Text>
-      ) : (
-        classes.map((cls: { id: React.Key | null | undefined; course: string; role: string; startTime: string; people: string }) => (
-          <TouchableOpacity key={cls.id} style={styles.classCard} onPress={handleTutorProfile}>
-            <View style={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
-              <Text style={styles.subject}>{cls.course} ({cls.role})</Text>
-              <Text style={{ fontSize: 18 }}>{cls.startTime}</Text>
-            </View> 
-            <Image source={{ uri: profiles[cls.people] }} style={styles.avatar} />
-          </TouchableOpacity>
-        ))
-      )}
-    </ScrollView>
+        {classes.length === 0 ? (
+          <Text
+            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center" }}
+          >
+            No classes yet.
+          </Text>
+        ) : (
+          classes.map(
+            (cls: {
+              id: React.Key | null | undefined;
+              course: string;
+              role: string;
+              startTime: string;
+              people: string;
+            }) => (
+              <TouchableOpacity
+                key={cls.id}
+                style={styles.classCard}
+                onPress={handleTutorProfile}
+              >
+                <View
+                  style={{
+                    flexDirection: "column",
+                    justifyContent: "space-evenly",
+                  }}
+                >
+                  <Text style={styles.subject}>
+                    {cls.course} ({cls.role})
+                  </Text>
+                  <Text style={{ fontSize: 18 }}>{cls.startTime}</Text>
+                </View>
+                <Image
+                  source={{ uri: profiles[cls.people] }}
+                  style={styles.avatar}
+                />
+              </TouchableOpacity>
+            ),
+          )
+        )}
+      </ScrollView>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingVertical : 40, paddingHorizontal: 20 },
+  container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
   background: {
-      position: 'absolute',
-      top: -550, 
-      left: -350,
-      width: 100000,
-      height: 650,
-      borderRadius: 0,
-      backgroundColor: '#ffc04d',
-      zIndex: -1,
+    position: "absolute",
+    top: -550,
+    left: -350,
+    width: 100000,
+    height: 650,
+    borderRadius: 0,
+    backgroundColor: "#ffc04d",
+    zIndex: -1,
   },
   headerText: {
-      fontSize: 28,
-      fontWeight: 'bold',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'black'
+    fontSize: 28,
+    fontWeight: "bold",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "black",
   },
   classCard: {
     marginBottom: 20,
     padding: 20,
     borderRadius: 20,
     borderWidth: 2,
-    flexDirection: 'row',
-    justifyContent: 'space-between'
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   subject: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 50,
-    alignSelf: 'center',
-    marginTop: 20
+    alignSelf: "center",
+    marginTop: 20,
   },
-})
+});
