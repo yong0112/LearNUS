@@ -70,7 +70,7 @@ export default function Login() {
     >
     <View style={styles.innerContainer}>
       <Image source={require('../assets/images/logo.jpg')} style={styles.image} />
-      <Text style={styles.title}>Welcome to LearNUS!</Text>
+      <Text style={styles.title}>Welcome to LearNUS, testing 123!</Text>
       <Text style={styles.headings}>Sign In</Text>
       <Text style={styles.subheadings}>Login with your personal email address</Text>
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" style={styles.input} />

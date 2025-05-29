@@ -15,10 +15,6 @@ jobs:
       matrix:
         project: [frontend, backend]
 
-    defaults:
-      run:
-        working-directory: ${{ matrix.project }}
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -28,15 +24,20 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json  # 👈 use matrix path
 
       - name: Install dependencies
         run: npm ci
+        working-directory: ${{ matrix.project }}
 
       - name: Run ESLint
         run: npm run lint
+        working-directory: ${{ matrix.project }}
 
       - name: Run Prettier
         run: npm run format
+        working-directory: ${{ matrix.project }}
 
       - name: Run TypeScript type check
         run: npm run typecheck
+        working-directory: ${{ matrix.project }}
