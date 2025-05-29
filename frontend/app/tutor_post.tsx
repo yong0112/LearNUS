@@ -47,7 +47,7 @@ export default function TutorPost() {
                     })
             } catch (error) {
                 console.warn("Using local data due to error: ", error);
-                fetch("http://192.168.0.104:5000/api/courses")
+                fetch("http://192.168.1.9:5000/api/courses")
                     .then((res) => {
                         if (!res.ok) throw new Error("Failed to fetch local courses");
                         return res.json();
@@ -68,7 +68,7 @@ export default function TutorPost() {
         }
 
         const fetchConstants = async () => {
-            fetch("http://192.168.0.104:5000/api/constants")
+            fetch("http://192.168.1.9:5000/api/constants")
             .then((res) => {
                 if (!res.ok) throw new Error("Failed to fetch constants");
                 return res.json();
@@ -89,7 +89,7 @@ export default function TutorPost() {
     const handlePosting = async () => {
         try {
             const currUser = auth.currentUser;
-            const response = await fetch("http://192.168.0.104:5000/api/tutors", {
+            const response = await fetch("http://192.168.1.9:5000/api/tutors", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
