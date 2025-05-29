@@ -55,7 +55,7 @@ export default function tutoring() {
         if (currentUser) {
           setTutors([]); 
           setFilteredTutors([]);
-          fetch(`http://192.168.0.104:5000/api/tutors`)
+          fetch(`http://192.168.1.9:5000/api/tutors`)
             .then((res) => {
               if (!res.ok) throw new Error("Failed to fetch tutors");
               return res.json();
@@ -66,7 +66,7 @@ export default function tutoring() {
               const tutorProfile: Record<string, any | undefined> = {};
               await Promise.all(data.map(async (cls: any) => {
                 try {
-                  const res = await fetch(`http://192.168.0.104:5000/api/users/${cls.tutor}`);
+                  const res = await fetch(`http://192.168.1.9:5000/api/users/${cls.tutor}`);
                   if (!res.ok) throw new Error("Failed to fetch tutor");
                   const userData = await res.json();
                   tutorProfile[cls.tutor] = userData;
