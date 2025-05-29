@@ -8,7 +8,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -54,8 +56,9 @@
     "@babel/core": "^7.25.2",
     "@react-native-community/cli": "latest",
     "@types/react": "~19.0.10",
-    "eslint": "^9.25.0",
+    "eslint": "^9.27.0",
     "eslint-config-expo": "~9.2.0",
+    "prettier": "^3.5.3",
     "typescript": "~5.8.3"
   },
   "private": true
