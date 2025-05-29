@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const courses = require('../data/courses.json');
+const courses = require("../data/courses.json");
 
-router.get('/', (req, res) => {
+router.get("/", (req, res) => {
   res.json(courses);
 });
 
