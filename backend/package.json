@@ -22,7 +22,9 @@
     "firebase-admin": "^13.4.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.27.0",
     "eslint": "^8.57.1",
+    "globals": "^16.2.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3"
