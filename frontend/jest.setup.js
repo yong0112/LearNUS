@@ -1,32 +1,32 @@
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+jest.mock("@react-native-async-storage/async-storage", () =>
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 
-jest.mock('firebase/app', () => ({
+jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
   getApp: jest.fn(),
   getApps: jest.fn(() => []),
 }));
 
-jest.mock('firebase/auth', () => ({
+jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(),
   initializeAuth: jest.fn(),
   getReactNativePersistence: jest.fn(),
 }));
 
-jest.mock('firebase/app', () => ({
+jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
   getApp: jest.fn(),
   getApps: jest.fn(() => []),
 }));
 
-jest.mock('firebase/auth', () => ({
+jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(),
   initializeAuth: jest.fn(),
   getReactNativePersistence: jest.fn(),
 }));
 
-jest.mock('firebase/firestore', () => ({
+jest.mock("firebase/firestore", () => ({
   getFirestore: jest.fn(),
   collection: jest.fn(),
   getDocs: jest.fn(),
@@ -40,8 +40,3 @@ jest.mock('firebase/firestore', () => ({
   where: jest.fn(),
   orderBy: jest.fn(),
 }));
-
-
-
-
-
