@@ -100,7 +100,7 @@ export default function Login() {
             source={require("../assets/images/logo.jpg")}
             style={styles.image}
           />
-          <Text style={styles.title}>Welcome to LearNUS, testing 123!</Text>
+          <Text style={styles.title}>Welcome to LearNUS!</Text>
           <Text style={styles.headings}>Sign In</Text>
           <Text style={styles.subheadings}>
             Login with your personal email address
