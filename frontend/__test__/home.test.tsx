@@ -17,11 +17,11 @@ jest.mock("firebase/auth", () => {
 
 // __test__/home.test.tsx
 
-jest.mock('../lib/firebase', () => {
+jest.mock("../lib/firebase", () => {
   return {
     auth: {
       onAuthStateChanged: jest.fn((callback) => {
-        callback({ uid: 'test-user' }); // mock user object
+        callback({ uid: "test-user" }); // mock user object
         return jest.fn(); // unsubscribe function
       }),
     },
@@ -29,12 +29,11 @@ jest.mock('../lib/firebase', () => {
   };
 });
 
-
 // Optional: Mock fetch if used
 global.fetch = jest.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve([]), // or mock dummy tutors list
-  })
+  }),
 ) as jest.Mock;
 
 describe("HomeScreen", () => {
@@ -42,9 +41,8 @@ describe("HomeScreen", () => {
     const { getByText } = render(
       <MenuProvider>
         <HomeScreen />
-      </MenuProvider>
+      </MenuProvider>,
     );
     expect(getByText("Lear")).toBeTruthy(); // Adjust text to match your UI
   });
 });
-
