@@ -16,5 +16,7 @@
     "expo-env.d.ts",
     "app/(tabs)/home.tsx",
     "backend/config/firebase.js"
-  ]
+  ],
+  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js", "__test__/**/*"]
 }
+
