@@ -27,7 +27,7 @@ jest.mock("../lib/firebase", () => ({
 global.fetch = jest.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve([]),
-  } as Response)
+  } as Response),
 ) as jest.Mock;
 
 describe("HomeScreen", () => {
@@ -41,10 +41,9 @@ describe("HomeScreen", () => {
   });
 });
 
-
 global.fetch = jest.fn(() =>
   Promise.resolve({
-    json: () => Promise.resolve([]), // 
+    json: () => Promise.resolve([]), //
   }),
 ) as jest.Mock;
 
@@ -55,6 +54,6 @@ describe("HomeScreen", () => {
         <HomeScreen />
       </MenuProvider>,
     );
-    expect(getByText("Lear")).toBeTruthy(); 
+    expect(getByText("Lear")).toBeTruthy();
   });
 });
