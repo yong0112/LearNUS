@@ -3,36 +3,48 @@ import { render } from "@testing-library/react-native";
 import HomeScreen from "../app/(tabs)/home"; // Adjust path as needed
 import { MenuProvider } from "react-native-popup-menu";
 
-// 🔧 Mock Firebase Auth
-jest.mock("firebase/auth", () => {
-  return {
-    getAuth: jest.fn(() => ({
-      onAuthStateChanged: jest.fn((callback) => {
-        callback({ uid: "test-user" }); // simulate logged-in user
-        return jest.fn(); // return fake unsubscribe
-      }),
-    })),
-  };
-});
+// Mock Firebase auth
+jest.mock("firebase/auth", () => ({
+  getAuth: jest.fn(() => ({
+    onAuthStateChanged: jest.fn((callback) => {
+      callback({ uid: "test-user" }); // Simulate logged-in user
+      return jest.fn(); // Fake unsubscribe
+    }),
+  })),
+}));
 
-// __test__/home.test.tsx
+jest.mock("../lib/firebase", () => ({
+  auth: {
+    onAuthStateChanged: jest.fn((callback) => {
+      callback({ uid: "test-user" });
+      return jest.fn();
+    }),
+  },
+  db: {},
+}));
 
-jest.mock("../lib/firebase", () => {
-  return {
-    auth: {
-      onAuthStateChanged: jest.fn((callback) => {
-        callback({ uid: "test-user" }); // mock user object
-        return jest.fn(); // unsubscribe function
-      }),
-    },
-    db: {}, // mock Firestore db object if needed
-  };
-});
-
-// Optional: Mock fetch if used
+// Mock fetch with proper typing
 global.fetch = jest.fn(() =>
   Promise.resolve({
-    json: () => Promise.resolve([]), // or mock dummy tutors list
+    json: () => Promise.resolve([]),
+  } as Response)
+) as jest.Mock;
+
+describe("HomeScreen", () => {
+  it("renders without crashing", async () => {
+    const { getByText } = render(
+      <MenuProvider>
+        <HomeScreen />
+      </MenuProvider>,
+    );
+    expect(getByText("Lear")).toBeTruthy();
+  });
+});
+
+
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () => Promise.resolve([]), // 
   }),
 ) as jest.Mock;
 
@@ -43,6 +55,6 @@ describe("HomeScreen", () => {
         <HomeScreen />
       </MenuProvider>,
     );
-    expect(getByText("Lear")).toBeTruthy(); // Adjust text to match your UI
+    expect(getByText("Lear")).toBeTruthy(); 
   });
 });
