@@ -44,3 +44,8 @@ jobs:
         if: matrix.project == 'frontend'
         run: npm run typecheck
         working-directory: ${{ matrix.project }}
+
+      - name: Run Unit Tests
+        run: npm run test
+        working-directory: ${{ matrix.project }}
+    
