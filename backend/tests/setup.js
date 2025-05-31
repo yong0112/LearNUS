@@ -1,6 +1,5 @@
-
 // LearNUS/backend/tests/setup.js
-jest.mock('firebase-admin', () => ({
+jest.mock("firebase-admin", () => ({
   initializeApp: jest.fn(),
   credential: {
     cert: jest.fn().mockReturnValue({}),
@@ -17,7 +16,7 @@ jest.mock('firebase-admin', () => ({
 }));
 
 // LearNUS/backend/tests/setup.js
-jest.mock('firebase-admin', () => {
+jest.mock("firebase-admin", () => {
   const mockCollection = {
     doc: jest.fn(() => mockDoc),
     get: jest.fn(),
