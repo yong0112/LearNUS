@@ -13,7 +13,7 @@ const fetchForumPosts = async (req, res) => {
 };
 
 const addForumPost = async (req, res) => {
-    const { title, content, courseTag } = req.body;
+    const { title, content, courseTag, author } = req.body;
 
     if (!title) {
         return res.status(400).json({ error: "Missing title" });
@@ -24,7 +24,7 @@ const addForumPost = async (req, res) => {
     }
 
     try {
-        const newPost = await postForum({ title, content, courseTag });
+        const newPost = await postForum({ title, content, courseTag, author });
         res.status(201).json({ message: "Post added", newPost });
     } catch (err) {
         console.error(err);

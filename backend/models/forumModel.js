@@ -15,12 +15,13 @@ const getForumPosts = async () => {
     return posts;
 };
 
-const postForum = async ({ title, content, courseTag }) => {
+const postForum = async ({ title, content, courseTag, author }) => {
     try {
         const docRef = await db.collection("forums").add({
             title,
             content,
             courseTag,
+            author,
             createdAt: new Date(),
         });
         const savedDoc = await docRef.get();

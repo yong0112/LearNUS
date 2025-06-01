@@ -47,10 +47,10 @@ export default function ForumPost() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          author: currUser?.uid,
           title: title,
           content: content,
           courseTag: selectedCourse || null,
+          author: currUser?.uid,
         }),
       });
 
