@@ -26,7 +26,7 @@ export default function TutorFilter() {
 
   useEffect(() => {
     const fetchConstants = async () => {
-      fetch("http://192.168.1.10:5000/api/constants")
+      fetch("https://learnus.onrender.com/api/constants")
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch constants");
           return res.json();
