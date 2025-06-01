@@ -1,5 +1,5 @@
 import { auth } from "@/lib/firebase";
-import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ScrollView,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
@@ -17,155 +18,105 @@ type courseOption = {
   value: string;
 };
 
-type locationOption = {
-  label: string;
-  value: string;
-};
-
-export default function TutorPost() {
+export default function ForumPost() {
   const router = useRouter();
   const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
-  const [locationOptions, setLocationOptions] = useState<locationOption[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [description, setDescription] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [rate, setRate] = useState<number>();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch local courses");
-            return res.json();
-          })
-          .then((data) => {
-            return data.map(
-              (course: {
-                moduleCode: string;
-                title: string;
-                semesters: number[];
-              }) => ({
-                label: `${course.moduleCode} - ${course.title}`,
-                value: course.moduleCode,
-              }),
-            );
-          })
-          .then((data) => {
-            setCourseOptions(data);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      } catch (error) {
-        console.warn("Using local data due to error: ", error);
-        fetch("http://192.168.1.10:5000/api/courses")
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch local courses");
-            return res.json();
-          })
-          .then((data) => {
-            return data.map(
-              (course: {
-                moduleCode: string;
-                title: string;
-                semesters: number[];
-              }) => ({
-                label: `${course.moduleCode} - ${course.title}`,
-                value: course.moduleCode,
-              }),
-            );
-          })
-          .then((data) => {
-            setCourseOptions(data);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
-    };
-
-    const fetchConstants = async () => {
-      fetch("http://192.168.1.10:5000/api/constants")
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch constants");
-          return res.json();
-        })
-        .then((data) => {
-          setLocationOptions(data.FORMATS);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    };
-
-    fetchCourses();
-    fetchConstants();
+    fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = data.map((course: any) => ({
+          label: `${course.moduleCode} - ${course.title}`,
+          value: course.moduleCode,
+        }));
+        setCourseOptions(formatted);
+      })
+      .catch((err) => console.error(err));
   }, []);
 
-  const handlePosting = async () => {
+  const handlePost = async () => {
     try {
       const currUser = auth.currentUser;
-      const response = await fetch("http://192.168.1.10:5000/api/tutors", {
+      const response = await fetch("http://192.168.1.8:5000/api/forum", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          tutor: currUser?.uid,
-          course: selectedCourse,
-          location: selectedLocation,
-          description: description,
-          availability: availability,
-          rate: rate,
+          author: currUser?.uid,
+          title: title,
+          content: content,
+          courseTag: selectedCourse || null,
         }),
       });
 
-      const result = response.json();
+      const result = await response.json();
       if (!response.ok) {
-        return console.error(result);
+        console.error(result);
+        return;
       }
-      Alert.alert("Tutor post created successfully!");
+      Alert.alert("Forum post created!");
       router.replace("/(tabs)/forum");
     } catch (error: any) {
-      console.error("Error: ", error);
-      Alert.alert("Posting failed" + error.message);
+      console.error("Error:", error);
+      Alert.alert("Failed to post: " + error.message);
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
+      <View style={styles.header}>
         <Ionicons
           name="arrow-back-circle"
           size={40}
           color="white"
           onPress={() => router.push("/(tabs)/forum")}
         />
-        <Text style={styles.headerText}>Create A Post!</Text>
+        <Text style={styles.headerText}>Create A Post</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <View
-        style={{
-          justifyContent: "flex-start",
-          flexDirection: "column",
-          paddingTop: 20,
-          paddingHorizontal: 10,
-        }}
-      >
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
-            Course Code
-          </Text>
+      <ScrollView contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Title</Text>
+          <View style={styles.searchBar}>
+            <MaterialIcons name="title" size={25} color="orange" />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter post title"
+              placeholderTextColor="#888"
+              onChangeText={setTitle}
+            />
+          </View>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Content</Text>
+          <View style={[styles.searchBar, { height: 250, alignItems: "flex-start" }]}>
+            <TextInput
+              style={{
+                flex: 1,
+                width: "100%",
+                textAlignVertical: "top",
+                color: "#222222",
+                fontSize: 17,
+            }}
+              placeholder="Write your post here..."
+              placeholderTextColor="#888"
+              multiline
+              onChangeText={setContent}
+              scrollEnabled
+            />
+          </View>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Course Tag (optional)</Text>
           <View style={styles.searchBar}>
             <Dropdown
               style={styles.dropdown}
@@ -175,11 +126,9 @@ export default function TutorPost() {
               maxHeight={300}
               labelField="label"
               valueField="value"
-              placeholder={"Select a course"}
+              placeholder="Select a course"
               value={selectedCourse}
-              onChange={(item) => {
-                setSelectedCourse(item.value);
-              }}
+              onChange={(item) => setSelectedCourse(item.value)}
               renderLeftIcon={() => (
                 <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
               )}
@@ -188,90 +137,11 @@ export default function TutorPost() {
             />
           </View>
         </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
-            Location
-          </Text>
-          <View style={styles.searchBar}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={locationOptions}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={"Physical / Online"}
-              value={selectedLocation}
-              onChange={(item) => {
-                setSelectedLocation(item.value);
-              }}
-              renderLeftIcon={() => (
-                <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
-              )}
-            />
-          </View>
-        </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
-            About the lesson
-          </Text>
-          <View style={styles.searchBar}>
-            <MaterialIcons name="keyboard" size={25} color="orange" />
-            <TextInput
-              style={{
-                color: "#222222",
-                fontSize: 17,
-                marginLeft: 10,
-                flex: 1,
-              }}
-              placeholder="Brief description about the lesson..."
-              placeholderTextColor="#888888"
-              onChangeText={setDescription}
-            />
-          </View>
-        </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
-            Availability, eg.(Monday 7-9pm)
-          </Text>
-          <View style={styles.searchBar}>
-            <MaterialIcons name="keyboard" size={25} color="orange" />
-            <TextInput
-              style={{
-                color: "#222222",
-                fontSize: 17,
-                marginLeft: 10,
-                flex: 1,
-              }}
-              placeholder="Time slots"
-              placeholderTextColor="#888888"
-              onChangeText={setAvailability}
-            />
-          </View>
-        </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
-            Hourly Rate
-          </Text>
-          <View style={styles.searchBar}>
-            <FontAwesome name="dollar" size={25} color="orange" />
-            <TextInput
-              style={{ color: "#222222", fontSize: 17, marginLeft: 10 }}
-              keyboardType="numeric"
-              placeholder="Singapore dollar"
-              placeholderTextColor="#888888"
-              onChangeText={(text) => {
-                const num = parseFloat(text);
-                setRate(isNaN(num) ? undefined : num);
-              }}
-            />
-          </View>
-        </View>
-        <TouchableOpacity style={styles.postButton} onPress={handlePosting}>
+
+        <TouchableOpacity style={styles.postButton} onPress={handlePost}>
           <Text style={styles.buttonText}>Post!</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -281,7 +151,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 40,
     paddingHorizontal: 20,
-    justifyContent: "flex-start",
   },
   background: {
     position: "absolute",
@@ -289,16 +158,27 @@ const styles = StyleSheet.create({
     left: -150,
     width: 700,
     height: 650,
-    borderRadius: 0,
     backgroundColor: "#ffc04d",
     zIndex: -1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   headerText: {
     fontSize: 28,
     fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
     color: "black",
+  },
+  inputGroup: {
+    paddingHorizontal: 5,
+    paddingVertical: 20,
+  },
+  label: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
   },
   searchBar: {
     borderRadius: 20,
@@ -306,15 +186,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingLeft: 8,
+    paddingRight: 8,
   },
-  label: {
-    position: "absolute",
-    backgroundColor: "#f5f5f5",
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
+  input: {
+    color: "#222",
+    fontSize: 17,
+    marginLeft: 10,
+    flex: 1,
   },
   dropdown: {
     height: 50,
@@ -324,25 +202,25 @@ const styles = StyleSheet.create({
   placeholderStyle: {
     fontSize: 17,
     marginLeft: 10,
-    color: "#888888",
+    color: "#888",
   },
   selectedTextStyle: {
     fontSize: 17,
     marginLeft: 10,
-    color: "#222222",
+    color: "#222",
   },
   postButton: {
-    marginTop: 20,
+    marginTop: 120,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "orange",
+    paddingVertical: 12,
+    height: 60,
   },
   buttonText: {
-    marginHorizontal: 4,
     fontSize: 28,
     fontWeight: "600",
-    marginBottom: 2,
     color: "white",
   },
 });

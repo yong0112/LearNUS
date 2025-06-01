@@ -3,6 +3,6 @@ const router = express.Router();
 const { fetchForumPosts, addForumPost } = require('../controllers/forumController');
 
 router.get('/', fetchForumPosts);
-router.get('/', addForumPost);
+router.post('/', addForumPost);
 
 module.exports = router;
