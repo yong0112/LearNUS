@@ -47,7 +47,7 @@ export default function Home() {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setTutors([]);
-        fetch(`http://192.168.1.10:5000/api/tutors`)
+        fetch(`https://learnus.onrender.com/api/tutors`)
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch tutors");
             return res.json();
@@ -60,7 +60,7 @@ export default function Home() {
               data.map(async (cls: any) => {
                 try {
                   const res = await fetch(
-                    `http://192.168.1.10:5000/api/users/${cls.tutor}`,
+                    `https://learnus.onrender.com/api/users/${cls.tutor}`,
                   );
                   if (!res.ok) throw new Error("Failed to fetch tutor");
                   const userData = await res.json();
