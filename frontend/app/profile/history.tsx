@@ -21,7 +21,7 @@ export default function history() {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setClasses([]);
-        fetch(`https://192.168.0.104:5000/api/users/${currentUser.uid}/classes`)
+        fetch(`https://learnus.onrender.com/api/users/${currentUser.uid}/classes`)
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch user classes");
             return res.json();
@@ -34,7 +34,7 @@ export default function history() {
               data.map(async (cls: any) => {
                 try {
                   const res = await fetch(
-                    `http://192.168.0.104:5000/api/users/${cls.people}`,
+                    `http://learnus.onrender.com/api/users/${cls.people}`,
                   );
                   if (!res.ok) throw new Error("Failed to fetch user profile");
                   const userData = await res.json();
