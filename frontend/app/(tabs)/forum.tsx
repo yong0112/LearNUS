@@ -30,7 +30,7 @@ export default function Forum() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        fetch("http://learnus.onrender.com/api/forum")
+        fetch("https://learnus.onrender.com/api/forum")
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch posts");
             return res.json();
