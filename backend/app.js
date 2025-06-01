@@ -20,6 +20,8 @@ const constantRoutes = require("./routes/constants");
 app.use("/api/constants", constantRoutes);
 const coursesRoutes = require("./routes/courses");
 app.use("/api/courses", coursesRoutes);
+const forumRoutes = require("./routes/forum");
+app.use("/api/forum", forumRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is working~~");
