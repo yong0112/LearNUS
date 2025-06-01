@@ -81,7 +81,9 @@ export default function ForumPost() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}
+      >
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Title</Text>
           <View style={styles.searchBar}>
@@ -97,7 +99,12 @@ export default function ForumPost() {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Content</Text>
-          <View style={[styles.searchBar, { height: 250, alignItems: "flex-start" }]}>
+          <View
+            style={[
+              styles.searchBar,
+              { height: 250, alignItems: "flex-start" },
+            ]}
+          >
             <TextInput
               style={{
                 flex: 1,
@@ -105,7 +112,7 @@ export default function ForumPost() {
                 textAlignVertical: "top",
                 color: "#222222",
                 fontSize: 17,
-            }}
+              }}
               placeholder="Write your post here..."
               placeholderTextColor="#888"
               multiline

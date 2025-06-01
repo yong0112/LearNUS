@@ -1,8 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { fetchForumPosts, addForumPost } = require('../controllers/forumController');
+const {
+  fetchForumPosts,
+  addForumPost,
+} = require("../controllers/forumController");
 
-router.get('/', fetchForumPosts);
-router.post('/', addForumPost);
+router.get("/", fetchForumPosts);
+router.post("/", addForumPost);
 
 module.exports = router;
