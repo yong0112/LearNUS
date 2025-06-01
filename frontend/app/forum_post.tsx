@@ -41,7 +41,7 @@ export default function ForumPost() {
   const handlePost = async () => {
     try {
       const currUser = auth.currentUser;
-      const response = await fetch("http://192.168.1.8:5000/api/forum", {
+      const response = await fetch("http://learnus.onrender.com/api/forum", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
