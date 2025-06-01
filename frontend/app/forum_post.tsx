@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     color: "#222",
   },
   postButton: {
-    marginTop: 120,
+    marginTop: 50,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
