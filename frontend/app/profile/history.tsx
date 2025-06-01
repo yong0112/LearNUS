@@ -21,7 +21,7 @@ export default function history() {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setClasses([]);
-        fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}/classes`)
+        fetch(`https://192.168.0.104:5000/api/users/${currentUser.uid}/classes`)
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch user classes");
             return res.json();

@@ -13,7 +13,7 @@ export default function Details() {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setUserProfile(null);
-        fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}`)
+        fetch(`https://192.168.0.104:5000/api/users/${currentUser.uid}`)
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch user profile");
             return res.json();

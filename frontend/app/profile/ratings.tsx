@@ -17,7 +17,7 @@ export default function ratings() {
       if (currentUser) {
         setUserProfile(null);
         setReviews([]);
-        fetch(`http://192.168.0.104:5000/api/users/${currentUser.uid}`)
+        fetch(`https://192.168.0.104:5000/api/users/${currentUser.uid}`)
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch user profile");
             return res.json();
@@ -32,7 +32,7 @@ export default function ratings() {
           })
           .then(() => {
             fetch(
-              `http://192.168.0.104:5000/api/users/${currentUser.uid}/reviews`,
+              `https://192.168.0.104:5000/api/users/${currentUser.uid}/reviews`,
             )
               .then((res) => {
                 if (!res.ok) throw new Error("Failed to fetch user reviews");
