@@ -166,8 +166,14 @@ export default function Signup() {
           </View>
           <Text style={styles.dividerText}>
             Already on LearNUS?{" "}
-            <Link href={"/login"} style={styles.link}>
-              <Text style={styles.link}>Sign in</Text>
+            <Link
+              href="/login"
+              onPress={(e) => {
+                e.preventDefault(); // prevent the default behavior
+                router.push("/login"); // do navigation manually
+              }}
+            >
+              <Text style={styles.link}>Sign In</Text>
             </Link>
           </Text>
         </ScrollView>
