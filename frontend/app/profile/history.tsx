@@ -21,7 +21,9 @@ export default function history() {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setClasses([]);
-        fetch(`https://learnus.onrender.com/api/users/${currentUser.uid}/classes`)
+        fetch(
+          `https://learnus.onrender.com/api/users/${currentUser.uid}/classes`,
+        )
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch user classes");
             return res.json();
