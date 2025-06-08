@@ -93,7 +93,7 @@ export default function Forum() {
 
   // Navigate to forum_post.tsx
   const handleNewPost = () => {
-    router.push("/forum_post");
+    router.push("../forum_post");
   };
 
   return (

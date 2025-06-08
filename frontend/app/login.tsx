@@ -133,7 +133,13 @@ export default function Login() {
           </View>
           <Text style={styles.dividerText}>
             New to LearNUS?{" "}
-            <Link href={"/signup"} style={styles.signUpLink}>
+            <Link
+              href="/login"
+              onPress={(e) => {
+                e.preventDefault(); // prevent the default behavior
+                router.push("/signup"); // do navigation manually
+              }}
+            >
               <Text style={styles.signUpLink}>Join Now</Text>
             </Link>
           </Text>
