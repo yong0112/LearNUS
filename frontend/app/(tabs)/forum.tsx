@@ -1,7 +1,7 @@
 import { auth } from "@/lib/firebase";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   Dimensions,
   Modal,
@@ -25,6 +25,17 @@ export default function Forum() {
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const displayedPosts = posts.filter((post) => {
+    const profile = userProfiles[post.author];
+    if (!profile) return null;
+    return (
+      post.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchText.toLowerCase()) ||
+      (post.courseTag &&
+        post.courseTag.toLowerCase().includes(searchText.toLowerCase()))
+    );
+  });
 
   // Fetch posts and user profiles
   useEffect(() => {
@@ -120,7 +131,7 @@ export default function Forum() {
             No posts yet.
           </Text>
         ) : (
-          posts.map((post) => {
+          displayedPosts.map((post) => {
             const profile = userProfiles[post.author];
             if (!profile) return null;
 
