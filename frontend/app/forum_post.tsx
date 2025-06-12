@@ -1,5 +1,10 @@
 import { auth } from "@/lib/firebase";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialIcons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import { set } from "date-fns";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -143,6 +148,15 @@ export default function ForumPost() {
               searchPlaceholder="Search course"
             />
           </View>
+          <TouchableOpacity
+            style={styles.clearFilterContainer}
+            onPress={() => {
+              setSelectedCourse("");
+            }}
+          >
+            <MaterialCommunityIcons name="close" size={20} color="black" />
+            <Text style={styles.filterButtonText}>Clear Tag</Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.postButton} onPress={handlePost}>
@@ -215,6 +229,24 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginLeft: 10,
     color: "#222",
+  },
+  clearFilterContainer: {
+    marginTop: 12,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 6,
+    alignSelf: "flex-start",
+  },
+  filterButtonText: {
+    marginHorizontal: 4,
+    fontSize: 14,
+    fontWeight: "400",
+    marginBottom: 2,
   },
   postButton: {
     marginTop: 50,
