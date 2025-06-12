@@ -1,4 +1,4 @@
-const db = require("../config/firebase");
+const { db } = require("../config/firebase");
 
 const getUserProfile = async (uid) => {
   const userDoc = await db.collection("users").doc(uid).get();

@@ -1,4 +1,4 @@
-const db = require("../config/firebase");
+const { db } = require("../config/firebase");
 
 const getForumPosts = async () => {
   const forumRef = await db.collection("forums").get();
