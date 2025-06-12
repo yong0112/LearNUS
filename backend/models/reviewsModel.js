@@ -1,4 +1,4 @@
-const db = require("../config/firebase");
+const { db } = require("../config/firebase");
 
 const getUserReviews = async (uid) => {
   const reviewsRef = await db
