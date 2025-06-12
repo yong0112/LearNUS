@@ -1,5 +1,5 @@
 import { auth } from "@/lib/firebase";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -12,8 +12,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 
 const screenHeight = Dimensions.get("window").height;
+
+type courseOption = {
+  label: string;
+  value: string;
+};
 
 export default function Forum() {
   const router = useRouter();
@@ -23,7 +29,11 @@ export default function Forum() {
     Record<string, any | undefined>
   >({});
   const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
+  const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch posts and user profiles
@@ -50,6 +60,7 @@ export default function Forum() {
                 ).getTime(),
             );
             setPosts(sortedPosts);
+            setFilteredPosts(sortedPosts);
             const profiles: Record<string, any | undefined> = {};
             await Promise.all(
               sortedPosts.map(async (post: any) => {
@@ -71,13 +82,51 @@ export default function Forum() {
             console.error(err);
             setError(err.message);
           });
+
+        //Fetch course from nusmods
+        fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch local courses");
+            return res.json();
+          })
+          .then((data) => {
+            return data.map(
+              (course: {
+                moduleCode: string;
+                title: string;
+                semesters: number[];
+              }) => ({
+                label: `${course.moduleCode} - ${course.title}`,
+                value: course.moduleCode,
+              }),
+            );
+          })
+          .then((data) => {
+            setCourseOptions(data);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       } else {
         setPosts([]);
+        setFilteredPosts([]);
+        setCourseOptions([]);
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const filtered = posts.filter((post) => {
+      if (!selectedCourse) return true; // Show all posts if no course selected
+      return (
+        post.courseTag &&
+        post.courseTag.toLowerCase().includes(selectedCourse.toLowerCase())
+      );
+    });
+    setFilteredPosts(filtered);
+  }, [selectedCourse, posts]);
 
   // Handle clicking a post to show details in modal
   const handlePostDetails = (post: any) => {
@@ -96,6 +145,29 @@ export default function Forum() {
     router.push("../forum_post");
   };
 
+  // Handle filter button toggle
+  const handleFilterToggle = () => {
+    setIsFilterVisible(!isFilterVisible);
+  };
+
+  // Handle clear filter
+  const handleClearFilter = () => {
+    setSelectedCourse("");
+    setIsFilterVisible(false);
+  };
+
+  //Search and filter
+  const displayedPosts = filteredPosts.filter((post) => {
+    const profile = userProfiles[post.author];
+    if (!profile) return null;
+    return (
+      post.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchText.toLowerCase()) ||
+      (post.courseTag &&
+        post.courseTag.toLowerCase().includes(searchText.toLowerCase()))
+    );
+  });
+
   return (
     <View style={styles.container}>
       {/* Search Bar */}
@@ -111,6 +183,68 @@ export default function Forum() {
         </View>
       </View>
 
+      {/* Filter Button */}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "flex-start",
+          paddingVertical: 12,
+        }}
+      >
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={handleFilterToggle}
+        >
+          <MaterialCommunityIcons
+            name="filter-outline"
+            size={20}
+            color="black"
+          />
+          <Text style={styles.buttonText}>Filter</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Course Filter Dropdown */}
+      {isFilterVisible && (
+        <View style={styles.filterWrapper}>
+          <View style={styles.searchBar}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              data={courseOptions}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder="Select a course tag"
+              value={selectedCourse}
+              onChange={(item) => {
+                if (item.value === selectedCourse) {
+                  handleClearFilter(); // Reset if same course is selected
+                } else {
+                  setSelectedCourse(item.value);
+                  setIsFilterVisible(false);
+                }
+              }}
+              renderLeftIcon={() => (
+                <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+              )}
+              search
+              searchPlaceholder="Search course"
+            />
+          </View>
+          <TouchableOpacity
+            style={styles.clearFilterContainer}
+            onPress={() => {
+              handleClearFilter();
+            }}
+          >
+            <MaterialCommunityIcons name="close" size={20} color="black" />
+            <Text style={styles.buttonText}>Clear Filter</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Post List */}
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {posts.length === 0 ? (
@@ -120,7 +254,7 @@ export default function Forum() {
             No posts yet.
           </Text>
         ) : (
-          posts.map((post) => {
+          displayedPosts.map((post) => {
             const profile = userProfiles[post.author];
             if (!profile) return null;
 
@@ -252,14 +386,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     justifyContent: "flex-start",
   },
+  filterWrapper: {
+    marginLeft: 8,
+  },
   searchBar: {
-    flex: 1,
     paddingHorizontal: 10,
     borderRadius: 20,
     backgroundColor: "#d1d5db",
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 8,
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  filterButton: {
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 6,
+  },
+  buttonText: {
+    marginHorizontal: 4,
+    fontSize: 14,
+    fontWeight: "400",
+    marginBottom: 2,
+  },
+  dropdown: {
+    height: 50,
+    flex: 1,
+    paddingRight: 8,
+  },
+  placeholderStyle: {
+    fontSize: 17,
+    marginLeft: 10,
+    color: "#888",
+  },
+  selectedTextStyle: {
+    fontSize: 17,
+    marginLeft: 10,
+    color: "#222",
+  },
+  clearFilterContainer: {
+    marginTop: 12,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 6,
+    alignSelf: "flex-start",
   },
   postCard: {
     marginBottom: 20,
