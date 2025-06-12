@@ -36,4 +36,3 @@ jest.mock("firebase-admin", () => {
     apps: [], // ✅ Add this line
   };
 });
-
