@@ -15,7 +15,6 @@ jest.mock("firebase-admin", () => ({
   })),
 }));
 
-// LearNUS/backend/tests/setup.js
 jest.mock("firebase-admin", () => {
   const mockCollection = {
     doc: jest.fn(() => mockDoc),
@@ -27,11 +26,14 @@ jest.mock("firebase-admin", () => {
   const mockFirestore = {
     collection: jest.fn(() => mockCollection),
   };
+
   return {
     initializeApp: jest.fn(),
     credential: {
       cert: jest.fn().mockReturnValue({}),
     },
     firestore: jest.fn(() => mockFirestore),
+    apps: [], // ✅ Add this line
   };
 });
+
