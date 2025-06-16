@@ -12,6 +12,7 @@ const fetchUserClasses = async (req, res) => {
 };
 
 const addUserClasses = async (req, res) => {
+  const uid = req.params.uid
   const { people,
       course,
       date,
@@ -35,6 +36,7 @@ const addUserClasses = async (req, res) => {
 
   try {
     const newClass = await postUserClasses({
+      uid,
       people,
       course,
       date,
