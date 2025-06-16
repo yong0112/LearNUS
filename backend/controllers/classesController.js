@@ -13,16 +13,8 @@ const fetchUserClasses = async (req, res) => {
 
 const addUserClasses = async (req, res) => {
   const uid = req.params.uid;
-  const { 
-    people,
-    course,
-    date,
-    startTime,
-    endTime,
-    rate,
-    status,
-    role
-  } = req.body;
+  const { people, course, date, startTime, endTime, rate, status, role } =
+    req.body;
 
   if (
     !people ||
@@ -46,8 +38,8 @@ const addUserClasses = async (req, res) => {
     endTime,
     rate,
     status,
-    role: "Student"
-  }
+    role: "Student",
+  };
 
   const tutorData = {
     user: people,
@@ -58,8 +50,8 @@ const addUserClasses = async (req, res) => {
     endTime,
     rate,
     status,
-    role: "Tutor"
-  }
+    role: "Tutor",
+  };
 
   try {
     const studentClass = await postUserClasses(studentData);
