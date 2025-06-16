@@ -225,7 +225,7 @@ export default function tutoring() {
         description: selectedTutor.description,
         location: selectedTutor.location,
         availability: selectedTutor.availability,
-        rate: selectedTutor.rate
+        rate: selectedTutor.rate,
       },
     });
   };

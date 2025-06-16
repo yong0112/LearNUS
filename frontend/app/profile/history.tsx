@@ -11,11 +11,30 @@ import {
   View,
 } from "react-native";
 
+type DayOptions = {
+  label: "string";
+  value: "string";
+};
+
 export default function history() {
   const router = useRouter();
   const [classes, setClasses] = useState<any>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [dayConstants, setDayConstants] = useState<DayOptions[]>([]);
   const [error, setError] = useState(null);
+
+  function formatDate(day: string, time: string) {
+    const Time = new Date(time);
+    const formattedTime = Time.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    const formattedDay = dayConstants.find((d) => d.value == day)?.label;
+
+    return formattedDay + "  " + formattedTime;
+  }
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -36,7 +55,7 @@ export default function history() {
               data.map(async (cls: any) => {
                 try {
                   const res = await fetch(
-                    `http://learnus.onrender.com/api/users/${cls.people}`,
+                    `https://learnus.onrender.com/api/users/${cls.people}`,
                   );
                   if (!res.ok) throw new Error("Failed to fetch user profile");
                   const userData = await res.json();
@@ -57,6 +76,21 @@ export default function history() {
       }
     });
 
+    const fetchConstants = async () => {
+      fetch("https://learnus.onrender.com/api/constants")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch constants");
+          return res.json();
+        })
+        .then((data) => {
+          setDayConstants(data.DAYS);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    fetchConstants();
     return () => unsubscribe();
   }, []);
 
@@ -99,9 +133,13 @@ export default function history() {
             (cls: {
               id: React.Key | null | undefined;
               course: string;
+              date: string;
               role: string;
               startTime: string;
+              endTime: string;
               people: string;
+              rate: string;
+              status: string;
             }) => (
               <TouchableOpacity
                 key={cls.id}
@@ -117,7 +155,9 @@ export default function history() {
                   <Text style={styles.subject}>
                     {cls.course} ({cls.role})
                   </Text>
-                  <Text style={{ fontSize: 18 }}>{cls.startTime}</Text>
+                  <Text style={{ fontSize: 18 }}>
+                    {formatDate(cls.date, cls.startTime)}
+                  </Text>
                 </View>
                 <Image
                   source={{ uri: profiles[cls.people] }}
