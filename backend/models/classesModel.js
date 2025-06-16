@@ -20,24 +20,26 @@ const getUserClasses = async (uid) => {
 };
 
 const postUserClasses = async ({
-  uid,
+  user,
   people,
   course,
   date,
   startTime,
   endTime,
   rate,
-  status
+  status,
+  role
 }) => {
   try {
-    const docRef = await db.collection("users").doc(uid).collection("classes").add({
+    const docRef = await db.collection("users").doc(user).collection("classes").add({
       people,
       course,
       date,
       startTime,
       endTime,
       rate,
-      status
+      status,
+      role
     });
     const savedDoc = await docRef.get();
     return { id: docRef.id, ...savedDoc.data() };

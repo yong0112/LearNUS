@@ -13,13 +13,15 @@ const fetchUserClasses = async (req, res) => {
 
 const addUserClasses = async (req, res) => {
   const uid = req.params.uid
-  const { people,
-      course,
-      date,
-      startTime,
-      endTime,
-      rate,
-      status
+  const { 
+    people,
+    course,
+    date,
+    startTime,
+    endTime,
+    rate,
+    status,
+    role
   } = req.body;
 
   if (
@@ -29,23 +31,40 @@ const addUserClasses = async (req, res) => {
     !startTime ||
     !endTime ||
     !rate ||
-    !status
+    !status ||
+    !role
   ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
+  const studentData = {
+    user: uid,
+    people: people,
+    course,
+    date,
+    startTime,
+    endTime,
+    rate,
+    status,
+    role: "Student"
+  }
+
+  const tutorData = {
+    user: people,
+    people: uid,
+    course,
+    date,
+    startTime,
+    endTime,
+    rate,
+    status,
+    role: "Tutor"
+  }
+
   try {
-    const newClass = await postUserClasses({
-      uid,
-      people,
-      course,
-      date,
-      startTime,
-      endTime,
-      rate,
-      status
-    });
-    res.status(201).json({ message: "Class added", newClass });
+    const studentClass = await postUserClasses({studentData});
+    const tutorClass = await postUserClasses({tutorData});
+    res.status(201).json({ message: "Class added", studentClass, tutorClass });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
