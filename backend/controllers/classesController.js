@@ -12,7 +12,7 @@ const fetchUserClasses = async (req, res) => {
 };
 
 const addUserClasses = async (req, res) => {
-  const uid = req.params.uid
+  const uid = req.params.uid;
   const { 
     people,
     course,
@@ -62,8 +62,8 @@ const addUserClasses = async (req, res) => {
   }
 
   try {
-    const studentClass = await postUserClasses({studentData});
-    const tutorClass = await postUserClasses({tutorData});
+    const studentClass = await postUserClasses(studentData);
+    const tutorClass = await postUserClasses(tutorData);
     res.status(201).json({ message: "Class added", studentClass, tutorClass });
   } catch (err) {
     console.error(err);
