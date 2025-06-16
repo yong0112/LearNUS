@@ -20,7 +20,7 @@ const getUserClasses = async (uid) => {
 };
 
 const postUserClasses = async ({
-  user,
+  uid,
   people,
   course,
   date,
@@ -30,7 +30,7 @@ const postUserClasses = async ({
   status
 }) => {
   try {
-    const docRef = await db.collection("users").doc(user).collection("classes").add({
+    const docRef = await db.collection("users").doc(uid).collection("classes").add({
       people,
       course,
       date,
