@@ -86,7 +86,6 @@ export default function BookingPage() {
         Alert.alert("End time could not be earlier than start time")
         router.reload();
     }
-    setStatus("completed")
     try {
       const currUser = auth.currentUser;
       const response = await fetch(`https://learnus.onrender.com/api/users/${currUser?.uid}/classes`, {
@@ -96,6 +95,7 @@ export default function BookingPage() {
         },
         body: JSON.stringify({
             people: tutor,
+            role: "Student",
             course: course,
             date: date,
             startTime: startTime,
