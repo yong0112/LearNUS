@@ -19,4 +19,33 @@ const getUserClasses = async (uid) => {
   return classes;
 };
 
-module.exports = { getUserClasses };
+const postUserClasses = async ({
+  user,
+  people,
+  course,
+  date,
+  startTime,
+  endTime,
+  rate,
+  status,
+  role
+}) => {
+  try {
+    const docRef = await db.collection("users").doc(user).collection("classes").add({
+      people,
+      course,
+      date,
+      startTime,
+      endTime,
+      rate,
+      status,
+      role
+    });
+    const savedDoc = await docRef.get();
+    return { id: docRef.id, ...savedDoc.data() };
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+module.exports = { getUserClasses, postUserClasses };
