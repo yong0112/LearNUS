@@ -12,9 +12,9 @@ import {
 } from "react-native";
 
 type DayOptions = {
-  label: 'string',
-  value: 'string'
-}
+  label: "string";
+  value: "string";
+};
 
 export default function history() {
   const router = useRouter();
@@ -26,9 +26,9 @@ export default function history() {
   function formatDate(day: string, time: string) {
     const Time = new Date(time);
     const formattedTime = Time.toLocaleTimeString([], {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
 
     const formattedDay = dayConstants.find((d) => d.value == day)?.label;
@@ -88,7 +88,7 @@ export default function history() {
         .catch((err) => {
           console.error(err);
         });
-    }
+    };
 
     fetchConstants();
     return () => unsubscribe();
@@ -155,7 +155,9 @@ export default function history() {
                   <Text style={styles.subject}>
                     {cls.course} ({cls.role})
                   </Text>
-                  <Text style={{ fontSize: 18 }}>{formatDate(cls.date, cls.startTime)}</Text>
+                  <Text style={{ fontSize: 18 }}>
+                    {formatDate(cls.date, cls.startTime)}
+                  </Text>
                 </View>
                 <Image
                   source={{ uri: profiles[cls.people] }}
