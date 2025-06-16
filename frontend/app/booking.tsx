@@ -1,5 +1,10 @@
 import { auth } from "@/lib/firebase";
-import { FontAwesome, Fontisto, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  FontAwesome,
+  Fontisto,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -16,18 +21,18 @@ import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 type Session = {
-    tutor: string,
-    course: string,
-    description: string,
-    location: string,
-    availability: string,
-    rate: number
-}
+  tutor: string;
+  course: string;
+  description: string;
+  location: string;
+  availability: string;
+  rate: number;
+};
 
 type Day = {
-    label: string,
-    value: string
-}
+  label: string;
+  value: string;
+};
 
 export default function BookingPage() {
   const router = useRouter();
@@ -40,7 +45,8 @@ export default function BookingPage() {
   const [status, setStatus] = useState<string>("pending");
   const [tutorProfile, setTutorProfile] = useState<any>();
   const [error, setError] = useState<any>();
-  const { tutor, course, description, location, availability, rate } = useLocalSearchParams() as unknown as Session;
+  const { tutor, course, description, location, availability, rate } =
+    useLocalSearchParams() as unknown as Session;
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(() => {
@@ -83,17 +89,19 @@ export default function BookingPage() {
 
   const handleBooking = async () => {
     if (startTime >= endTime) {
-        Alert.alert("End time could not be earlier than start time")
-        router.reload();
+      Alert.alert("End time could not be earlier than start time");
+      router.reload();
     }
     try {
       const currUser = auth.currentUser;
-      const response = await fetch(`https://learnus.onrender.com/api/users/${currUser?.uid}/classes`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await fetch(
+        `https://learnus.onrender.com/api/users/${currUser?.uid}/classes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
             people: tutor,
             role: "Student",
             course: course,
@@ -101,9 +109,10 @@ export default function BookingPage() {
             startTime: startTime,
             endTime: endTime,
             rate: rate,
-            status: status
-        }),
-      });
+            status: status,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const text = await response.text();
@@ -147,16 +156,20 @@ export default function BookingPage() {
         }}
       >
         <View style={{ flexDirection: "column" }}>
-            <Image
-                source={{ uri: tutorProfile?.profilePicture }}
-                style={styles.avatar}
-            />
-            <Text style={styles.name}>{tutorProfile?.firstName} {tutorProfile?.lastName}</Text>
+          <Image
+            source={{ uri: tutorProfile?.profilePicture }}
+            style={styles.avatar}
+          />
+          <Text style={styles.name}>
+            {tutorProfile?.firstName} {tutorProfile?.lastName}
+          </Text>
         </View>
 
         <View style={{ marginHorizontal: 10 }}>
-            <Text style={{ fontSize: 18, color: '#888888', fontWeight: 'bold' }}>About the lesson</Text>
-            <Text style={{ fontSize: 18, color: '#888888' }}>{description}</Text>
+          <Text style={{ fontSize: 18, color: "#888888", fontWeight: "bold" }}>
+            About the lesson
+          </Text>
+          <Text style={{ fontSize: 18, color: "#888888" }}>{description}</Text>
         </View>
 
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
@@ -168,57 +181,69 @@ export default function BookingPage() {
         </View>
 
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-            <Text style={styles.titleText}>Day and Time</Text>
-            <View style={styles.searchBar}>
-                <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.textStyle}
-                selectedTextStyle={styles.textStyle}
-                data={dayOptions}
-                maxHeight={200}
-                labelField="label"
-                valueField="value"
-                placeholder={"Select a day"}
-                value={date}
-                onChange={(item) => {
-                    setDate(item.value);
+          <Text style={styles.titleText}>Day and Time</Text>
+          <View style={styles.searchBar}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.textStyle}
+              selectedTextStyle={styles.textStyle}
+              data={dayOptions}
+              maxHeight={200}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select a day"}
+              value={date}
+              onChange={(item) => {
+                setDate(item.value);
+              }}
+              renderLeftIcon={() => (
+                <Fontisto color={"#ffc04d"} name="date" size={20} />
+              )}
+              search
+              searchPlaceholder="Select a day"
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              paddingHorizontal: 10,
+              marginTop: 10,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              title={`Start: ${startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+              onPress={() => setShowStart(true)}
+              color={"#ffb347"}
+            />
+            {showStart && (
+              <DateTimePicker
+                mode="time"
+                value={startTime}
+                onChange={(_, selected) => {
+                  setShowStart(false);
+                  if (selected) setStartTime(selected);
                 }}
-                renderLeftIcon={() => (
-                    <Fontisto color={"#ffc04d"} name="date" size={20} />
-                )}
-                search
-                searchPlaceholder="Select a day"
-                />
-            </View>
-            <View style={{ flexDirection: 'row', paddingHorizontal: 10, marginTop: 10, justifyContent: 'center', alignItems: 'center' }}>
-                <Button 
-                title={`Start: ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                onPress={() => setShowStart(true)} 
-                color={"#ffb347"} />
-                {showStart && (
-                    <DateTimePicker 
-                    mode="time"
-                    value={startTime}
-                    onChange={(_, selected) => {
-                        setShowStart(false);
-                        if (selected) setStartTime(selected)
-                    }}/>
-                )}
-                <Text style={{ fontWeight: '800', marginHorizontal: 20 }}>-</Text>
-                <Button 
-                title={`End: ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                onPress={() => setShowEnd(true)} 
-                color={"#ffb347"} />
-                {showEnd && (
-                    <DateTimePicker 
-                    mode="time"
-                    value={endTime}
-                    onChange={(_, selected) => {
-                        setShowEnd(false);
-                        if (selected) setEndTime(selected)
-                    }}/>
-                )}
-            </View>
+              />
+            )}
+            <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>-</Text>
+            <Button
+              title={`End: ${endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+              onPress={() => setShowEnd(true)}
+              color={"#ffb347"}
+            />
+            {showEnd && (
+              <DateTimePicker
+                mode="time"
+                value={endTime}
+                onChange={(_, selected) => {
+                  setShowEnd(false);
+                  if (selected) setEndTime(selected);
+                }}
+              />
+            )}
+          </View>
         </View>
 
         <View style={{ paddingHorizontal: 5, paddingVertical: 15 }}>
@@ -228,7 +253,7 @@ export default function BookingPage() {
             <Text style={styles.textStyle}>{rate}</Text>
           </View>
         </View>
-        
+
         <TouchableOpacity style={styles.bookButton} onPress={handleBooking}>
           <Text style={styles.buttonText}>Book!</Text>
         </TouchableOpacity>
@@ -281,7 +306,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingLeft: 8,
-    paddingVertical: 8
+    paddingVertical: 8,
   },
   dropdown: {
     height: 30,
@@ -289,9 +314,9 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   titleText: {
-    fontSize: 20, 
-    fontWeight: "bold", 
-    marginBottom: 5
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
   },
   textStyle: {
     fontSize: 17,
