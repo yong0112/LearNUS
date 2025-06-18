@@ -1,4 +1,15 @@
-const { postUserEvents } = require("../models/eventsModel");
+const { getUserEvents, postUserEvents } = require("../models/eventsModel");
+
+const fetchUserEvents = async (req, res) => {
+  const uid = req.params.uid;
+
+  try {
+    const events = await getUserEvents(uid);
+    res.json(events);
+  } catch (err) {
+    res.status(404).json({ message: "No events" });
+  }
+};
 
 const addUserEvents = async (req, res) => {
   const uid = req.params.uid;
@@ -30,4 +41,4 @@ const addUserEvents = async (req, res) => {
   }
 };
 
-module.exports = { addUserEvents };
+module.exports = { fetchUserEvents, addUserEvents };
