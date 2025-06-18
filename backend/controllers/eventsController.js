@@ -26,6 +26,7 @@ const addUserEvents = async (req, res) => {
   }
 
   const eventData = {
+    user: uid,
     title,
     date,
     startTime,

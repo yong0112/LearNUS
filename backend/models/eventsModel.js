@@ -20,6 +20,7 @@ const getUserEvents = async (uid) => {
 };
 
 const postUserEvents = async ({
+  user,
   title,
   date,
   startTime,
