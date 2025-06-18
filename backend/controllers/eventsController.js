@@ -1,4 +1,4 @@
-import { postUserEvents } from "../models/eventsModel";
+const { postUserEvents } = require("../models/eventsModel");
 
 const addUserEvents = async (req, res) => {
   const uid = req.params.uid;
