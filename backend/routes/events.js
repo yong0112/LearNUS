@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
-const { postUserEvents } = require("../controllers/eventsController");
+const { addUserEvents } = require("../controllers/eventsController");
 
-router.post("/:uid/events", postUserEvents);
+router.post("/:uid/events", addUserEvents);
 
 module.exports = router;
