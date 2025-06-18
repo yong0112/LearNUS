@@ -1,4 +1,4 @@
-const { db } = require("../config/firebase");
+const db = require("../config/firebase");
 
 const getForumPosts = async () => {
   const forumRef = await db.collection("forums").get();
@@ -35,7 +35,11 @@ const postForum = async ({ title, content, courseTag, author }) => {
 
 const getComments = async (postId) => {
   try {
-    const commentsRef = await db.collection("forums").doc(postId).collection("comments").get();
+    const commentsRef = await db
+      .collection("forums")
+      .doc(postId)
+      .collection("comments")
+      .get();
     if (commentsRef.empty) {
       return [];
     }
@@ -50,14 +54,14 @@ const getComments = async (postId) => {
   }
 };
 
-const addComment = async (postId, { content, author, authorName }) => {
+const postComment = async (postId, { content, author, authorName }) => {
   try {
     const postRef = db.collection("forums").doc(postId);
     const postDoc = await postRef.get();
     if (!postDoc.exists) {
       throw new Error("Post not found");
     }
-  
+
     const docRef = await postRef.collection("comments").add({
       content,
       author,
@@ -114,7 +118,7 @@ const getPostUpvoteStatus = async (postId, userId) => {
       upvoteRef.get(),
     ]);
 
-    if (!postDoc.exists) {  
+    if (!postDoc.exists) {
       throw new Error("Post not found");
     }
 
@@ -130,7 +134,11 @@ const getPostUpvoteStatus = async (postId, userId) => {
 
 const toggleCommentUpvote = async (postId, commentId, userId) => {
   try {
-    const commentRef = db.collection("forums").doc(postId).collection("comments").doc(commentId);
+    const commentRef = db
+      .collection("forums")
+      .doc(postId)
+      .collection("comments")
+      .doc(commentId);
     const upvoteRef = commentRef.collection("upvotes").doc(userId);
 
     return await db.runTransaction(async (transaction) => {
@@ -162,14 +170,18 @@ const toggleCommentUpvote = async (postId, commentId, userId) => {
 
 const getCommentUpvoteStatus = async (postId, commentId, userId) => {
   try {
-    const commentRef = db.collection("forums").doc(postId).collection("comments").doc(commentId);
+    const commentRef = db
+      .collection("forums")
+      .doc(postId)
+      .collection("comments")
+      .doc(commentId);
     const upvoteRef = commentRef.collection("upvotes").doc(userId);
     const [commentDoc, upvoteDoc] = await Promise.all([
       commentRef.get(),
       upvoteRef.get(),
     ]);
 
-    if (!commentDoc.exists) {  
+    if (!commentDoc.exists) {
       throw new Error("Post not found");
     }
 
@@ -183,4 +195,13 @@ const getCommentUpvoteStatus = async (postId, commentId, userId) => {
   }
 };
 
-module.exports = { getForumPosts, postForum, getComments, addComment, togglePostUpvote, getPostUpvoteStatus, toggleCommentUpvote, getCommentUpvoteStatus };
+module.exports = {
+  getForumPosts,
+  postForum,
+  getComments,
+  postComment,
+  togglePostUpvote,
+  getPostUpvoteStatus,
+  toggleCommentUpvote,
+  getCommentUpvoteStatus,
+};
