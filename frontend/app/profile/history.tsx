@@ -12,8 +12,8 @@ import {
 } from "react-native";
 
 type DayOptions = {
-  label: "string";
-  value: "string";
+  label: string;
+  value: number;
 };
 
 export default function history() {
@@ -23,7 +23,7 @@ export default function history() {
   const [dayConstants, setDayConstants] = useState<DayOptions[]>([]);
   const [error, setError] = useState(null);
 
-  function formatDate(day: string, time: string) {
+  function formatDate(day: number, time: string) {
     const Time = new Date(time);
     const formattedTime = Time.toLocaleTimeString([], {
       hour: "numeric",
@@ -133,7 +133,7 @@ export default function history() {
             (cls: {
               id: React.Key | null | undefined;
               course: string;
-              date: string;
+              date: number;
               role: string;
               startTime: string;
               endTime: string;

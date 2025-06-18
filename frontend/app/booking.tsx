@@ -31,7 +31,7 @@ type Session = {
 
 type Day = {
   label: string;
-  value: string;
+  value: number;
 };
 
 export default function BookingPage() {
