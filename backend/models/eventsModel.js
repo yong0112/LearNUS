@@ -1,6 +1,6 @@
 const { db } = require("../config/firebase");
 
-const postUserClasses = async ({
+const postUserEvents = async ({
   title,
   date,
   startTime,
