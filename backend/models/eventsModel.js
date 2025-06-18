@@ -1,5 +1,24 @@
 const { db } = require("../config/firebase");
 
+const getUserEvents = async (uid) => {
+  const eventsRef = await db
+    .collection("users")
+    .doc(uid)
+    .collection("events")
+    .get();
+
+  if (eventsRef.empty) {
+    return [];
+  } 
+
+  const events = eventsRef.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return events;
+};
+
 const postUserEvents = async ({
   title,
   date,
@@ -24,4 +43,4 @@ const postUserEvents = async ({
   }
 };
 
-module.exports = { postUserEvents };
+module.exports = { getUserEvents, postUserEvents };
