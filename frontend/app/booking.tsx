@@ -182,7 +182,9 @@ export default function BookingPage() {
 
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
           <Text style={styles.titleText}>Day and Time</Text>
-          <Text style={styles.contentText}>*Choose only time slots when tutors are available</Text>
+          <Text style={styles.contentText}>
+            *Choose only time slots when tutors are available
+          </Text>
           <Text style={styles.contentText}>{availability}</Text>
           <View style={styles.searchBar}>
             <Dropdown
