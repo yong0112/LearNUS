@@ -1,9 +1,21 @@
 import { auth } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
-import { EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, updateEmail } from "@firebase/auth";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  sendEmailVerification,
+  updateEmail,
+} from "@firebase/auth";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function EmailChanging() {
   const router = useRouter();
@@ -13,10 +25,12 @@ export default function EmailChanging() {
 
   const handleChangeEmail = async () => {
     if (newEmail != confirmEmail) {
-        Alert.alert("Failed to change email. Email and confirmation email do not match.");
-        setNewEmail("");
-        setConfirmEmail("");
-        return;
+      Alert.alert(
+        "Failed to change email. Email and confirmation email do not match.",
+      );
+      setNewEmail("");
+      setConfirmEmail("");
+      return;
     }
 
     const currUser = auth.currentUser;
@@ -28,35 +42,38 @@ export default function EmailChanging() {
       await reauthenticateWithCredential(currUser, credential);
       await updateEmail(currUser, newEmail);
       await sendEmailVerification(currUser);
-      
+
       try {
-        const response = await fetch("http://192.168.0.103:5000/api/update-profile", {
+        const response = await fetch(
+          "http://192.168.0.103:5000/api/update-profile",
+          {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                uid: currUser?.uid,
-                email: newEmail,
-                updatedAt: new Date()
-            })  
-        })
+              uid: currUser?.uid,
+              email: newEmail,
+              updatedAt: new Date(),
+            }),
+          },
+        );
 
         if (!response.ok) {
-            const text = await response.text();
-            return console.error(text);
+          const text = await response.text();
+          return console.error(text);
         }
 
         Alert.alert("Email changed successfully");
         router.push("/profile/details");
       } catch (err: any) {
-          console.log("Error: ", err);
-          Alert.alert("Email changed failed: ", err.message);
+        console.log("Error: ", err);
+        Alert.alert("Email changed failed: ", err.message);
       }
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -66,7 +83,7 @@ export default function EmailChanging() {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 30
+          marginBottom: 30,
         }}
       >
         <Ionicons
@@ -81,53 +98,53 @@ export default function EmailChanging() {
 
       <View>
         <View style={styles.inputBar}>
-            <TextInput
+          <TextInput
             style={{
-                color: "#222222",
-                fontSize: 17,
-                marginLeft: 10,
-                flex: 1,
+              color: "#222222",
+              fontSize: 17,
+              marginLeft: 10,
+              flex: 1,
             }}
             placeholder="New Email"
             placeholderTextColor="#888888"
             onChangeText={setNewEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            />
+          />
         </View>
         <View style={styles.inputBar}>
-            <TextInput
+          <TextInput
             style={{
-                color: "#222222",
-                fontSize: 17,
-                marginLeft: 10,
-                flex: 1,
+              color: "#222222",
+              fontSize: 17,
+              marginLeft: 10,
+              flex: 1,
             }}
             placeholder="Confirm Email"
             placeholderTextColor="#888888"
             onChangeText={setConfirmEmail}
-            />
+          />
         </View>
 
         <View style={styles.inputBar}>
-            <TextInput
+          <TextInput
             style={{
-                color: "#222222",
-                fontSize: 17,
-                marginLeft: 10,
-                flex: 1,
+              color: "#222222",
+              fontSize: 17,
+              marginLeft: 10,
+              flex: 1,
             }}
             placeholder="Password"
             placeholderTextColor="#888888"
             onChangeText={setPassword}
             secureTextEntry
-            />
+          />
         </View>
 
         <View>
-            <TouchableOpacity style={styles.button} onPress={handleChangeEmail}>
+          <TouchableOpacity style={styles.button} onPress={handleChangeEmail}>
             <Text style={styles.buttonText}>Change</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -162,6 +179,6 @@ const styles = StyleSheet.create({
     fontWeight: "semibold",
     color: "#3a3a3a",
     padding: 5,
-    alignSelf: "center"
-  }
+    alignSelf: "center",
+  },
 });

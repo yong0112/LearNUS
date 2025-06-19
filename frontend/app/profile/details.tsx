@@ -1,9 +1,22 @@
 import { auth } from "@/lib/firebase";
 import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
-import { EmailAuthCredential, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, updateEmail } from "@firebase/auth";
+import {
+  EmailAuthCredential,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  sendEmailVerification,
+  updateEmail,
+} from "@firebase/auth";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Details() {
   const router = useRouter();
@@ -38,15 +51,20 @@ export default function Details() {
 
   const handleChangeProfilePic = async () => {
     Alert.alert("Sorry, feature under development");
-    {/**Need to add something with Firebase Storage 
+    {
+      /**Need to add something with Firebase Storage 
       
       
       
       
-      */}
+      */
+    }
 
-    {/**Update the firestore done */}
-    {/**
+    {
+      /**Update the firestore done */
+    }
+    {
+      /**
     const currUser = auth.currentUser;
 
     if (!currUser) return;
@@ -74,7 +92,8 @@ export default function Details() {
     } catch (err) {
       console.error(err);
     }
-      */}
+      */
+    }
   };
 
   return (
