@@ -35,13 +35,42 @@ const screenHeight = Dimensions.get("window").height;
 
 export default function Home() {
   const router = useRouter();
+  const [classes, setClasses] = useState<any[]>([]);
+  const [todayClass, setTodayClass] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any>([]);
   const [tutorProfiles, setTutorProfiles] = useState<
     Record<string, any | undefined>
   >({});
   const [error, setError] = useState(null);
-  const [selectedTutor, setSelectedTutor] = useState<any>(null);
+  const [selectedTutor, setSelectedTutor] = useState<any>();
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setTutors([]);
+        fetch(`https://learnus.onrender.com/api/users/${currentUser.uid}/classes`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch classes");
+            return res.json();
+          })
+          .then(async (data) => {
+            console.log("Classes:", data);
+            setClasses(data);
+            setTodayClass(classes.filter((cls) => cls.date == new Date().getDay()))
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(err.message);
+          });
+      } else {
+        setClasses([]);
+        setTodayClass([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -147,6 +176,14 @@ export default function Home() {
     Alert.alert("Sorry, feature under development");
   };
 
+  function formatTime(date: string) {
+    const time = new Date(date);
+    return time.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -188,36 +225,51 @@ export default function Home() {
       >
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => router.push("/+not-found")}
+          onPress={() => Alert.alert("Sorry, feature under development")}
         >
           <Ionicons name="heart-outline" size={15} color="black" />
           <Text style={styles.buttonText}>Favourites</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => router.push("/+not-found")}
+          onPress={() => router.push("/profile/history")}
         >
           <Ionicons name="list" size={15} color="black" />
           <Text style={styles.buttonText}>Classes</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => router.push("/+not-found")}
-        >
-          <Octicons name="history" size={15} color="black" />
-          <Text style={styles.buttonText}>History</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => router.push("/+not-found")}
+          onPress={() => router.push("/profile/ratings")}
         >
           <MaterialIcons name="stars" size={15} color="black" />
           <Text style={styles.buttonText}>Ratings</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => router.push("/profile/security")}
+        >
+          <MaterialIcons name="security" size={15} color="black" />
+          <Text style={styles.buttonText}>Security</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       <View style={styles.reminder}>
-        <Text style={styles.reminderText}>Currently no classes now...</Text>
+        {todayClass.length > 0 ? (
+          todayClass.map((cls, index) => (
+            <View key={index} style={styles.classBox}>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                {cls.course}
+              </Text>
+              <Text style={{ fontSize: 16 }}>
+                {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <View style={{ justifyContent: "flex-start", alignSelf: "center" }}>
+            <Text style={styles.reminderText}>Currently no classes now...</Text>
+          </View>
+        )}
       </View>
 
       <Text style={styles.explore}>Explore</Text>
@@ -242,14 +294,14 @@ export default function Home() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.exploreButton}
-          onPress={() => router.push("/+not-found")}
+          onPress={() => router.push("../wallet")}
         >
           <MaterialIcons name="wallet" size={45} color="black" />
           <Text style={styles.exploreButtonText}>Wallet</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.exploreButton}
-          onPress={() => router.push("/+not-found")}
+          onPress={() => router.push("/profile/achievements")}
         >
           <SimpleLineIcons name="badge" size={40} color="black" />
           <Text style={styles.exploreButtonText}>Badges</Text>
@@ -530,8 +582,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#aaaaaa",
     justifyContent: "center",
-    alignItems: "center",
     marginBottom: 30,
+  },
+  classBox: {
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "gray",
+    flexDirection: "column",
+    justifyContent: "space-around",
+    alignItems: "baseline"
   },
   reminderText: { fontSize: 20, fontWeight: "bold", color: "black" },
   explore: { fontSize: 24, fontWeight: "bold", marginRight: 10 },
