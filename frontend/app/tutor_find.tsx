@@ -9,6 +9,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
   Modal,
@@ -30,6 +31,7 @@ const screenHeight = Dimensions.get("window").height;
 
 export default function tutoring() {
   const router = useRouter();
+  const [searching, setSearching] = useState("");
   const [searchText, setSearchText] = useState("");
   const [tutors, setTutors] = useState<any>([]);
   const [tutorProfile, setTutorProfiles] = useState<
@@ -61,6 +63,10 @@ export default function tutoring() {
       );
     },
   );
+
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+  }
 
   const handleFilter = () => {
     router.push("/tutor_find_filter");
@@ -216,6 +222,10 @@ export default function tutoring() {
     setModalVisible(false);
   };
 
+  const handleProfileSharing = () => {
+    Alert.alert("Sorry, feature under development")
+  }
+
   const handleBooking = () => {
     router.push({
       pathname: "/booking",
@@ -231,7 +241,7 @@ export default function tutoring() {
   };
 
   const handleContact = () => {
-    console.log("Contact in progress");
+    Alert.alert("Sorry, feature under development");
   };
 
   return (
@@ -245,13 +255,15 @@ export default function tutoring() {
           onPress={() => router.push("/(tabs)/home")}
         />
         <View style={styles.searchBar}>
-          <Ionicons name="search-sharp" size={30} color="#ffc04d" />
           <TextInput
-            style={{ color: "#888888", fontSize: 17, marginLeft: 5 }}
+            style={{ color: "#888888", fontSize: 15, marginLeft: 5 }}
             placeholder="Search by tutors name or course code"
-            value={searchText}
-            onChangeText={setSearchText}
+            value={searching}
+            onChangeText={setSearching}
           />
+          <TouchableOpacity onPress={() => handleSearch(searching)}>
+            <Ionicons name="search-sharp" size={30} color="#ffc04d" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -413,7 +425,7 @@ export default function tutoring() {
                     </TouchableOpacity>
                   </View>
                   <View>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress = {handleProfileSharing}>
                       <FontAwesome name="share" size={30} color={"orange"} />
                     </TouchableOpacity>
                   </View>
@@ -581,6 +593,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 8,
+    justifyContent: "space-between"
   },
   filterButton: {
     borderRadius: 10,
