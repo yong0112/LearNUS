@@ -13,15 +13,9 @@ const fetchUserEvents = async (req, res) => {
 
 const addUserEvents = async (req, res) => {
   const uid = req.params.uid;
-  const { title, date, startTime, endTime } =
-    req.body;
+  const { title, date, startTime, endTime } = req.body;
 
-  if (
-    !title||
-    !date ||
-    !startTime ||
-    !endTime
-  ) {
+  if (!title || !date || !startTime || !endTime) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -30,7 +24,7 @@ const addUserEvents = async (req, res) => {
     title,
     date,
     startTime,
-    endTime
+    endTime,
   };
 
   try {
