@@ -14,6 +14,6 @@ const updateUserProfile = async (uid, updateDate) => {
   const userRef = db.collection("users").doc(uid);
   await userRef.update(updateDate);
   return true;
-}
+};
 
 module.exports = { getUserProfile, updateUserProfile };
