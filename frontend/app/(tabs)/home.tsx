@@ -49,7 +49,9 @@ export default function Home() {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setTutors([]);
-        fetch(`https://learnus.onrender.com/api/users/${currentUser.uid}/classes`)
+        fetch(
+          `https://learnus.onrender.com/api/users/${currentUser.uid}/classes`,
+        )
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch classes");
             return res.json();
@@ -57,7 +59,9 @@ export default function Home() {
           .then(async (data) => {
             console.log("Classes:", data);
             setClasses(data);
-            setTodayClass(classes.filter((cls) => cls.date == new Date().getDay()))
+            setTodayClass(
+              classes.filter((cls) => cls.date == new Date().getDay()),
+            );
           })
           .catch((err) => {
             console.error(err);
@@ -594,7 +598,7 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     flexDirection: "column",
     justifyContent: "space-around",
-    alignItems: "baseline"
+    alignItems: "baseline",
   },
   reminderText: { fontSize: 20, fontWeight: "bold", color: "black" },
   explore: { fontSize: 24, fontWeight: "bold", marginRight: 10 },
