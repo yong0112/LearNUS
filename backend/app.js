@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 const userRoutes = require("./routes/users");
-app.use("/api/users", userRoutes);
+app.use("/api", userRoutes);
 const classesRoutes = require("./routes/classes");
 app.use("/api/users", classesRoutes);
 const reviewsRoutes = require("./routes/reviews");
@@ -31,6 +31,6 @@ app.get("/", (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
 });

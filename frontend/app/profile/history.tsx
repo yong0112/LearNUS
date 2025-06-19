@@ -141,11 +141,7 @@ export default function history() {
               rate: string;
               status: string;
             }) => (
-              <TouchableOpacity
-                key={cls.id}
-                style={styles.classCard}
-                onPress={handleTutorProfile}
-              >
+              <View key={cls.id} style={styles.classCard}>
                 <View
                   style={{
                     flexDirection: "column",
@@ -163,7 +159,7 @@ export default function history() {
                   source={{ uri: profiles[cls.people] }}
                   style={styles.avatar}
                 />
-              </TouchableOpacity>
+              </View>
             ),
           )
         )}
