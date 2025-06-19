@@ -1,12 +1,14 @@
 import { auth } from "@/lib/firebase";
 import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
+import { EmailAuthCredential, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, updateEmail } from "@firebase/auth";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Details() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
+  const [newProfilePic, setNewProfilePic] = useState<string>("");
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -34,12 +36,45 @@ export default function Details() {
     return () => unsubscribe();
   }, []);
 
-  const handleChangeEmail = () => {
-    console.log("Change email....");
-  };
+  const handleChangeProfilePic = async () => {
+    Alert.alert("Sorry, feature under development");
+    {/**Need to add something with Firebase Storage 
+      
+      
+      
+      
+      */}
 
-  const handleChangeProfilePic = () => {
-    console.log("Change profile pic");
+    {/**Update the firestore done */}
+    {/**
+    const currUser = auth.currentUser;
+
+    if (!currUser) return;
+
+    try {
+      const response = await fetch("https://learnus.onrender.com/api/update-profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          uid: currUser.uid,
+          profilePicture: newProfilePic,
+          updatedAt: new Date()
+        })
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        return console.error("Error: ", text);
+      }
+
+      Alert.alert("Profile picture changed successfully");
+      router.push("/(tabs)/profile");
+    } catch (err) {
+      console.error(err);
+    }
+      */}
   };
 
   return (
@@ -93,22 +128,20 @@ export default function Details() {
         </View>
         <View style={{ paddingBottom: 35 }}>
           <Text style={styles.label}>Email</Text>
-          <TouchableOpacity
+          <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
               borderBottomColor: "#aaaaaa",
               borderBottomWidth: 2,
             }}
-            onPress={handleChangeEmail}
           >
             <Text
               style={{ fontSize: 16, marginHorizontal: 5, color: "#666666" }}
             >
               {userProfile?.email}
             </Text>
-            <Octicons name="pencil" size={15} />
-          </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
