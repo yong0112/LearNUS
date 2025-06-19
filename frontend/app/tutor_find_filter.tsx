@@ -44,7 +44,7 @@ export default function TutorFilter() {
 
   const handleClearing = () => {
     setSelectedLocation("");
-    setRatings([-1]);
+    setRatings([0]);
     setRate([0, 100]);
   };
 
