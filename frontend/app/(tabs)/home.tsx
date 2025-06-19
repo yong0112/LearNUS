@@ -125,12 +125,26 @@ export default function Home() {
     setModalVisible(false);
   };
 
+  const handleProfileSharing = () => {
+    Alert.alert("Sorry, feature under development");
+  };
+
   const handleBooking = () => {
-    console.log("Booking in progress");
+    router.push({
+      pathname: "/booking",
+      params: {
+        tutor: selectedTutor.tutor,
+        course: selectedTutor.course,
+        description: selectedTutor.description,
+        location: selectedTutor.location,
+        availability: selectedTutor.availability,
+        rate: selectedTutor.rate,
+      },
+    });
   };
 
   const handleContact = () => {
-    console.log("Contact in progress");
+    Alert.alert("Sorry, feature under development");
   };
 
   return (
@@ -331,7 +345,7 @@ export default function Home() {
                     </TouchableOpacity>
                   </View>
                   <View>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleProfileSharing}>
                       <FontAwesome name="share" size={30} color={"orange"} />
                     </TouchableOpacity>
                   </View>
