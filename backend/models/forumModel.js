@@ -148,17 +148,17 @@ const toggleCommentUpvote = async (postId, commentId, userId) => {
       }
 
       const upVoteDoc = await transaction.get(upvoteRef);
-      const currentCount = postDoc.data().upvoteCount || 0;
+      const currentCount = commentDoc.data().upvoteCount || 0;
 
       if (upVoteDoc.exists) {
         // User has already upvoted, remove the upvote
         transaction.delete(upvoteRef);
-        transaction.update(postRef, { upvoteCount: currentCount - 1 });
+        transaction.update(commentRef, { upvoteCount: currentCount - 1 });
         return { upvoteCount: currentCount - 1, hasUpvoted: false };
       } else {
         // User has not upvoted, add the upvote
         transaction.set(upvoteRef, { userId });
-        transaction.update(postRef, { upvoteCount: currentCount + 1 });
+        transaction.update(commentRef, { upvoteCount: currentCount + 1 });
         return { upvoteCount: currentCount + 1, hasUpvoted: true };
       }
     });
@@ -182,16 +182,16 @@ const getCommentUpvoteStatus = async (postId, commentId, userId) => {
     ]);
 
     if (!commentDoc.exists) {
-      throw new Error("Post not found");
+      throw new Error("Comment not found");
     }
 
     return {
-      upvoteCount: postDoc.data().upvoteCount || 0,
+      upvoteCount: commentDoc.data().upvoteCount || 0,
       hasUpvoted: upvoteDoc.exists,
     };
   } catch (error) {
-    console.error("Error fetching post upvote status: ", error);
-    throw new Error("Failed to fetch post upvote status");
+    console.error("Error fetching comment upvote status: ", error);
+    throw new Error("Failed to fetch comment upvote status");
   }
 };
 

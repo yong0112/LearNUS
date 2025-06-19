@@ -52,7 +52,7 @@ export default function ForumPostDetails() {
   const [postUpvoteStatus, setPostUpvoteStatus] = useState<UpvoteStatus | null>(
     null,
   );
-  const [commentUpvoteStatuses, setCommentUpvoteStatuses] = useState<
+  const [commentUpvoteStatuses, setCommentUpvoteStatus] = useState<
     Record<string, UpvoteStatus>
   >({});
   const [error, setError] = useState<string | null>(null);
@@ -131,7 +131,7 @@ export default function ForumPostDetails() {
               }
             }),
           );
-          setCommentUpvoteStatuses(commentStatuses);
+          setCommentUpvoteStatus(commentStatuses);
         }
       } catch (err) {
         console.error(err);
@@ -182,9 +182,14 @@ export default function ForumPostDetails() {
           body: JSON.stringify({ userId: auth.currentUser.uid }),
         },
       );
-      if (!res.ok) throw new Error("Failed to toggle upvote");
+      if (!res.ok) {
+        const errorBody = await res.text();
+        throw new Error(
+          `Failed to toggle upvote: ${res.status} ${res.statusText} - ${errorBody}`,
+        );
+      }
       const result: UpvoteStatus = await res.json();
-      setCommentUpvoteStatuses((prev) => ({ ...prev, [commentId]: result }));
+      setCommentUpvoteStatus((prev) => ({ ...prev, [commentId]: result }));
       // Re-sort comments
       setComments((prev) =>
         [...prev].sort(
