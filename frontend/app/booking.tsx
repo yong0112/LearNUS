@@ -182,6 +182,8 @@ export default function BookingPage() {
 
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
           <Text style={styles.titleText}>Day and Time</Text>
+          <Text style={styles.contentText}>*Choose only time slots when tutors are available</Text>
+          <Text style={styles.contentText}>{availability}</Text>
           <View style={styles.searchBar}>
             <Dropdown
               style={styles.dropdown}
@@ -316,6 +318,11 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 20,
     fontWeight: "bold",
+    marginBottom: 3,
+  },
+  contentText: {
+    fontSize: 16,
+    color: "#888888",
     marginBottom: 5,
   },
   textStyle: {
