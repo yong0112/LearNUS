@@ -66,7 +66,7 @@ export default function tutoring() {
 
   const handleSearch = (text: string) => {
     setSearchText(text);
-  }
+  };
 
   const handleFilter = () => {
     router.push("/tutor_find_filter");
@@ -223,8 +223,8 @@ export default function tutoring() {
   };
 
   const handleProfileSharing = () => {
-    Alert.alert("Sorry, feature under development")
-  }
+    Alert.alert("Sorry, feature under development");
+  };
 
   const handleBooking = () => {
     router.push({
@@ -425,7 +425,7 @@ export default function tutoring() {
                     </TouchableOpacity>
                   </View>
                   <View>
-                    <TouchableOpacity onPress = {handleProfileSharing}>
+                    <TouchableOpacity onPress={handleProfileSharing}>
                       <FontAwesome name="share" size={30} color={"orange"} />
                     </TouchableOpacity>
                   </View>
@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 8,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   filterButton: {
     borderRadius: 10,

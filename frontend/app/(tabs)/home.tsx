@@ -127,7 +127,7 @@ export default function Home() {
 
   const handleProfileSharing = () => {
     Alert.alert("Sorry, feature under development");
-  }
+  };
 
   const handleBooking = () => {
     router.push({
@@ -138,9 +138,9 @@ export default function Home() {
         description: selectedTutor.description,
         location: selectedTutor.location,
         availability: selectedTutor.availability,
-        rate: selectedTutor.rate
-      }
-    })
+        rate: selectedTutor.rate,
+      },
+    });
   };
 
   const handleContact = () => {
