@@ -12,13 +12,13 @@ const fetchUserProfile = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const { uid, newEmail } = req.body();
+  const { uid, email } = req.body;
 
   if (!uid) return res.status(404).json({ error: "UID is required" });
 
   try {
     const updateData = {
-      ...(newEmail && { newEmail }),
+      ...(email && { email }),
       updatedAt: new Date(),
     };
 

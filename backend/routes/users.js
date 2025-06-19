@@ -5,7 +5,7 @@ const {
   updateUser,
 } = require("../controllers/userController");
 
-router.get("/:uid", fetchUserProfile);
+router.get("/users/:uid", fetchUserProfile);
 router.post("/update-profile", updateUser);
 
 module.exports = router;
