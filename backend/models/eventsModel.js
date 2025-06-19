@@ -9,7 +9,7 @@ const getUserEvents = async (uid) => {
 
   if (eventsRef.empty) {
     return [];
-  } 
+  }
 
   const events = eventsRef.docs.map((doc) => ({
     id: doc.id,
@@ -19,13 +19,7 @@ const getUserEvents = async (uid) => {
   return events;
 };
 
-const postUserEvents = async ({
-  user,
-  title,
-  date,
-  startTime,
-  endTime,
-}) => {
+const postUserEvents = async ({ user, title, date, startTime, endTime }) => {
   try {
     const docRef = await db
       .collection("users")
@@ -35,7 +29,7 @@ const postUserEvents = async ({
         title,
         date,
         startTime,
-        endTime
+        endTime,
       });
     const savedDoc = await docRef.get();
     return { id: docRef.id, ...savedDoc.data() };
