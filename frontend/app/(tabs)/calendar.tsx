@@ -1,10 +1,20 @@
 import { auth } from "@/lib/firebase";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Dimensions, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Button,
+  Dimensions,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Calendar } from "react-native-calendars";
 import { MarkedDates } from "react-native-calendars/src/types";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 const screenHeight = Dimensions.get("window").height;
@@ -17,10 +27,12 @@ export default function CalendarPage() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [eventTitle, setEventTitle] = useState<string>("");
   const [eventDate, setEventDate] = useState<Date>(currTime);
-  const [showDate, setShowDate]=  useState<boolean>(false);
+  const [showDate, setShowDate] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<Date>(currTime);
   const [showStart, setShowStart] = useState<boolean>(false);
-  const [endTime, setEndTime] = useState<Date>(new Date(currTime.getTime() + (2 * 60 * 60 * 1000)));
+  const [endTime, setEndTime] = useState<Date>(
+    new Date(currTime.getTime() + 2 * 60 * 60 * 1000),
+  );
   const [showEnd, setShowEnd] = useState<boolean>(false);
 
   const handleAddButton = () => {
@@ -32,8 +44,8 @@ export default function CalendarPage() {
       title: eventTitle,
       date: eventDate,
       startTime: startTime,
-      endTime: endTime
-    }
+      endTime: endTime,
+    };
 
     try {
       const currUser = auth.currentUser;
@@ -42,11 +54,11 @@ export default function CalendarPage() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(newEvent)
-        }
-      )
+          body: JSON.stringify(newEvent),
+        },
+      );
 
       if (!response.ok) {
         const text = await response.text();
@@ -54,60 +66,60 @@ export default function CalendarPage() {
       }
 
       console.log(response);
-      setEvents((events) => [...events, newEvent])
+      setEvents((events) => [...events, newEvent]);
       Alert.alert("New event added successfully");
       setModalVisible(false);
     } catch (err) {
       console.error("Error: ", err);
-      Alert.alert("New event failed to be added")
+      Alert.alert("New event failed to be added");
     }
-  }
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currUser) => {
       if (currUser) {
         fetch(`https://learnus.onrender.com/api/users/${currUser.uid}/classes`)
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch classes");
-          return res.json();
-        })
-        .then((data) => {
-          console.log("User classes: ", data)
-          setClasses(data)
-        })
-        .catch((err) => {
-          console.error(err.message)
-        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch classes");
+            return res.json();
+          })
+          .then((data) => {
+            console.log("User classes: ", data);
+            setClasses(data);
+          })
+          .catch((err) => {
+            console.error(err.message);
+          });
       } else {
-        setClasses([])
+        setClasses([]);
       }
-    })
+    });
 
     return () => unsubscribe();
-  }, [])
+  }, []);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currUser) => {
       if (currUser) {
         fetch(`https://learnus.onrender.com/api/users/${currUser.uid}/events`)
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch events");
-          return res.json();
-        })
-        .then((data) => {
-          console.log("User events: ", data)
-          setEvents(data)
-        })
-        .catch((err) => {
-          console.error(err.message)
-        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch events");
+            return res.json();
+          })
+          .then((data) => {
+            console.log("User events: ", data);
+            setEvents(data);
+          })
+          .catch((err) => {
+            console.error(err.message);
+          });
       } else {
-        setEvents([])
+        setEvents([]);
       }
-    })
+    });
 
     return () => unsubscribe();
-  }, [])
+  }, []);
 
   function getDates(day: number, month: number, year: number) {
     const date = new Date(year, month - 1, 1);
@@ -123,7 +135,7 @@ export default function CalendarPage() {
       date.setDate(date.getDate() + 1);
     }
 
-    return dates
+    return dates;
   }
 
   function formatDate(day: number, month: number, year: number) {
@@ -135,7 +147,7 @@ export default function CalendarPage() {
   }
 
   const markedDates: MarkedDates = useMemo(() => {
-    const dict : Record<string, any> = {};
+    const dict: Record<string, any> = {};
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth() + 1;
@@ -145,18 +157,22 @@ export default function CalendarPage() {
       matchingDates.forEach((date) => {
         dict[date] = {
           marked: true,
-          dotColor: "orange"
-        }
-      })
+          dotColor: "orange",
+        };
+      });
     });
 
     events.forEach((event) => {
-      const date = formatDate(new Date(event.date).getDate(), new Date(event.date).getMonth() + 1, new Date(event.date).getFullYear());
+      const date = formatDate(
+        new Date(event.date).getDate(),
+        new Date(event.date).getMonth() + 1,
+        new Date(event.date).getFullYear(),
+      );
       console.log(date);
       dict[date] = {
         marked: true,
-        dotColor: "orange"
-      }
+        dotColor: "orange",
+      };
     });
 
     if (selected && dict[selected]) {
@@ -173,46 +189,49 @@ export default function CalendarPage() {
             alignSelf: "center",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: -7
-          }
-        },
-      }
-    } else if (selected) {
-        dict[selected] = {
-          selected: true,
-          customStyles: {
-            container: {
-              backgroundColor: "orange",
-              width: 38,
-              height: 38,
-              borderRadius: 25,
-              alignSelf: "center",
-              justifyContent: "center",
-              marginTop: -7
-            },
+            marginTop: -7,
           },
-        }
-    };
+        },
+      };
+    } else if (selected) {
+      dict[selected] = {
+        selected: true,
+        customStyles: {
+          container: {
+            backgroundColor: "orange",
+            width: 38,
+            height: 38,
+            borderRadius: 25,
+            alignSelf: "center",
+            justifyContent: "center",
+            marginTop: -7,
+          },
+        },
+      };
+    }
 
     return dict;
-  }, [classes, selected, events])
+  }, [classes, selected, events]);
 
   const classesForSelectedDate = useMemo(() => {
     const formattedDate = new Date(selected);
     return classes.filter((cls) => cls.date == formattedDate.getDay());
-  }, [classes, selected])
+  }, [classes, selected]);
 
   const eventsForSelectedDate = useMemo(() => {
     const formattedDate = new Date(selected);
-    return events.filter((event) => new Date(event.date).toDateString() == formattedDate.toDateString());
-  }, [events, selected])
+    return events.filter(
+      (event) =>
+        new Date(event.date).toDateString() == formattedDate.toDateString(),
+    );
+  }, [events, selected]);
 
   function formatTime(date: string) {
     const time = new Date(date);
     return time.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   return (
@@ -244,7 +263,7 @@ export default function CalendarPage() {
             textDayHeaderFontSize: 14,
             arrowWidth: 40,
             dotColor: "orange",
-            selectedDotColor: "white"
+            selectedDotColor: "white",
           }}
         />
 
@@ -252,13 +271,19 @@ export default function CalendarPage() {
           {classesForSelectedDate.length > 0 ? (
             classesForSelectedDate.map((cls, index) => (
               <View key={index} style={styles.classBox}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{cls.course}</Text>
-                <Text style={{ fontSize: 16 }}>{formatTime(cls.startTime)} - {formatTime(cls.endTime)}</Text>
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {cls.course}
+                </Text>
+                <Text style={{ fontSize: 16 }}>
+                  {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
+                </Text>
               </View>
             ))
           ) : selected ? (
-            <View style={{ alignSelf: "center", alignItems: 'center' }}>
-              <Text style={{ fontSize: 20, fontWeight: 'semibold' }}>No classes for today</Text>
+            <View style={{ alignSelf: "center", alignItems: "center" }}>
+              <Text style={{ fontSize: 20, fontWeight: "semibold" }}>
+                No classes for today
+              </Text>
             </View>
           ) : (
             <View />
@@ -267,8 +292,12 @@ export default function CalendarPage() {
           {eventsForSelectedDate.length > 0 ? (
             eventsForSelectedDate.map((event, index) => (
               <View key={index} style={styles.classBox}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{event.title}</Text>
-                <Text style={{ fontSize: 16 }}>{formatTime(event.startTime)} - {formatTime(event.endTime)}</Text>
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {event.title}
+                </Text>
+                <Text style={{ fontSize: 16 }}>
+                  {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                </Text>
               </View>
             ))
           ) : (
@@ -281,98 +310,146 @@ export default function CalendarPage() {
         </TouchableOpacity>
       </View>
 
-      <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
-          <View style={styles.modalContent}>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 30,
-              }}
-            >
-              <View>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Entypo name="cross" size={30} color={"orange"} />
-                </TouchableOpacity>
-              </View>
-  
-              <View>
-                <Text style={{ fontSize: 24, fontWeight: 'bold' }}>New Event</Text>
-              </View>
-              
-              <View>
-                <TouchableOpacity onPress={handleAddEvent}>
-                  <AntDesign name="plus" size={30} color={"orange"} />
-                </TouchableOpacity>
-              </View> 
+      <Modal
+        animationType="slide"
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContent}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 30,
+            }}
+          >
+            <View>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Entypo name="cross" size={30} color={"orange"} />
+              </TouchableOpacity>
             </View>
 
-            <View style={{ flexDirection: 'column', padding: 10 }}>
-              <View style={styles.inputBar}>
-                <TextInput style={{
+            <View>
+              <Text style={{ fontSize: 24, fontWeight: "bold" }}>
+                New Event
+              </Text>
+            </View>
+
+            <View>
+              <TouchableOpacity onPress={handleAddEvent}>
+                <AntDesign name="plus" size={30} color={"orange"} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: "column", padding: 10 }}>
+            <View style={styles.inputBar}>
+              <TextInput
+                style={{
                   color: "#222222",
                   fontSize: 17,
                   marginLeft: 10,
                   flex: 1,
                 }}
-                placeholder="Event Title" 
-                placeholderTextColor="#888888" 
-                onChangeText={setEventTitle}/>
-              </View>
+                placeholder="Event Title"
+                placeholderTextColor="#888888"
+                onChangeText={setEventTitle}
+              />
+            </View>
 
-              {/**Date picker */}
-              <View style={styles.timeBar}>
-                <Text style={{ fontSize: 17, marginLeft: 10, color: "#111111", fontWeight: '500' }}>Date: </Text>
-                <TouchableOpacity onPress={() => setShowDate(true)}>
-                  <Text style={styles.timeButton}>{format(eventDate, 'dd MMM yyyy')}</Text>
-                </TouchableOpacity>
-                {showDate && (
-                  <DateTimePicker
-                    mode="date"
-                    value={eventDate}
-                    onChange={(_, selected) => {
-                      setShowDate(false);
-                      if (selected) setEventDate(selected);
-                    }}
-                  />
-                )}
-              </View>
+            {/**Date picker */}
+            <View style={styles.timeBar}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  marginLeft: 10,
+                  color: "#111111",
+                  fontWeight: "500",
+                }}
+              >
+                Date:{" "}
+              </Text>
+              <TouchableOpacity onPress={() => setShowDate(true)}>
+                <Text style={styles.timeButton}>
+                  {format(eventDate, "dd MMM yyyy")}
+                </Text>
+              </TouchableOpacity>
+              {showDate && (
+                <DateTimePicker
+                  mode="date"
+                  value={eventDate}
+                  onChange={(_, selected) => {
+                    setShowDate(false);
+                    if (selected) setEventDate(selected);
+                  }}
+                />
+              )}
+            </View>
 
-              <View style={styles.timeBar}>
-                <Text style={{ fontSize: 17, marginLeft: 10, color: "#111111", fontWeight: '500' }}>Start Time: </Text>
-                <TouchableOpacity onPress={() => setShowStart(true)}>
-                  <Text style={styles.timeButton}>{startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</Text>
-                </TouchableOpacity>
-                {showStart && (
-                  <DateTimePicker
-                    mode="time"
-                    value={startTime}
-                    onChange={(_, selected) => {
-                      setShowStart(false);
-                      if (selected) setStartTime(selected);
-                    }}
-                  />
-                )}
-              </View>
-              <View style={styles.timeBar}>
-                <Text style={{ fontSize: 17, marginLeft: 10, color: "#111111", fontWeight: '500' }}>End Time: </Text>
-                <TouchableOpacity onPress={() => setShowEnd(true)}>
-                  <Text style={styles.timeButton}>{endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</Text>
-                </TouchableOpacity>
-                {showEnd && (
-                  <DateTimePicker
-                    mode="time"
-                    value={endTime}
-                    onChange={(_, selected) => {
-                      setShowEnd(false);
-                      if (selected) setEndTime(selected);
-                    }}
-                  />
-                )}
-              </View>
+            <View style={styles.timeBar}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  marginLeft: 10,
+                  color: "#111111",
+                  fontWeight: "500",
+                }}
+              >
+                Start Time:{" "}
+              </Text>
+              <TouchableOpacity onPress={() => setShowStart(true)}>
+                <Text style={styles.timeButton}>
+                  {startTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </TouchableOpacity>
+              {showStart && (
+                <DateTimePicker
+                  mode="time"
+                  value={startTime}
+                  onChange={(_, selected) => {
+                    setShowStart(false);
+                    if (selected) setStartTime(selected);
+                  }}
+                />
+              )}
+            </View>
+            <View style={styles.timeBar}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  marginLeft: 10,
+                  color: "#111111",
+                  fontWeight: "500",
+                }}
+              >
+                End Time:{" "}
+              </Text>
+              <TouchableOpacity onPress={() => setShowEnd(true)}>
+                <Text style={styles.timeButton}>
+                  {endTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </TouchableOpacity>
+              {showEnd && (
+                <DateTimePicker
+                  mode="time"
+                  value={endTime}
+                  onChange={(_, selected) => {
+                    setShowEnd(false);
+                    if (selected) setEndTime(selected);
+                  }}
+                />
+              )}
             </View>
           </View>
+        </View>
       </Modal>
     </View>
   );
@@ -399,7 +476,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   classList: {
-    paddingBottom: 20
+    paddingBottom: 20,
   },
   classBox: {
     marginBottom: 20,
@@ -407,9 +484,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'gray',
-    flexDirection: 'column',
-    justifyContent: 'space-around'
+    borderColor: "gray",
+    flexDirection: "column",
+    justifyContent: "space-around",
   },
   modalContent: {
     width: "97%",
@@ -417,7 +494,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     padding: 15,
-    flexDirection: 'column',
+    flexDirection: "column",
     overflow: "hidden",
     elevation: 10,
     shadowColor: "#000",
@@ -432,7 +509,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingLeft: 8,
-    marginBottom: 40
+    marginBottom: 40,
   },
   timeBar: {
     borderRadius: 10,
@@ -442,7 +519,7 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     padding: 10,
     justifyContent: "space-between",
-    marginVertical: 2
+    marginVertical: 2,
   },
   timeButton: {
     borderRadius: 5,
@@ -451,6 +528,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: "#9ca3af",
     color: "black",
-    fontSize: 16
-  }
+    fontSize: 16,
+  },
 });
