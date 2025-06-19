@@ -1,10 +1,10 @@
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   Dimensions,
-  Modal,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,28 +13,58 @@ import {
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import { doc, getDoc } from "firebase/firestore";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 const screenHeight = Dimensions.get("window").height;
 
-type courseOption = {
+interface CourseOption {
   label: string;
   value: string;
-};
+}
+
+interface ForumPost {
+  id: string;
+  title: string;
+  content: string;
+  courseTag?: string;
+  author: string;
+  createdAt: { _seconds: number; _nanoseconds: number };
+  upvoteCount: number;
+}
+
+interface UserProfile {
+  firstName: string;
+  profilePicture?: string;
+}
+
+interface UpvoteStatus {
+  upvoteCount: number;
+  hasUpvoted: boolean;
+}
 
 export default function Forum() {
   const router = useRouter();
   const [searchText, setSearchText] = useState("");
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<ForumPost[]>([]);
   const [userProfiles, setUserProfiles] = useState<
-    Record<string, any | undefined>
+    Record<string, UserProfile | undefined>
   >({});
+  const [upvoteStatus, setUpvoteStatus] = useState<
+    Record<string, UpvoteStatus>
+  >({});
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>(
+    {},
+  );
   const [selectedPost, setSelectedPost] = useState<any>(null);
-  const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
-  const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>([]);
+  const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [modalVisible, setModalVisible] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const BASE_URL = "https://learnus.onrender.com";
 
   // Fetch posts and user profiles
   useEffect(() => {
@@ -45,7 +75,7 @@ export default function Forum() {
             if (!res.ok) throw new Error("Failed to fetch posts");
             return res.json();
           })
-          .then(async (data) => {
+          .then(async (data: ForumPost[]) => {
             console.log("Posts:", data);
             // Sort posts by createdDate (newest first)
             const sortedPosts = data.sort(
@@ -61,22 +91,62 @@ export default function Forum() {
             );
             setPosts(sortedPosts);
             setFilteredPosts(sortedPosts);
+
             const profiles: Record<string, any | undefined> = {};
             await Promise.all(
               sortedPosts.map(async (post: any) => {
                 try {
-                  const res = await fetch(
+                  const userRes = await fetch(
                     `https://learnus.onrender.com/api/users/${post.author}`,
                   );
-                  if (!res.ok) throw new Error("Failed to fetch user profile");
-                  const userData = await res.json();
-                  profiles[post.author] = userData;
+                  if (!userRes.ok)
+                    throw new Error("Failed to fetch user profile");
+                  const userData: UserProfile = await userRes.json();
+                  const userDoc = await getDoc(doc(db, "users", post.author));
+                  if (userDoc.exists()) {
+                    profiles[post.author] = {
+                      ...userData,
+                      profilePicture: userDoc.data().profilePicture,
+                    };
+                  } else {
+                    profiles[post.author] = userData;
+                  }
                 } catch (err) {
                   console.error(err);
                 }
               }),
             );
             setUserProfiles(profiles);
+
+            // Fetch upvote status and comment counts
+            const upvoteStatus: Record<string, UpvoteStatus> = {};
+            const commentCounts: Record<string, number> = {};
+            await Promise.all(
+              sortedPosts.map(async (post: any) => {
+                try {
+                  if (currentUser.uid) {
+                    const upvoteRes = await fetch(
+                      `${BASE_URL}/api/forum/${post.id}/upvote-status/${currentUser.uid}`,
+                    );
+                    if (upvoteRes.ok) {
+                      upvoteStatus[post.id] = await upvoteRes.json();
+                    }
+                  }
+
+                  const commentsRes = await fetch(
+                    `${BASE_URL}/api/forum/${post.id}/comments`,
+                  );
+                  if (commentsRes.ok) {
+                    const comments = await commentsRes.json();
+                    commentCounts[post.id] = comments.length;
+                  }
+                } catch (err) {
+                  console.error(err);
+                }
+              }),
+            );
+            setUpvoteStatus(upvoteStatus);
+            setCommentCounts(commentCounts);
           })
           .catch((err) => {
             console.error(err);
@@ -117,6 +187,7 @@ export default function Forum() {
     return () => unsubscribe();
   }, []);
 
+  // Filter posts based on course tag
   useEffect(() => {
     const filtered = posts.filter((post) => {
       if (!selectedCourse) return true; // Show all posts if no course selected
@@ -128,17 +199,43 @@ export default function Forum() {
     setFilteredPosts(filtered);
   }, [selectedCourse, posts]);
 
-  // Handle clicking a post to show details in modal
-  const handlePostDetails = (post: any) => {
-    setSelectedPost(post);
-    setModalVisible(true);
+  // Handle upvote toggle
+  const handleUpvote = async (postId: string) => {
+    if (!auth.currentUser) {
+      alert("Please log in to upvote");
+      return;
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/api/forum/${postId}/upvote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: auth.currentUser.uid }),
+      });
+      if (!res.ok) throw new Error("Failed to toggle upvote");
+      const result: UpvoteStatus = await res.json();
+      setUpvoteStatus((prev) => ({ ...prev, [postId]: result }));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upvote");
+    }
   };
 
-  // Close the modal
-  const closeModal = () => {
-    setSelectedPost(null);
-    setModalVisible(false);
+  // Navigate to post details
+  const handlePostDetails = (postId: string) => {
+    router.push(`../forum/${postId}`);
   };
+
+  // Handle clicking a post to show details in modal
+  // const handlePostDetails = (post: any) => {
+  //   setSelectedPost(post);
+  //   setModalVisible(true);
+  // };
+
+  // // Close the modal
+  // const closeModal = () => {
+  //   setSelectedPost(null);
+  //   setModalVisible(false);
+  // };
 
   // Navigate to forum_post.tsx
   const handleNewPost = () => {
@@ -262,8 +359,32 @@ export default function Forum() {
               <TouchableOpacity
                 key={post.id}
                 style={styles.postCard}
-                onPress={() => handlePostDetails(post)}
+                onPress={() => handlePostDetails(post.id)}
               >
+                {/* User Info */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Image
+                    source={
+                      profile.profilePicture
+                        ? { uri: profile.profilePicture }
+                        : require("../../assets/images/defaultProfile.jpg") // Adjust path to your default avatar
+                    }
+                    style={styles.profilePicture}
+                  />
+                  <Text
+                    style={{ fontSize: 16, fontWeight: "600", marginLeft: 8 }}
+                  >
+                    {profile.firstName}
+                  </Text>
+                </View>
+
+                {/* Title and Course Tag */}
                 <View
                   style={{
                     flexDirection: "row",
@@ -280,27 +401,57 @@ export default function Forum() {
                     </Text>
                   )}
                 </View>
+
+                {/* Content */}
                 <Text
                   style={{
                     fontSize: 18,
                     fontWeight: "600",
                     color: "#888888",
-                    marginVertical: 5,
+                    marginVertical: 8,
                   }}
                   numberOfLines={2}
                 >
                   {post.content}
                 </Text>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "700",
-                    fontStyle: "italic",
-                    color: "#444444",
-                  }}
-                >
-                  Posted by {profile.firstName}
-                </Text>
+
+                {/* Action Buttons */}
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginRight: 16,
+                    }}
+                    onPress={() => handleUpvote(post.id)}
+                  >
+                    <MaterialCommunityIcons
+                      name={
+                        upvoteStatus[post.id]?.hasUpvoted
+                          ? "thumb-up"
+                          : "thumb-up-outline"
+                      }
+                      size={20}
+                      color="#ffc04d"
+                    />
+                    <Text style={{ marginLeft: 4 }}>
+                      {upvoteStatus[post.id]?.upvoteCount || post.upvoteCount}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                    onPress={() => handlePostDetails(post.id)}
+                  >
+                    <Ionicons
+                      name="chatbubble-outline"
+                      size={20}
+                      color="#ffc04d"
+                    />
+                    <Text style={{ marginLeft: 4 }}>
+                      {commentCounts[post.id] || 0}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </TouchableOpacity>
             );
           })
@@ -311,70 +462,6 @@ export default function Forum() {
       <TouchableOpacity style={styles.fab} onPress={handleNewPost}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
-
-      {/* Post Details Modal */}
-      <Modal
-        animationType="slide"
-        transparent
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {selectedPost && (
-              <>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    alignSelf: "stretch",
-                    marginBottom: 30,
-                  }}
-                >
-                  <TouchableOpacity onPress={closeModal}>
-                    <Ionicons name="arrow-back" size={30} color="orange" />
-                  </TouchableOpacity>
-                </View>
-                <Text
-                  style={{
-                    fontSize: 28,
-                    fontWeight: "600",
-                    alignSelf: "center",
-                  }}
-                >
-                  {selectedPost.title}
-                </Text>
-                {selectedPost.courseTag && (
-                  <Text
-                    style={{
-                      fontSize: 24,
-                      fontWeight: "600",
-                      marginTop: 25,
-                      alignSelf: "center",
-                    }}
-                  >
-                    {selectedPost.courseTag}
-                  </Text>
-                )}
-                <Text style={{ fontSize: 18, color: "#888888", marginTop: 10 }}>
-                  {selectedPost.content}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "600",
-                    marginTop: 15,
-                    color: "#444444",
-                  }}
-                >
-                  Posted by: {userProfiles[selectedPost.author]?.firstName}
-                </Text>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -449,26 +536,10 @@ const styles = StyleSheet.create({
     borderBottomColor: "gray",
     paddingBottom: 10,
   },
-  modalOverlay: {
-    padding: 20,
-    alignItems: "center",
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "97%",
-    height: screenHeight * 0.95,
-    backgroundColor: "white",
+  profilePicture: {
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    padding: 15,
-    alignItems: "flex-start",
-    overflow: "hidden",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    alignSelf: "center",
   },
   fab: {
     position: "absolute",
