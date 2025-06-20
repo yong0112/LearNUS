@@ -10,11 +10,14 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { doc, getDoc } from "firebase/firestore";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@/components/ThemedView";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -64,6 +67,11 @@ export default function Forum() {
   const [modalVisible, setModalVisible] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
+  
 
   const BASE_URL = "https://learnus.onrender.com";
 
@@ -271,7 +279,106 @@ export default function Forum() {
     );
   });
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 10,
+      justifyContent: "flex-start",
+    },
+    filterWrapper: {
+      marginLeft: 8,
+    },
+    searchBar: {
+      paddingHorizontal: 10,
+      borderRadius: 20,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      marginLeft: 8,
+      marginTop: 12,
+      marginBottom: 12,
+    },
+    filterButton: {
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 6,
+      borderColor: text
+    },
+    buttonText: {
+      marginHorizontal: 4,
+      fontSize: 14,
+      fontWeight: "400",
+      marginBottom: 2,
+      color: text
+    },
+    dropdown: {
+      height: 50,
+      flex: 1,
+      paddingRight: 8,
+    },
+    placeholderStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#888",
+    },
+    selectedTextStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#222",
+    },
+    clearFilterContainer: {
+      marginTop: 12,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 6,
+      alignSelf: "flex-start",
+      borderColor: text
+    },
+    postCard: {
+      marginBottom: 20,
+      flexDirection: "column",
+      borderBottomWidth: 2,
+      borderBottomColor: "gray",
+      paddingBottom: 10,
+    },
+    profilePicture: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+    },
+    fab: {
+      position: "absolute",
+      bottom: 30,
+      right: 30,
+      backgroundColor: "orange",
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      alignItems: "center",
+      justifyContent: "center",
+      elevation: 5,
+    },
+    fabText: {
+      color: "white",
+      fontSize: 32,
+      lineHeight: 36,
+      fontWeight: "bold",
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       {/* Search Bar */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -311,7 +418,7 @@ export default function Forum() {
           <MaterialCommunityIcons
             name="filter-outline"
             size={20}
-            color="black"
+            color={text}
           />
           <Text style={styles.buttonText}>Filter</Text>
         </TouchableOpacity>
@@ -352,7 +459,7 @@ export default function Forum() {
               handleClearFilter();
             }}
           >
-            <MaterialCommunityIcons name="close" size={20} color="black" />
+            <MaterialCommunityIcons name="close" size={20} color={text} />
             <Text style={styles.buttonText}>Clear Filter</Text>
           </TouchableOpacity>
         </View>
@@ -362,7 +469,7 @@ export default function Forum() {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {posts.length === 0 ? (
           <Text
-            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center" }}
+            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center", color: text }}
           >
             No posts yet.
           </Text>
@@ -394,7 +501,7 @@ export default function Forum() {
                     style={styles.profilePicture}
                   />
                   <Text
-                    style={{ fontSize: 16, fontWeight: "600", marginLeft: 8 }}
+                    style={{ fontSize: 16, fontWeight: "600", marginLeft: 8, color: text }}
                   >
                     {profile.firstName}
                   </Text>
@@ -408,7 +515,7 @@ export default function Forum() {
                     alignItems: "center",
                   }}
                 >
-                  <Text style={{ fontSize: 24, fontWeight: "800" }}>
+                  <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>
                     {post.title}
                   </Text>
                   {post.courseTag && (
@@ -450,7 +557,7 @@ export default function Forum() {
                       size={20}
                       color="#ffc04d"
                     />
-                    <Text style={{ marginLeft: 4 }}>
+                    <Text style={{ marginLeft: 4, color: text }}>
                       {upvoteStatus[post.id]?.upvoteCount || post.upvoteCount}
                     </Text>
                   </TouchableOpacity>
@@ -463,7 +570,7 @@ export default function Forum() {
                       size={20}
                       color="#ffc04d"
                     />
-                    <Text style={{ marginLeft: 4 }}>
+                    <Text style={{ marginLeft: 4, color: text }}>
                       {commentCounts[post.id] || 0}
                     </Text>
                   </TouchableOpacity>
@@ -479,100 +586,6 @@ export default function Forum() {
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 10,
-    justifyContent: "flex-start",
-  },
-  filterWrapper: {
-    marginLeft: 8,
-  },
-  searchBar: {
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 8,
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  filterButton: {
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 6,
-  },
-  buttonText: {
-    marginHorizontal: 4,
-    fontSize: 14,
-    fontWeight: "400",
-    marginBottom: 2,
-  },
-  dropdown: {
-    height: 50,
-    flex: 1,
-    paddingRight: 8,
-  },
-  placeholderStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#888",
-  },
-  selectedTextStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#222",
-  },
-  clearFilterContainer: {
-    marginTop: 12,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 6,
-    alignSelf: "flex-start",
-  },
-  postCard: {
-    marginBottom: 20,
-    flexDirection: "column",
-    borderBottomWidth: 2,
-    borderBottomColor: "gray",
-    paddingBottom: 10,
-  },
-  profilePicture: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  fab: {
-    position: "absolute",
-    bottom: 30,
-    right: 30,
-    backgroundColor: "#000000",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 5,
-  },
-  fabText: {
-    color: "white",
-    fontSize: 32,
-    lineHeight: 36,
-    fontWeight: "bold",
-  },
-});

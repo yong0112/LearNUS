@@ -21,6 +21,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import {
@@ -30,6 +31,8 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { auth } from "../../lib/firebase";
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -44,6 +47,10 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [selectedTutor, setSelectedTutor] = useState<any>();
   const [modalVisible, setModalVisible] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -188,7 +195,107 @@ export default function Home() {
     });
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: "column",
+      paddingHorizontal: 20,
+      paddingVertical: 40,
+      justifyContent: "flex-start",
+    },
+    headerLear: { fontSize: 25, fontWeight: "bold", marginLeft: 10, color: text },
+    headerNUS: { fontSize: 25, fontWeight: "bold", color: "orange" },
+    tabBar: {
+      paddingHorizontal: 0,
+      paddingTop: 10,
+      paddingBottom: 20,
+    },
+    tabButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: isDarkMode ? "gray" : "#f2f2f2",
+      borderRadius: 20,
+      paddingVertical: 8,
+      paddingHorizontal: 6,
+      marginHorizontal: 6,
+      borderWidth: 1,
+      alignSelf: "center"
+    },
+    buttonText: { marginLeft: 6, fontSize: 14, fontWeight: "semibold" },
+    reminder: {
+      width: "auto",
+      height: 150,
+      borderRadius: 10,
+      backgroundColor: "#aaaaaa",
+      justifyContent: "center",
+      marginBottom: 30,
+    },
+    classBox: {
+      marginBottom: 20,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 20,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: "gray",
+      flexDirection: "column",
+      justifyContent: "space-around",
+      alignItems: "baseline",
+    },
+    reminderText: { fontSize: 20, fontWeight: "bold", color: "black" },
+    explore: { fontSize: 24, fontWeight: "bold", marginRight: 10, color: text },
+    exploreButton: {
+      width: 90,
+      height: 75,
+      flexDirection: "column",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      borderColor: "#ddd",
+      marginRight: 20,
+    },
+    exploreButtonText: {
+      marginTop: 10,
+      fontSize: 16,
+      fontWeight: "semibold",
+      textAlign: "center",
+      color: text
+    },
+    tutorProfile: {
+      width: 100,
+      height: "auto",
+      flexDirection: "column",
+      marginRight: 10,
+    },
+    image: { width: 50, height: 50, borderRadius: 10 },
+    modalOverlay: {
+      padding: 20,
+      alignItems: "center",
+      flex: 1,
+    },
+    modalContent: {
+      width: "97%",
+      height: screenHeight * 0.95,
+      backgroundColor: isDarkMode ? "#999999" : "white",
+      borderRadius: 20,
+      padding: 15,
+      alignItems: "flex-start",
+      overflow: "hidden",
+      elevation: 10,
+      shadowColor: "#000",
+      shadowOpacity: 0.8,
+      shadowOffset: { width: 0, height: 4 },
+      shadowRadius: 8,
+      alignSelf: "center",
+    },
+    modalImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 50,
+      alignSelf: "center",
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Image
@@ -202,7 +309,7 @@ export default function Home() {
         >
           <Menu onSelect={handleSettings}>
             <MenuTrigger>
-              <Ionicons name="settings-outline" size={30} color="black" />
+              <Ionicons name="settings-outline" size={30} color={text} />
             </MenuTrigger>
             <MenuOptions
               customStyles={{
@@ -286,7 +393,7 @@ export default function Home() {
           style={styles.exploreButton}
           onPress={() => router.push("/tutor_post")}
         >
-          <FontAwesome5 name="chalkboard-teacher" size={40} color="black" />
+          <FontAwesome5 name="chalkboard-teacher" size={40} color={text} />
           <Text style={styles.exploreButtonText}>Tutoring</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.exploreButton} onPress={handleNUSMods}>
@@ -300,14 +407,14 @@ export default function Home() {
           style={styles.exploreButton}
           onPress={() => router.push("../wallet")}
         >
-          <MaterialIcons name="wallet" size={45} color="black" />
+          <MaterialIcons name="wallet" size={45} color={text} />
           <Text style={styles.exploreButtonText}>Wallet</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.exploreButton}
           onPress={() => router.push("/profile/achievements")}
         >
-          <SimpleLineIcons name="badge" size={40} color="black" />
+          <SimpleLineIcons name="badge" size={40} color={text} />
           <Text style={styles.exploreButtonText}>Badges</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -317,7 +424,7 @@ export default function Home() {
         onPress={() => router.push("/tutor_find")}
       >
         <Text style={styles.explore}>Looking for tutor?</Text>
-        <AntDesign name={"rightcircle"} size={20} color={"black"} />
+        <AntDesign name={"rightcircle"} size={20} color={text} />
       </TouchableOpacity>
 
       <ScrollView
@@ -327,7 +434,7 @@ export default function Home() {
       >
         {tutors.length === 0 ? (
           <Text
-            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center" }}
+            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center", color: text }}
           >
             No tutors yet.
           </Text>
@@ -358,7 +465,7 @@ export default function Home() {
                     style={{ width: 80, height: 100, alignSelf: "center" }}
                   />
                 )}
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 16, fontWeight: "bold", color: text }}>
                   {cls.course}
                 </Text>
                 <Text
@@ -366,6 +473,7 @@ export default function Home() {
                     fontSize: 16,
                     fontWeight: "500",
                     fontStyle: "italic",
+                    color: text
                   }}
                 >
                   S${cls.rate} hourly
@@ -427,7 +535,7 @@ export default function Home() {
                 >
                   {selectedTutor.course}
                 </Text>
-                <Text style={{ fontSize: 18, color: "#888888", marginTop: 10 }}>
+                <Text style={{ fontSize: 18, color: isDarkMode ? "111111" : "#888888", marginTop: 10 }}>
                   {selectedTutor.description}
                 </Text>
                 <Text
@@ -435,7 +543,7 @@ export default function Home() {
                 >
                   Availability
                 </Text>
-                <Text style={{ fontSize: 18, color: "#888888", marginTop: 5 }}>
+                <Text style={{ fontSize: 18, color: isDarkMode ? "#111111" : "#888888", marginTop: 5 }}>
                   {selectedTutor.availability}
                 </Text>
                 <View
@@ -448,7 +556,7 @@ export default function Home() {
                 >
                   <View
                     style={{
-                      backgroundColor: "lightgray",
+                      backgroundColor: isDarkMode ? "#999999" : "white",
                       justifyContent: "center",
                       alignItems: "center",
                       width: 50,
@@ -460,7 +568,7 @@ export default function Home() {
                   <Text
                     style={{
                       fontSize: 20,
-                      color: "gray",
+                      color: "#222222",
                       marginHorizontal: 10,
                     }}
                   >
@@ -477,7 +585,7 @@ export default function Home() {
                 >
                   <View
                     style={{
-                      backgroundColor: "#f0f0f0",
+                      backgroundColor: isDarkMode ? "#999999" : "white",
                       justifyContent: "center",
                       alignItems: "center",
                       width: 50,
@@ -489,7 +597,7 @@ export default function Home() {
                   <Text
                     style={{
                       fontSize: 20,
-                      color: "gray",
+                      color: "#222222",
                       marginHorizontal: 10,
                     }}
                   >
@@ -551,103 +659,6 @@ export default function Home() {
         </View>
       </Modal>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-    justifyContent: "flex-start",
-    flexDirection: "column",
-  },
-  headerLear: { fontSize: 25, fontWeight: "bold", marginLeft: 10 },
-  headerNUS: { fontSize: 25, fontWeight: "bold", color: "orange" },
-  tabBar: {
-    paddingHorizontal: 0,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-  tabButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2f2f2",
-    borderRadius: 20,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-    marginHorizontal: 6,
-    borderWidth: 2,
-    borderColor: "#ddd",
-  },
-  buttonText: { marginLeft: 6, fontSize: 14, fontWeight: "semibold" },
-  reminder: {
-    width: "auto",
-    height: 150,
-    borderRadius: 10,
-    backgroundColor: "#aaaaaa",
-    justifyContent: "center",
-    marginBottom: 30,
-  },
-  classBox: {
-    marginBottom: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "gray",
-    flexDirection: "column",
-    justifyContent: "space-around",
-    alignItems: "baseline",
-  },
-  reminderText: { fontSize: 20, fontWeight: "bold", color: "black" },
-  explore: { fontSize: 24, fontWeight: "bold", marginRight: 10 },
-  exploreButton: {
-    width: 90,
-    height: 75,
-    flexDirection: "column",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    borderColor: "#ddd",
-    marginRight: 20,
-  },
-  exploreButtonText: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: "semibold",
-    textAlign: "center",
-  },
-  tutorProfile: {
-    width: 100,
-    height: "auto",
-    flexDirection: "column",
-    marginRight: 10,
-  },
-  image: { width: 50, height: 50, borderRadius: 10 },
-  modalOverlay: {
-    padding: 20,
-    alignItems: "center",
-    flex: 1,
-  },
-  modalContent: {
-    width: "97%",
-    height: screenHeight * 0.95,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 15,
-    alignItems: "flex-start",
-    overflow: "hidden",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    alignSelf: "center",
-  },
-  modalImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 50,
-    alignSelf: "center",
-  },
-});

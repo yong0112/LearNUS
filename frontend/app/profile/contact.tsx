@@ -1,10 +1,36 @@
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { Entypo, Fontisto, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 export default function contact() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 10000,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "black",
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -48,7 +74,7 @@ export default function contact() {
         </View>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Entypo name="old-phone" size={30} color={"orange"} />
-          <Text style={{ fontSize: 18, fontWeight: "500", marginLeft: 10 }}>
+          <Text style={{ fontSize: 18, fontWeight: "500", marginLeft: 10, color: text }}>
             +65 9019 1786
           </Text>
         </View>
@@ -56,24 +82,3 @@ export default function contact() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 10000,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-});

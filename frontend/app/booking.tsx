@@ -15,10 +15,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@/components/ThemedView";
 
 type Session = {
   tutor: string;
@@ -47,6 +50,10 @@ export default function BookingPage() {
   const [error, setError] = useState<any>();
   const { tutor, course, description, location, availability, rate } =
     useLocalSearchParams() as unknown as Session;
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(() => {
@@ -127,7 +134,92 @@ export default function BookingPage() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+      justifyContent: "flex-start",
+    },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 700,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: text,
+    },
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      alignSelf: "center",
+      marginTop: 20,
+    },
+    name: {
+      fontSize: 24,
+      fontWeight: "500",
+      alignSelf: "center",
+      marginTop: 8,
+      marginBottom: 10,
+      color: text
+    },
+    searchBar: {
+      borderRadius: 20,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: 8,
+      paddingVertical: 8,
+    },
+    dropdown: {
+      height: 30,
+      flex: 1,
+      paddingRight: 8,
+    },
+    titleText: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginBottom: 3,
+      color: text
+    },
+    contentText: {
+      fontSize: 16,
+      color: "#888888",
+      marginBottom: 5,
+    },
+    textStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#222222",
+    },
+    bookButton: {
+      marginTop: 20,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "orange",
+    },
+    buttonText: {
+      marginHorizontal: 4,
+      fontSize: 28,
+      fontWeight: "600",
+      marginBottom: 2,
+      color: "white",
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       <View style={styles.background} />
       <View
@@ -140,7 +232,7 @@ export default function BookingPage() {
         <Ionicons
           name="arrow-back-circle"
           size={40}
-          color="white"
+          color={text}
           onPress={() => router.push("/tutor_find")}
         />
         <Text style={styles.headerText}>Session Booking</Text>
@@ -263,87 +355,6 @@ export default function BookingPage() {
         </TouchableOpacity>
       </View>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    justifyContent: "flex-start",
-  },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 700,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: "center",
-    marginTop: 20,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: "500",
-    alignSelf: "center",
-    marginTop: 8,
-    marginBottom: 10,
-  },
-  searchBar: {
-    borderRadius: 20,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 8,
-    paddingVertical: 8,
-  },
-  dropdown: {
-    height: 30,
-    flex: 1,
-    paddingRight: 8,
-  },
-  titleText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 3,
-  },
-  contentText: {
-    fontSize: 16,
-    color: "#888888",
-    marginBottom: 5,
-  },
-  textStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#222222",
-  },
-  bookButton: {
-    marginTop: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "orange",
-  },
-  buttonText: {
-    marginHorizontal: 4,
-    fontSize: 28,
-    fontWeight: "600",
-    marginBottom: 2,
-    color: "white",
-  },
-});

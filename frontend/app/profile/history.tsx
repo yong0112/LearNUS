@@ -1,3 +1,6 @@
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -8,6 +11,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -22,6 +26,10 @@ export default function history() {
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [dayConstants, setDayConstants] = useState<DayOptions[]>([]);
   const [error, setError] = useState(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   function formatDate(day: number, time: string) {
     const Time = new Date(time);
@@ -98,7 +106,49 @@ export default function history() {
     console.log("Press me");
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -350,
+      width: 100000,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: text,
+    },
+    classCard: {
+      marginBottom: 20,
+      padding: 20,
+      borderRadius: 20,
+      borderWidth: 2,
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    subject: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: text
+    },
+    avatar: {
+      width: 80,
+      height: 80,
+      borderRadius: 50,
+      alignSelf: "center",
+      marginTop: 20,
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }} >
     <View style={styles.container}>
       {/*Header*/}
       <View style={styles.background} />
@@ -113,7 +163,7 @@ export default function history() {
         <Ionicons
           name="arrow-back-circle"
           size={40}
-          color="white"
+          color={isDarkMode ? "white" : "orange"}
           onPress={() => router.push("/(tabs)/profile")}
         />
         <Text style={styles.headerText}>Tutoring History</Text>
@@ -124,7 +174,7 @@ export default function history() {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {classes.length === 0 ? (
           <Text
-            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center" }}
+            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center", color: text }}
           >
             No classes yet.
           </Text>
@@ -151,7 +201,7 @@ export default function history() {
                   <Text style={styles.subject}>
                     {cls.course} ({cls.role})
                   </Text>
-                  <Text style={{ fontSize: 18 }}>
+                  <Text style={{ fontSize: 18, color: text }}>
                     {formatDate(cls.date, cls.startTime)}
                   </Text>
                 </View>
@@ -165,45 +215,6 @@ export default function history() {
         )}
       </ScrollView>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -350,
-    width: 100000,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-  classCard: {
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 20,
-    borderWidth: 2,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  subject: {
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 50,
-    alignSelf: "center",
-    marginTop: 20,
-  },
-});

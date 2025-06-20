@@ -1,3 +1,5 @@
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import {
@@ -15,6 +17,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -23,6 +26,10 @@ export default function Details() {
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
   const [newProfilePic, setNewProfilePic] = useState<string>("");
   const [error, setError] = useState(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -96,7 +103,45 @@ export default function Details() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 10000,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: text,
+    },
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      alignSelf: "center",
+      marginTop: 20,
+    },
+    info: { marginHorizontal: 20 },
+    label: { fontSize: 24, fontWeight: 500, marginBottom: 10, color: text },
+    field: {
+      fontSize: 16,
+      marginHorizontal: 8,
+      color: "#666666",
+      borderBottomColor: "#aaaaaa",
+      borderBottomWidth: 2,
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       {/*Header*/}
       <View style={styles.background} />
@@ -110,7 +155,7 @@ export default function Details() {
         <Ionicons
           name="arrow-back-circle"
           size={40}
-          color="white"
+          color={isDarkMode ? "white" : "orange"}
           onPress={() => router.push("/(tabs)/profile")}
         />
         <Text style={styles.headerText}>Personal Details</Text>
@@ -127,7 +172,7 @@ export default function Details() {
           style={{ alignSelf: "center", marginLeft: 100 }}
           onPress={handleChangeProfilePic}
         >
-          <MaterialCommunityIcons name="progress-pencil" size={30} />
+          <MaterialCommunityIcons name="progress-pencil" size={30} color={text} />
         </TouchableOpacity>
       </View>
 
@@ -164,42 +209,6 @@ export default function Details() {
         </View>
       </View>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 10000,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: "center",
-    marginTop: 20,
-  },
-  info: { marginHorizontal: 20 },
-  label: { fontSize: 24, fontWeight: 500, marginBottom: 10 },
-  field: {
-    fontSize: 16,
-    marginHorizontal: 8,
-    color: "#666666",
-    borderBottomColor: "#aaaaaa",
-    borderBottomWidth: 2,
-  },
-});
