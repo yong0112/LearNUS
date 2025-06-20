@@ -16,10 +16,13 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
+  useColorScheme,
   View,
 } from "react-native";
 import { auth, db } from "../lib/firebase";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { set } from "date-fns";
 
 export default function Signup() {
@@ -31,6 +34,10 @@ export default function Signup() {
   const [upperCaseValid, setUpperCaseValid] = useState(false);
   const [lowerCaseValid, setLowerCaseValid] = useState(false);
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     setLenghthValid(password.length >= 8);
@@ -117,6 +124,79 @@ export default function Signup() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, padding: 20, backgroundColor: bg },
+    scrollContainer: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingVertical: 20,
+    },
+    // innerContainer: { flex: 1, justifyContent: 'center' },
+    title: {
+      fontSize: 25,
+      fontWeight: "bold",
+      marginLeft: 10,
+      marginTop: 50,
+      color: text,
+    },
+    headings: {
+      fontSize: 28,
+      fontWeight: "bold",
+      marginTop: 80,
+      marginBottom: 10,
+      color: text,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: "#ccc",
+      padding: 10,
+      marginVertical: 10,
+      borderRadius: 5,
+      opacity: 0.5,
+      color: text,
+    },
+    button: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 8,
+      borderRadius: 5,
+      backgroundColor: "orange",
+      marginTop: 5,
+    },
+    buttonText: {
+      fontSize: 17,
+      fontWeight: "bold",
+      textAlign: "center",
+      color: "#ffffff",
+    },
+    dividerText: { marginHorizontal: 10, color: "#666", textAlign: "center" },
+    link: {
+      color: text,
+      fontWeight: "600",
+      textDecorationLine: "underline",
+    },
+    image: {
+      width: 70,
+      height: 70,
+      borderRadius: 10,
+      alignItems: "center",
+      marginTop: 50,
+    },
+    validationContainer: {
+      marginBottom: 10,
+    },
+    validationText: {
+      fontSize: 16, // Match input font size
+      marginVertical: 2,
+    },
+    valid: {
+      color: "green",
+    },
+    invalid: {
+      color: "red",
+    },
+  });
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
@@ -139,11 +219,13 @@ export default function Signup() {
             value={firstName}
             onChangeText={setFirstName}
             style={styles.input}
+            placeholderTextColor={text}
           />
           <TextInput
             placeholder="Last Name"
             value={lastName}
             onChangeText={setLastName}
+            placeholderTextColor={text}
             style={styles.input}
           />
           <TextInput
@@ -151,6 +233,7 @@ export default function Signup() {
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
+            placeholderTextColor={text}
             style={styles.input}
           />
           <TextInput
@@ -158,8 +241,10 @@ export default function Signup() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            placeholderTextColor={text}
             style={styles.input}
           />
+
           <View style={styles.validationContainer}>
             <Text
               style={[
@@ -188,12 +273,10 @@ export default function Signup() {
               lowercase letter
             </Text>
           </View>
-          <Button
-            title="Create Account"
-            onPress={handleSignup}
-            color={"#000000"}
-            disabled={!isPasswordValid}
-          />
+          <TouchableOpacity style={styles.button} onPress={handleSignup}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+
           <View
             style={{
               flexDirection: "row",
@@ -222,54 +305,3 @@ export default function Signup() {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingVertical: 20,
-  },
-  // innerContainer: { flex: 1, justifyContent: 'center' },
-  title: { fontSize: 25, fontWeight: "bold", marginLeft: 10, marginTop: 50 },
-  headings: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginTop: 80,
-    marginBottom: 10,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-    opacity: 0.5,
-  },
-  dividerText: { marginHorizontal: 10, color: "#666", textAlign: "center" },
-  link: {
-    color: "#000000",
-    fontWeight: "600",
-    textDecorationLine: "underline",
-  },
-  image: {
-    width: 70,
-    height: 70,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 50,
-  },
-  validationContainer: {
-    marginBottom: 10,
-  },
-  validationText: {
-    fontSize: 16, // Match input font size
-    marginVertical: 2,
-  },
-  valid: {
-    color: "green",
-  },
-  invalid: {
-    color: "red",
-  },
-});

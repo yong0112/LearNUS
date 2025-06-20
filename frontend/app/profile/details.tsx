@@ -1,3 +1,5 @@
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import {
@@ -15,6 +17,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -23,6 +26,10 @@ export default function Details() {
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
   const [newProfilePic, setNewProfilePic] = useState<string>("");
   const [error, setError] = useState(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -96,110 +103,116 @@ export default function Details() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 10000,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: text,
+    },
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      alignSelf: "center",
+      marginTop: 20,
+    },
+    info: { marginHorizontal: 20 },
+    label: { fontSize: 24, fontWeight: 500, marginBottom: 10, color: text },
+    field: {
+      fontSize: 16,
+      marginHorizontal: 8,
+      color: "#666666",
+      borderBottomColor: "#aaaaaa",
+      borderBottomWidth: 2,
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      {/*Header*/}
-      <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="white"
-          onPress={() => router.push("/(tabs)/profile")}
-        />
-        <Text style={styles.headerText}>Personal Details</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {/*Avatar*/}
-      <View style={{ paddingVertical: 20, marginBottom: 40 }}>
-        <Image
-          source={{ uri: userProfile?.profilePicture }}
-          style={styles.avatar}
-        />
-        <TouchableOpacity
-          style={{ alignSelf: "center", marginLeft: 100 }}
-          onPress={handleChangeProfilePic}
+    <ThemedView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/*Header*/}
+        <View style={styles.background} />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
         >
-          <MaterialCommunityIcons name="progress-pencil" size={30} />
-        </TouchableOpacity>
-      </View>
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={isDarkMode ? "white" : "orange"}
+            onPress={() => router.push("/(tabs)/profile")}
+          />
+          <Text style={styles.headerText}>Personal Details</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      {/*Info List*/}
-      <View style={styles.info}>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>First Name</Text>
-          <Text style={styles.field}>{userProfile?.firstName}</Text>
-        </View>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>Last Name</Text>
-          <Text style={styles.field}>{userProfile?.lastName}</Text>
-        </View>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>Gender</Text>
-          <Text style={styles.field}>Unknown</Text>
-        </View>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>Email</Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              borderBottomColor: "#aaaaaa",
-              borderBottomWidth: 2,
-            }}
+        {/*Avatar*/}
+        <View style={{ paddingVertical: 20, marginBottom: 40 }}>
+          <Image
+            source={{ uri: userProfile?.profilePicture }}
+            style={styles.avatar}
+          />
+          <TouchableOpacity
+            style={{ alignSelf: "center", marginLeft: 100 }}
+            onPress={handleChangeProfilePic}
           >
-            <Text
-              style={{ fontSize: 16, marginHorizontal: 5, color: "#666666" }}
+            <MaterialCommunityIcons
+              name="progress-pencil"
+              size={30}
+              color={text}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/*Info List*/}
+        <View style={styles.info}>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>First Name</Text>
+            <Text style={styles.field}>{userProfile?.firstName}</Text>
+          </View>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>Last Name</Text>
+            <Text style={styles.field}>{userProfile?.lastName}</Text>
+          </View>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>Gender</Text>
+            <Text style={styles.field}>Unknown</Text>
+          </View>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>Email</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                borderBottomColor: "#aaaaaa",
+                borderBottomWidth: 2,
+              }}
             >
-              {userProfile?.email}
-            </Text>
+              <Text
+                style={{ fontSize: 16, marginHorizontal: 5, color: "#666666" }}
+              >
+                {userProfile?.email}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 10000,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: "center",
-    marginTop: 20,
-  },
-  info: { marginHorizontal: 20 },
-  label: { fontSize: 24, fontWeight: 500, marginBottom: 10 },
-  field: {
-    fontSize: 16,
-    marginHorizontal: 8,
-    color: "#666666",
-    borderBottomColor: "#aaaaaa",
-    borderBottomWidth: 2,
-  },
-});

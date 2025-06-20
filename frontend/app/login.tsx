@@ -17,16 +17,24 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  useColorScheme,
 } from "react-native";
 import { db, auth } from "../lib/firebase";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedText } from "@/components/ThemedText";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const navigation = useNavigation();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   const handleLogin = async () => {
     try {
@@ -87,15 +95,77 @@ export default function Login() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, padding: 20 },
+    innerContainer: { flex: 1, justifyContent: "center" }, // Added style for innerContainer
+    title: {
+      fontSize: 30,
+      fontWeight: "bold",
+      marginBottom: 50,
+      textAlign: "center",
+      color: text,
+    },
+    headings: {
+      fontSize: 24,
+      fontWeight: "bold",
+      marginBottom: 8,
+      textAlign: "center",
+      color: text,
+    },
+    subheadings: {
+      fontSize: 15,
+      marginBottom: 20,
+      textAlign: "center",
+      color: text,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: "#ccc",
+      padding: 10,
+      marginVertical: 10,
+      borderRadius: 5,
+      opacity: 0.5,
+      color: text,
+    },
+    button: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 8,
+      borderRadius: 5,
+      backgroundColor: "orange",
+      marginTop: 5,
+    },
+    buttonText: {
+      fontSize: 17,
+      fontWeight: "bold",
+      textAlign: "center",
+      color: "#ffffff",
+    },
+    dividerText: { marginHorizontal: 10, color: "#666", textAlign: "center" },
+    signUpLink: {
+      color: text,
+      fontWeight: "600",
+      textDecorationLine: "underline",
+    },
+    image: {
+      width: 120,
+      height: 120,
+      borderRadius: 10,
+      marginBottom: 10,
+      marginTop: 100,
+      alignSelf: "center",
+    },
+  });
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
-        style={styles.container}
+        style={{ flex: 1, padding: 20, backgroundColor: bg }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         enabled
       >
-        <View style={styles.innerContainer}>
+        <View>
           <Image
             source={require("../assets/images/logo.jpg")}
             style={styles.image}
@@ -111,6 +181,7 @@ export default function Login() {
             onChangeText={setEmail}
             autoCapitalize="none"
             style={styles.input}
+            placeholderTextColor={text}
           />
           <TextInput
             placeholder="Password"
@@ -118,8 +189,11 @@ export default function Login() {
             onChangeText={setPassword}
             secureTextEntry
             style={styles.input}
+            placeholderTextColor={text}
           />
-          <Button title="Continue" onPress={handleLogin} color={"#000000"} />
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Continue</Text>
+          </TouchableOpacity>
           <View
             style={{
               flexDirection: "row",
@@ -148,43 +222,3 @@ export default function Login() {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  innerContainer: { flex: 1, justifyContent: "center" }, // Added style for innerContainer
-  title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    marginBottom: 50,
-    textAlign: "center",
-  },
-  headings: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subheadings: { fontSize: 15, marginBottom: 20, textAlign: "center" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-    opacity: 0.5,
-  },
-  dividerText: { marginHorizontal: 10, color: "#666", textAlign: "center" },
-  signUpLink: {
-    color: "#000000",
-    fontWeight: "600",
-    textDecorationLine: "underline",
-  },
-  image: {
-    width: 120,
-    height: 120,
-    borderRadius: 10,
-    marginBottom: 10,
-    marginTop: 100,
-    alignSelf: "center",
-  },
-});

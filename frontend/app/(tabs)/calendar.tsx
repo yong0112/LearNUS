@@ -10,6 +10,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
@@ -17,6 +18,8 @@ import { MarkedDates } from "react-native-calendars/src/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@/components/ThemedView";
 const screenHeight = Dimensions.get("window").height;
 
 export default function CalendarPage() {
@@ -34,6 +37,10 @@ export default function CalendarPage() {
     new Date(currTime.getTime() + 2 * 60 * 60 * 1000),
   );
   const [showEnd, setShowEnd] = useState<boolean>(false);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   const handleAddButton = () => {
     setModalVisible(true);
@@ -234,300 +241,309 @@ export default function CalendarPage() {
     });
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+    },
+    header: {
+      fontSize: 30,
+      fontWeight: "600",
+      marginBottom: 10,
+      color: text,
+    },
+    calendar: {
+      borderWidth: 1,
+      borderColor: "gray",
+      height: 350,
+    },
+    plus: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+    },
+    classList: {
+      paddingBottom: 20,
+    },
+    classBox: {
+      marginVertical: 10,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: "gray",
+      flexDirection: "column",
+      justifyContent: "space-around",
+    },
+    modalContent: {
+      width: "97%",
+      height: screenHeight * 0.85,
+      backgroundColor: isDarkMode ? "#999999" : "white",
+      borderRadius: 20,
+      padding: 15,
+      flexDirection: "column",
+      overflow: "hidden",
+      elevation: 10,
+      shadowColor: "#000",
+      shadowOpacity: 0.8,
+      shadowOffset: { width: 0, height: 4 },
+      shadowRadius: 8,
+      alignSelf: "center",
+    },
+    inputBar: {
+      borderRadius: 10,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: 8,
+      marginBottom: 40,
+    },
+    timeBar: {
+      borderRadius: 10,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: 5,
+      padding: 10,
+      justifyContent: "space-between",
+      marginVertical: 2,
+    },
+    timeButton: {
+      borderRadius: 5,
+      padding: 2,
+      paddingHorizontal: 5,
+      alignSelf: "center",
+      backgroundColor: "#9ca3af",
+      color: "black",
+      fontSize: 16,
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Calendar</Text>
-      <View style={{ flex: 1, justifyContent: "space-between" }}>
-        <Calendar
-          markingType="custom"
-          onDayPress={(day) => {
-            setSelected(day.dateString);
-          }}
-          markedDates={markedDates}
-          style={styles.calendar}
-          theme={{
-            backgroundColor: "#000000",
-            calendarBackground: "#ffffff",
-            textSectionTitleColor: "#b6c1cd",
-            selectedDayBackgroundColor: "orange",
-            selectedDayTextColor: "#ffffff",
-            todayTextColor: "orange",
-            dayTextColor: "black",
-            textDisabledColor: "lightgray",
-            arrowColor: "orange",
-            textDayFontWeight: "300",
-            textMonthFontWeight: "bold",
-            textDayHeaderFontWeight: "600",
-            textDayFontSize: 18,
-            textMonthFontSize: 20,
-            textDayHeaderFontSize: 14,
-            arrowWidth: 40,
-            dotColor: "orange",
-            selectedDotColor: "white",
-          }}
-        />
-
-        <View style={styles.classList}>
-          {classesForSelectedDate.length > 0 ? (
-            classesForSelectedDate.map((cls, index) => (
-              <View key={index} style={styles.classBox}>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                  {cls.course}
-                </Text>
-                <Text style={{ fontSize: 16 }}>
-                  {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
-                </Text>
-              </View>
-            ))
-          ) : selected ? (
-            <View style={{ alignSelf: "center", alignItems: "center" }}>
-              <Text style={{ fontSize: 20, fontWeight: "semibold" }}>
-                No classes for today
-              </Text>
-            </View>
-          ) : (
-            <View />
-          )}
-
-          {eventsForSelectedDate.length > 0 ? (
-            eventsForSelectedDate.map((event, index) => (
-              <View key={index} style={styles.classBox}>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                  {event.title}
-                </Text>
-                <Text style={{ fontSize: 16 }}>
-                  {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                </Text>
-              </View>
-            ))
-          ) : (
-            <View />
-          )}
-        </View>
-
-        <TouchableOpacity style={styles.plus} onPress={handleAddButton}>
-          <AntDesign name="pluscircle" size={50} color={"orange"} />
-        </TouchableOpacity>
-      </View>
-
-      <Modal
-        animationType="slide"
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContent}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 30,
+    <ThemedView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Calendar</Text>
+        <View style={{ flex: 1, justifyContent: "space-between" }}>
+          <Calendar
+            markingType="custom"
+            onDayPress={(day) => {
+              setSelected(day.dateString);
             }}
-          >
-            <View>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Entypo name="cross" size={30} color={"orange"} />
-              </TouchableOpacity>
-            </View>
+            markedDates={markedDates}
+            style={styles.calendar}
+            theme={{
+              backgroundColor: "#000000",
+              calendarBackground: "#ffffff",
+              textSectionTitleColor: "#b6c1cd",
+              selectedDayBackgroundColor: "orange",
+              selectedDayTextColor: "#ffffff",
+              todayTextColor: "orange",
+              dayTextColor: "black",
+              textDisabledColor: "lightgray",
+              arrowColor: "orange",
+              textDayFontWeight: "300",
+              textMonthFontWeight: "bold",
+              textDayHeaderFontWeight: "600",
+              textDayFontSize: 18,
+              textMonthFontSize: 20,
+              textDayHeaderFontSize: 14,
+              arrowWidth: 40,
+              dotColor: "orange",
+              selectedDotColor: "white",
+            }}
+          />
 
-            <View>
-              <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-                New Event
-              </Text>
-            </View>
+          <View style={styles.classList}>
+            {classesForSelectedDate.length > 0 ? (
+              classesForSelectedDate.map((cls, index) => (
+                <View key={index} style={styles.classBox}>
+                  <Text
+                    style={{ fontSize: 18, fontWeight: "bold", color: text }}
+                  >
+                    {cls.course}
+                  </Text>
+                  <Text style={{ fontSize: 16, color: text }}>
+                    {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
+                  </Text>
+                </View>
+              ))
+            ) : selected ? (
+              <View style={{ alignSelf: "center", alignItems: "center" }}>
+                <Text
+                  style={{ fontSize: 20, fontWeight: "semibold", color: text }}
+                >
+                  No classes for today
+                </Text>
+              </View>
+            ) : (
+              <View />
+            )}
 
-            <View>
-              <TouchableOpacity onPress={handleAddEvent}>
-                <AntDesign name="plus" size={30} color={"orange"} />
-              </TouchableOpacity>
-            </View>
+            {eventsForSelectedDate.length > 0 ? (
+              eventsForSelectedDate.map((event, index) => (
+                <View key={index} style={styles.classBox}>
+                  <Text
+                    style={{ fontSize: 18, fontWeight: "bold", color: text }}
+                  >
+                    {event.title}
+                  </Text>
+                  <Text style={{ fontSize: 16, color: text }}>
+                    {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <View />
+            )}
           </View>
 
-          <View style={{ flexDirection: "column", padding: 10 }}>
-            <View style={styles.inputBar}>
-              <TextInput
-                style={{
-                  color: "#222222",
-                  fontSize: 17,
-                  marginLeft: 10,
-                  flex: 1,
-                }}
-                placeholder="Event Title"
-                placeholderTextColor="#888888"
-                onChangeText={setEventTitle}
-              />
-            </View>
-
-            {/**Date picker */}
-            <View style={styles.timeBar}>
-              <Text
-                style={{
-                  fontSize: 17,
-                  marginLeft: 10,
-                  color: "#111111",
-                  fontWeight: "500",
-                }}
-              >
-                Date:{" "}
-              </Text>
-              <TouchableOpacity onPress={() => setShowDate(true)}>
-                <Text style={styles.timeButton}>
-                  {format(eventDate, "dd MMM yyyy")}
-                </Text>
-              </TouchableOpacity>
-              {showDate && (
-                <DateTimePicker
-                  mode="date"
-                  value={eventDate}
-                  onChange={(_, selected) => {
-                    setShowDate(false);
-                    if (selected) setEventDate(selected);
-                  }}
-                />
-              )}
-            </View>
-
-            <View style={styles.timeBar}>
-              <Text
-                style={{
-                  fontSize: 17,
-                  marginLeft: 10,
-                  color: "#111111",
-                  fontWeight: "500",
-                }}
-              >
-                Start Time:{" "}
-              </Text>
-              <TouchableOpacity onPress={() => setShowStart(true)}>
-                <Text style={styles.timeButton}>
-                  {startTime.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </TouchableOpacity>
-              {showStart && (
-                <DateTimePicker
-                  mode="time"
-                  value={startTime}
-                  onChange={(_, selected) => {
-                    setShowStart(false);
-                    if (selected) setStartTime(selected);
-                  }}
-                />
-              )}
-            </View>
-            <View style={styles.timeBar}>
-              <Text
-                style={{
-                  fontSize: 17,
-                  marginLeft: 10,
-                  color: "#111111",
-                  fontWeight: "500",
-                }}
-              >
-                End Time:{" "}
-              </Text>
-              <TouchableOpacity onPress={() => setShowEnd(true)}>
-                <Text style={styles.timeButton}>
-                  {endTime.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </TouchableOpacity>
-              {showEnd && (
-                <DateTimePicker
-                  mode="time"
-                  value={endTime}
-                  onChange={(_, selected) => {
-                    setShowEnd(false);
-                    if (selected) setEndTime(selected);
-                  }}
-                />
-              )}
-            </View>
-          </View>
+          <TouchableOpacity style={styles.plus} onPress={handleAddButton}>
+            <AntDesign name="pluscircle" size={50} color={"orange"} />
+          </TouchableOpacity>
         </View>
-      </Modal>
-    </View>
+
+        <Modal
+          animationType="slide"
+          transparent
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 30,
+              }}
+            >
+              <View>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Entypo name="cross" size={30} color={"orange"} />
+                </TouchableOpacity>
+              </View>
+
+              <View>
+                <Text style={{ fontSize: 24, fontWeight: "bold" }}>
+                  New Event
+                </Text>
+              </View>
+
+              <View>
+                <TouchableOpacity onPress={handleAddEvent}>
+                  <AntDesign name="plus" size={30} color={"orange"} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "column", padding: 10 }}>
+              <View style={styles.inputBar}>
+                <TextInput
+                  style={{
+                    color: "#222222",
+                    fontSize: 17,
+                    marginLeft: 10,
+                    flex: 1,
+                  }}
+                  placeholder="Event Title"
+                  placeholderTextColor="#888888"
+                  onChangeText={setEventTitle}
+                />
+              </View>
+
+              {/**Date picker */}
+              <View style={styles.timeBar}>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    marginLeft: 10,
+                    color: "#111111",
+                    fontWeight: "500",
+                  }}
+                >
+                  Date:{" "}
+                </Text>
+                <TouchableOpacity onPress={() => setShowDate(true)}>
+                  <Text style={styles.timeButton}>
+                    {format(eventDate, "dd MMM yyyy")}
+                  </Text>
+                </TouchableOpacity>
+                {showDate && (
+                  <DateTimePicker
+                    mode="date"
+                    value={eventDate}
+                    onChange={(_, selected) => {
+                      setShowDate(false);
+                      if (selected) setEventDate(selected);
+                    }}
+                  />
+                )}
+              </View>
+
+              <View style={styles.timeBar}>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    marginLeft: 10,
+                    color: "#111111",
+                    fontWeight: "500",
+                  }}
+                >
+                  Start Time:{" "}
+                </Text>
+                <TouchableOpacity onPress={() => setShowStart(true)}>
+                  <Text style={styles.timeButton}>
+                    {startTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+                {showStart && (
+                  <DateTimePicker
+                    mode="time"
+                    value={startTime}
+                    onChange={(_, selected) => {
+                      setShowStart(false);
+                      if (selected) setStartTime(selected);
+                    }}
+                  />
+                )}
+              </View>
+              <View style={styles.timeBar}>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    marginLeft: 10,
+                    color: "#111111",
+                    fontWeight: "500",
+                  }}
+                >
+                  End Time:{" "}
+                </Text>
+                <TouchableOpacity onPress={() => setShowEnd(true)}>
+                  <Text style={styles.timeButton}>
+                    {endTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+                {showEnd && (
+                  <DateTimePicker
+                    mode="time"
+                    value={endTime}
+                    onChange={(_, selected) => {
+                      setShowEnd(false);
+                      if (selected) setEndTime(selected);
+                    }}
+                  />
+                )}
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  header: {
-    fontSize: 30,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  calendar: {
-    borderWidth: 1,
-    borderColor: "gray",
-    height: 350,
-  },
-  plus: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  classList: {
-    paddingBottom: 20,
-  },
-  classBox: {
-    marginBottom: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "gray",
-    flexDirection: "column",
-    justifyContent: "space-around",
-  },
-  modalContent: {
-    width: "97%",
-    height: screenHeight * 0.85,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 15,
-    flexDirection: "column",
-    overflow: "hidden",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    alignSelf: "center",
-  },
-  inputBar: {
-    borderRadius: 10,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 8,
-    marginBottom: 40,
-  },
-  timeBar: {
-    borderRadius: 10,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 5,
-    padding: 10,
-    justifyContent: "space-between",
-    marginVertical: 2,
-  },
-  timeButton: {
-    borderRadius: 5,
-    padding: 2,
-    paddingHorizontal: 5,
-    alignSelf: "center",
-    backgroundColor: "#9ca3af",
-    color: "black",
-    fontSize: 16,
-  },
-});

@@ -10,11 +10,14 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { doc, getDoc } from "firebase/firestore";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@/components/ThemedView";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -64,6 +67,10 @@ export default function Forum() {
   const [modalVisible, setModalVisible] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   const BASE_URL = "https://learnus.onrender.com";
 
@@ -271,308 +278,325 @@ export default function Forum() {
     );
   });
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 10,
+      justifyContent: "flex-start",
+    },
+    filterWrapper: {
+      marginLeft: 8,
+    },
+    searchBar: {
+      paddingHorizontal: 10,
+      borderRadius: 20,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      marginLeft: 8,
+      marginTop: 12,
+      marginBottom: 12,
+    },
+    filterButton: {
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 6,
+      borderColor: text,
+    },
+    buttonText: {
+      marginHorizontal: 4,
+      fontSize: 14,
+      fontWeight: "400",
+      marginBottom: 2,
+      color: text,
+    },
+    dropdown: {
+      height: 50,
+      flex: 1,
+      paddingRight: 8,
+    },
+    placeholderStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#888",
+    },
+    selectedTextStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#222",
+    },
+    clearFilterContainer: {
+      marginTop: 12,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 6,
+      alignSelf: "flex-start",
+      borderColor: text,
+    },
+    postCard: {
+      marginBottom: 20,
+      flexDirection: "column",
+      borderBottomWidth: 2,
+      borderBottomColor: "gray",
+      paddingBottom: 10,
+    },
+    profilePicture: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+    },
+    fab: {
+      position: "absolute",
+      bottom: 30,
+      right: 30,
+      backgroundColor: "orange",
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      alignItems: "center",
+      justifyContent: "center",
+      elevation: 5,
+    },
+    fabText: {
+      color: "white",
+      fontSize: 32,
+      lineHeight: 36,
+      fontWeight: "bold",
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      {/* Search Bar */}
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View style={styles.searchBar}>
-          <TouchableOpacity
-            onPress={() => {
-              setSearchText("");
-              setSearching("");
-            }}
-          >
-            <Entypo name="cross" size={25} color="#444444" />
-          </TouchableOpacity>
-          <TextInput
-            style={{ flex: 1, color: "#888888", fontSize: 17, marginLeft: 5 }}
-            placeholder="Search posts by title or course"
-            value={seraching}
-            onChangeText={setSearching}
-          />
-          <TouchableOpacity onPress={handleSearch}>
-            <Ionicons name="search-sharp" size={30} color="#ffc04d" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Filter Button */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "flex-start",
-          paddingVertical: 12,
-        }}
-      >
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={handleFilterToggle}
-        >
-          <MaterialCommunityIcons
-            name="filter-outline"
-            size={20}
-            color="black"
-          />
-          <Text style={styles.buttonText}>Filter</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Course Filter Dropdown */}
-      {isFilterVisible && (
-        <View style={styles.filterWrapper}>
+    <ThemedView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/* Search Bar */}
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View style={styles.searchBar}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={courseOptions}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder="Select a course tag"
-              value={selectedCourse}
-              onChange={(item) => {
-                if (item.value === selectedCourse) {
-                  handleClearFilter(); // Reset if same course is selected
-                } else {
-                  setSelectedCourse(item.value);
-                  setIsFilterVisible(false);
-                }
+            <TouchableOpacity
+              onPress={() => {
+                setSearchText("");
+                setSearching("");
               }}
-              renderLeftIcon={() => (
-                <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
-              )}
-              search
-              searchPlaceholder="Search course"
+            >
+              <Entypo name="cross" size={25} color="#444444" />
+            </TouchableOpacity>
+            <TextInput
+              style={{ flex: 1, color: "#888888", fontSize: 17, marginLeft: 5 }}
+              placeholder="Search posts by title or course"
+              value={seraching}
+              onChangeText={setSearching}
             />
+            <TouchableOpacity onPress={handleSearch}>
+              <Ionicons name="search-sharp" size={30} color="#ffc04d" />
+            </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Filter Button */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            paddingVertical: 12,
+          }}
+        >
           <TouchableOpacity
-            style={styles.clearFilterContainer}
-            onPress={() => {
-              handleClearFilter();
-            }}
+            style={styles.filterButton}
+            onPress={handleFilterToggle}
           >
-            <MaterialCommunityIcons name="close" size={20} color="black" />
-            <Text style={styles.buttonText}>Clear Filter</Text>
+            <MaterialCommunityIcons
+              name="filter-outline"
+              size={20}
+              color={text}
+            />
+            <Text style={styles.buttonText}>Filter</Text>
           </TouchableOpacity>
         </View>
-      )}
 
-      {/* Post List */}
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {posts.length === 0 ? (
-          <Text
-            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center" }}
-          >
-            No posts yet.
-          </Text>
-        ) : (
-          displayedPosts.map((post) => {
-            const profile = userProfiles[post.author];
-            if (!profile) return null;
+        {/* Course Filter Dropdown */}
+        {isFilterVisible && (
+          <View style={styles.filterWrapper}>
+            <View style={styles.searchBar}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                data={courseOptions}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder="Select a course tag"
+                value={selectedCourse}
+                onChange={(item) => {
+                  if (item.value === selectedCourse) {
+                    handleClearFilter(); // Reset if same course is selected
+                  } else {
+                    setSelectedCourse(item.value);
+                    setIsFilterVisible(false);
+                  }
+                }}
+                renderLeftIcon={() => (
+                  <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+                )}
+                search
+                searchPlaceholder="Search course"
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.clearFilterContainer}
+              onPress={() => {
+                handleClearFilter();
+              }}
+            >
+              <MaterialCommunityIcons name="close" size={20} color={text} />
+              <Text style={styles.buttonText}>Clear Filter</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-            return (
-              <TouchableOpacity
-                key={post.id}
-                style={styles.postCard}
-                onPress={() => handlePostDetails(post.id)}
-              >
-                {/* User Info */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 8,
-                  }}
+        {/* Post List */}
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          {posts.length === 0 ? (
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "bold",
+                alignSelf: "center",
+                color: text,
+              }}
+            >
+              No posts yet.
+            </Text>
+          ) : (
+            displayedPosts.map((post) => {
+              const profile = userProfiles[post.author];
+              if (!profile) return null;
+
+              return (
+                <TouchableOpacity
+                  key={post.id}
+                  style={styles.postCard}
+                  onPress={() => handlePostDetails(post.id)}
                 >
-                  <Image
-                    source={
-                      profile.profilePicture
-                        ? { uri: profile.profilePicture }
-                        : require("../../assets/images/defaultProfile.jpg") // Adjust path to your default avatar
-                    }
-                    style={styles.profilePicture}
-                  />
-                  <Text
-                    style={{ fontSize: 16, fontWeight: "600", marginLeft: 8 }}
-                  >
-                    {profile.firstName}
-                  </Text>
-                </View>
-
-                {/* Title and Course Tag */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ fontSize: 24, fontWeight: "800" }}>
-                    {post.title}
-                  </Text>
-                  {post.courseTag && (
-                    <Text style={{ fontSize: 16, color: "#888888" }}>
-                      {post.courseTag}
-                    </Text>
-                  )}
-                </View>
-
-                {/* Content */}
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "600",
-                    color: "#888888",
-                    marginVertical: 8,
-                  }}
-                  numberOfLines={2}
-                >
-                  {post.content}
-                </Text>
-
-                {/* Action Buttons */}
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <TouchableOpacity
+                  {/* User Info */}
+                  <View
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      marginRight: 16,
+                      marginBottom: 8,
                     }}
-                    onPress={() => handleUpvote(post.id)}
                   >
-                    <MaterialCommunityIcons
-                      name={
-                        upvoteStatus[post.id]?.hasUpvoted
-                          ? "thumb-up"
-                          : "thumb-up-outline"
+                    <Image
+                      source={
+                        profile.profilePicture
+                          ? { uri: profile.profilePicture }
+                          : require("../../assets/images/defaultProfile.jpg") // Adjust path to your default avatar
                       }
-                      size={20}
-                      color="#ffc04d"
+                      style={styles.profilePicture}
                     />
-                    <Text style={{ marginLeft: 4 }}>
-                      {upvoteStatus[post.id]?.upvoteCount || post.upvoteCount}
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        marginLeft: 8,
+                        color: text,
+                      }}
+                    >
+                      {profile.firstName}
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                    onPress={() => handlePostDetails(post.id)}
-                  >
-                    <Ionicons
-                      name="chatbubble-outline"
-                      size={20}
-                      color="#ffc04d"
-                    />
-                    <Text style={{ marginLeft: 4 }}>
-                      {commentCounts[post.id] || 0}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </ScrollView>
+                  </View>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={handleNewPost}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
-    </View>
+                  {/* Title and Course Tag */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{ fontSize: 24, fontWeight: "800", color: text }}
+                    >
+                      {post.title}
+                    </Text>
+                    {post.courseTag && (
+                      <Text style={{ fontSize: 16, color: "#888888" }}>
+                        {post.courseTag}
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* Content */}
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "600",
+                      color: "#888888",
+                      marginVertical: 8,
+                    }}
+                    numberOfLines={2}
+                  >
+                    {post.content}
+                  </Text>
+
+                  {/* Action Buttons */}
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginRight: 16,
+                      }}
+                      onPress={() => handleUpvote(post.id)}
+                    >
+                      <MaterialCommunityIcons
+                        name={
+                          upvoteStatus[post.id]?.hasUpvoted
+                            ? "thumb-up"
+                            : "thumb-up-outline"
+                        }
+                        size={20}
+                        color="#ffc04d"
+                      />
+                      <Text style={{ marginLeft: 4, color: text }}>
+                        {upvoteStatus[post.id]?.upvoteCount || post.upvoteCount}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                      onPress={() => handlePostDetails(post.id)}
+                    >
+                      <Ionicons
+                        name="chatbubble-outline"
+                        size={20}
+                        color="#ffc04d"
+                      />
+                      <Text style={{ marginLeft: 4, color: text }}>
+                        {commentCounts[post.id] || 0}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+
+        {/* Floating Action Button */}
+        <TouchableOpacity style={styles.fab} onPress={handleNewPost}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 10,
-    justifyContent: "flex-start",
-  },
-  filterWrapper: {
-    marginLeft: 8,
-  },
-  searchBar: {
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 8,
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  filterButton: {
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 6,
-  },
-  buttonText: {
-    marginHorizontal: 4,
-    fontSize: 14,
-    fontWeight: "400",
-    marginBottom: 2,
-  },
-  dropdown: {
-    height: 50,
-    flex: 1,
-    paddingRight: 8,
-  },
-  placeholderStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#888",
-  },
-  selectedTextStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#222",
-  },
-  clearFilterContainer: {
-    marginTop: 12,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 6,
-    alignSelf: "flex-start",
-  },
-  postCard: {
-    marginBottom: 20,
-    flexDirection: "column",
-    borderBottomWidth: 2,
-    borderBottomColor: "gray",
-    paddingBottom: 10,
-  },
-  profilePicture: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  fab: {
-    position: "absolute",
-    bottom: 30,
-    right: 30,
-    backgroundColor: "#000000",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 5,
-  },
-  fabText: {
-    color: "white",
-    fontSize: 32,
-    lineHeight: 36,
-    fontWeight: "bold",
-  },
-});
