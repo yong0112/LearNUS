@@ -4,7 +4,7 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -23,17 +23,29 @@ import {
 } from "react-native";
 import { auth, db } from "../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { set } from "date-fns";
 
 export default function Signup() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [lengthValid, setLenghthValid] = useState(false);
+  const [upperCaseValid, setUpperCaseValid] = useState(false);
+  const [lowerCaseValid, setLowerCaseValid] = useState(false);
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
+
+  useEffect(() => {
+    setLenghthValid(password.length >= 8);
+    setUpperCaseValid(/[A-Z]/.test(password));
+    setLowerCaseValid(/[a-z]/.test(password));
+  }, [password]);
+
+  const isPasswordValid = lengthValid && upperCaseValid && lowerCaseValid;
 
   const handleSignup = async () => {
     // if (!email.endsWith('@u.nus.edu')) {
@@ -219,9 +231,39 @@ export default function Signup() {
             placeholderTextColor={text}
             style={styles.input}
           />
+          
+          <View style={styles.validationContainer}>
+            <Text
+              style={[
+                styles.validationText,
+                lengthValid ? styles.valid : styles.invalid,
+              ]}
+            >
+              {lengthValid ? "✓" : "⚠"} Password must be at least 8 characters
+            </Text>
+            <Text
+              style={[
+                styles.validationText,
+                upperCaseValid ? styles.valid : styles.invalid,
+              ]}
+            >
+              {upperCaseValid ? "✓" : "⚠"} Password must contain at least one
+              uppercase letter
+            </Text>
+            <Text
+              style={[
+                styles.validationText,
+                lowerCaseValid ? styles.valid : styles.invalid,
+              ]}
+            >
+              {lowerCaseValid ? "✓" : "⚠"} Password must contain at least one
+              lowercase letter
+            </Text>
+          </View>
           <TouchableOpacity style={styles.button} onPress={handleSignup}>
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>
+          
           <View
             style={{
               flexDirection: "row",
