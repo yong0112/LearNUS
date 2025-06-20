@@ -255,8 +255,11 @@ export default function tutoring() {
           onPress={() => router.push("/(tabs)/home")}
         />
         <View style={styles.searchBar}>
+          <TouchableOpacity onPress={() => {setSearchText(""); setSearching("")}}>
+            <Entypo name="cross" size={25} color="#444444" />
+          </TouchableOpacity>
           <TextInput
-            style={{ color: "#888888", fontSize: 15, marginLeft: 5 }}
+            style={{ flex: 1, color: "#888888", fontSize: 15, marginLeft: 5 }}
             placeholder="Search by tutors name or course code"
             value={searching}
             onChangeText={setSearching}
@@ -593,7 +596,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 8,
-    justifyContent: "space-between",
   },
   filterButton: {
     borderRadius: 10,

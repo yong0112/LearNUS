@@ -1,5 +1,5 @@
 import { auth, db } from "@/lib/firebase";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { use, useEffect, useState } from "react";
 import {
@@ -46,6 +46,7 @@ interface UpvoteStatus {
 export default function Forum() {
   const router = useRouter();
   const [searchText, setSearchText] = useState("");
+  const [seraching, setSearching] = useState("");
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [userProfiles, setUserProfiles] = useState<
     Record<string, UserProfile | undefined>
@@ -242,6 +243,11 @@ export default function Forum() {
     router.push("../forum_post");
   };
 
+  // Handle search
+  const handleSearch = () => {
+    setSearchText(seraching);
+  }
+
   // Handle filter button toggle
   const handleFilterToggle = () => {
     setIsFilterVisible(!isFilterVisible);
@@ -270,13 +276,18 @@ export default function Forum() {
       {/* Search Bar */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <View style={styles.searchBar}>
-          <Ionicons name="search-sharp" size={30} color="#ffc04d" />
+          <TouchableOpacity onPress={() => {setSearchText(""); setSearching("");}}>
+            <Entypo name="cross" size={25} color="#444444" />
+          </TouchableOpacity>
           <TextInput
-            style={{ color: "#888888", fontSize: 17, marginLeft: 5 }}
+            style={{ flex: 1, color: "#888888", fontSize: 17, marginLeft: 5 }}
             placeholder="Search posts by title or course"
-            value={searchText}
-            onChangeText={setSearchText}
+            value={seraching}
+            onChangeText={setSearching}
           />
+          <TouchableOpacity onPress={handleSearch}>
+            <Ionicons name="search-sharp" size={30} color="#ffc04d" />
+          </TouchableOpacity>
         </View>
       </View>
 
