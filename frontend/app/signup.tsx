@@ -182,6 +182,19 @@ export default function Signup() {
       alignItems: "center",
       marginTop: 50,
     },
+    validationContainer: {
+      marginBottom: 10,
+    },
+    validationText: {
+      fontSize: 16, // Match input font size
+      marginVertical: 2,
+    },
+    valid: {
+      color: "green",
+    },
+    invalid: {
+      color: "red",
+    },
   });
 
   return (
