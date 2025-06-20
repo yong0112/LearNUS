@@ -244,7 +244,7 @@ export default function Signup() {
             placeholderTextColor={text}
             style={styles.input}
           />
-          
+
           <View style={styles.validationContainer}>
             <Text
               style={[
@@ -276,7 +276,7 @@ export default function Signup() {
           <TouchableOpacity style={styles.button} onPress={handleSignup}>
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>
-          
+
           <View
             style={{
               flexDirection: "row",
