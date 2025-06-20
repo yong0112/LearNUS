@@ -16,10 +16,10 @@ export default function Chat() {
     header: {
       fontSize: 30,
       fontWeight: "600",
-      color: text
+      color: text,
     },
   });
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Chat</Text>

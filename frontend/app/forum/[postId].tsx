@@ -277,7 +277,7 @@ export default function ForumPostDetails() {
       borderTopWidth: 1,
       borderTopColor: "#ccc",
       alignItems: "center",
-      borderRadius: 10
+      borderRadius: 10,
     },
   });
 
@@ -291,171 +291,215 @@ export default function ForumPostDetails() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.background} />
-      <View style={styles.header}>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color={text}
-          onPress={() => router.push("/(tabs)/forum")}
-        />
-        <Text style={styles.headerText}>Post Details</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.background} />
+        <View style={styles.header}>
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={text}
+            onPress={() => router.push("/(tabs)/forum")}
+          />
+          <Text style={styles.headerText}>Post Details</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      {/* Post and Comments */}
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Post */}
-        <View style={styles.postCard}>
-          {/* User Info */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Image
-              source={
-                userProfiles[post.author]?.profilePicture
-                  ? { uri: userProfiles[post.author]?.profilePicture }
-                  : require("../../assets/images/defaultProfile.jpg")
-              }
-              style={styles.profilePicture}
-            />
-            <Text style={{ fontSize: 16, fontWeight: "600", marginLeft: 8, color: text }}>
-              {userProfiles[post.author]?.firstName}
-            </Text>
-          </View>
-
-          {/* Title and Course Tag */}
-          <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>{post.title}</Text>
-          {post.courseTag && (
-            <Text style={{ fontSize: 16, color: "#888888", marginVertical: 8 }}>
-              {post.courseTag}
-            </Text>
-          )}
-
-          {/* Content */}
-          <Text style={{ fontSize: 18, color: isDarkMode ? "#999999" : "#888888", marginVertical: 8 }}>
-            {post.content}
-          </Text>
-
-          {/* Timestamp */}
-          <Text style={{ fontSize: 14, color: isDarkMode ? "#999999" : "#888888" }}>
-            {formatTimestamp(post.createdAt)}
-          </Text>
-
-          {/* Action Buttons */}
-          <View
-            style={{ flexDirection: "row", alignItems: "center", marginTop: 8 }}
-          >
-            <TouchableOpacity
+        {/* Post and Comments */}
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          {/* Post */}
+          <View style={styles.postCard}>
+            {/* User Info */}
+            <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginRight: 16,
+                marginBottom: 8,
               }}
-              onPress={handlePostUpvote}
             >
-              <MaterialCommunityIcons
-                name={
-                  postUpvoteStatus?.hasUpvoted ? "thumb-up" : "thumb-up-outline"
+              <Image
+                source={
+                  userProfiles[post.author]?.profilePicture
+                    ? { uri: userProfiles[post.author]?.profilePicture }
+                    : require("../../assets/images/defaultProfile.jpg")
                 }
-                size={20}
-                color="#ffc04d"
+                style={styles.profilePicture}
               />
-              <Text style={{ marginLeft: 4, color: text }}>
-                {postUpvoteStatus?.upvoteCount || post.upvoteCount}
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  marginLeft: 8,
+                  color: text,
+                }}
+              >
+                {userProfiles[post.author]?.firstName}
               </Text>
-            </TouchableOpacity>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons name="chatbubble-outline" size={20} color="#ffc04d" />
-              <Text style={{ marginLeft: 4, color: text }}>{comments.length}</Text>
             </View>
-          </View>
-        </View>
 
-        {/* Comments */}
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            marginTop: 16,
-            marginBottom: 8,
-            color: text
-          }}
-        >
-          Comments
-        </Text>
-        {comments.length === 0 ? (
-          <Text style={{ fontSize: 18, color: "#888888" }}>
-            No comments yet.
-          </Text>
-        ) : (
-          comments.map((comment) => (
-            <View key={comment.id} style={styles.commentCard}>
-              <View
+            {/* Title and Course Tag */}
+            <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>
+              {post.title}
+            </Text>
+            {post.courseTag && (
+              <Text
+                style={{ fontSize: 16, color: "#888888", marginVertical: 8 }}
+              >
+                {post.courseTag}
+              </Text>
+            )}
+
+            {/* Content */}
+            <Text
+              style={{
+                fontSize: 18,
+                color: isDarkMode ? "#999999" : "#888888",
+                marginVertical: 8,
+              }}
+            >
+              {post.content}
+            </Text>
+
+            {/* Timestamp */}
+            <Text
+              style={{
+                fontSize: 14,
+                color: isDarkMode ? "#999999" : "#888888",
+              }}
+            >
+              {formatTimestamp(post.createdAt)}
+            </Text>
+
+            {/* Action Buttons */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 8,
+              }}
+            >
+              <TouchableOpacity
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  marginBottom: 8,
-                  backgroundColor: isDarkMode ? "#999999" : "white"
+                  marginRight: 16,
                 }}
-              >
-                <Image
-                  source={
-                    userProfiles[comment.author]?.profilePicture
-                      ? { uri: userProfiles[comment.author]?.profilePicture }
-                      : require("../../assets/images/defaultProfile.jpg")
-                  }
-                  style={styles.profilePicture}
-                />
-                <Text
-                  style={{ fontSize: 16, fontWeight: "600", marginLeft: 8 }}
-                >
-                  {userProfiles[comment.author]?.firstName}
-                </Text>
-              </View>
-              <Text style={{ fontSize: 16, color: isDarkMode ? "#222222" : "#888888", marginBottom: 8 }}>
-                {comment.content}
-              </Text>
-              <Text style={{ fontSize: 14, color: isDarkMode ? "#222222" : "#888888", marginBottom: 8 }}>
-                {formatTimestamp(comment.createdAt)}
-              </Text>
-              <TouchableOpacity
-                style={{ flexDirection: "row", alignItems: "center" }}
-                onPress={() => handleCommentUpvote(comment.id)}
+                onPress={handlePostUpvote}
               >
                 <MaterialCommunityIcons
                   name={
-                    commentUpvoteStatuses[comment.id]?.hasUpvoted
+                    postUpvoteStatus?.hasUpvoted
                       ? "thumb-up"
                       : "thumb-up-outline"
                   }
                   size={20}
                   color="#ffc04d"
                 />
-                <Text style={{ marginLeft: 4 }}>
-                  {commentUpvoteStatuses[comment.id]?.upvoteCount ||
-                    comment.upvoteCount}
+                <Text style={{ marginLeft: 4, color: text }}>
+                  {postUpvoteStatus?.upvoteCount || post.upvoteCount}
                 </Text>
               </TouchableOpacity>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Ionicons name="chatbubble-outline" size={20} color="#ffc04d" />
+                <Text style={{ marginLeft: 4, color: text }}>
+                  {comments.length}
+                </Text>
+              </View>
             </View>
-          ))
-        )}
-      </ScrollView>
+          </View>
 
-      {/* Comment Input Bar */}
-      <TouchableOpacity
-        style={styles.commentBar}
-        onPress={() => router.push(`../forum/${postId}/comment`)}
-      >
-        <Text style={{ fontSize: 16, color: "#888888" }}>Add your comment</Text>
-      </TouchableOpacity>
-    </View>
+          {/* Comments */}
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "bold",
+              marginTop: 16,
+              marginBottom: 8,
+              color: text,
+            }}
+          >
+            Comments
+          </Text>
+          {comments.length === 0 ? (
+            <Text style={{ fontSize: 18, color: "#888888" }}>
+              No comments yet.
+            </Text>
+          ) : (
+            comments.map((comment) => (
+              <View key={comment.id} style={styles.commentCard}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 8,
+                    backgroundColor: isDarkMode ? "#999999" : "white",
+                  }}
+                >
+                  <Image
+                    source={
+                      userProfiles[comment.author]?.profilePicture
+                        ? { uri: userProfiles[comment.author]?.profilePicture }
+                        : require("../../assets/images/defaultProfile.jpg")
+                    }
+                    style={styles.profilePicture}
+                  />
+                  <Text
+                    style={{ fontSize: 16, fontWeight: "600", marginLeft: 8 }}
+                  >
+                    {userProfiles[comment.author]?.firstName}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: isDarkMode ? "#222222" : "#888888",
+                    marginBottom: 8,
+                  }}
+                >
+                  {comment.content}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: isDarkMode ? "#222222" : "#888888",
+                    marginBottom: 8,
+                  }}
+                >
+                  {formatTimestamp(comment.createdAt)}
+                </Text>
+                <TouchableOpacity
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                  onPress={() => handleCommentUpvote(comment.id)}
+                >
+                  <MaterialCommunityIcons
+                    name={
+                      commentUpvoteStatuses[comment.id]?.hasUpvoted
+                        ? "thumb-up"
+                        : "thumb-up-outline"
+                    }
+                    size={20}
+                    color="#ffc04d"
+                  />
+                  <Text style={{ marginLeft: 4 }}>
+                    {commentUpvoteStatuses[comment.id]?.upvoteCount ||
+                      comment.upvoteCount}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
+        </ScrollView>
+
+        {/* Comment Input Bar */}
+        <TouchableOpacity
+          style={styles.commentBar}
+          onPress={() => router.push(`../forum/${postId}/comment`)}
+        >
+          <Text style={{ fontSize: 16, color: "#888888" }}>
+            Add your comment
+          </Text>
+        </TouchableOpacity>
+      </View>
     </ThemedView>
   );
 }

@@ -20,7 +20,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  useColorScheme
+  useColorScheme,
 } from "react-native";
 import { db, auth } from "../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -103,16 +103,21 @@ export default function Login() {
       fontWeight: "bold",
       marginBottom: 50,
       textAlign: "center",
-      color: text
+      color: text,
     },
     headings: {
       fontSize: 24,
       fontWeight: "bold",
       marginBottom: 8,
       textAlign: "center",
-      color: text
+      color: text,
     },
-    subheadings: { fontSize: 15, marginBottom: 20, textAlign: "center", color: text },
+    subheadings: {
+      fontSize: 15,
+      marginBottom: 20,
+      textAlign: "center",
+      color: text,
+    },
     input: {
       borderWidth: 1,
       borderColor: "#ccc",
@@ -120,7 +125,7 @@ export default function Login() {
       marginVertical: 10,
       borderRadius: 5,
       opacity: 0.5,
-      color: text
+      color: text,
     },
     button: {
       justifyContent: "center",
@@ -128,13 +133,13 @@ export default function Login() {
       paddingVertical: 8,
       borderRadius: 5,
       backgroundColor: "orange",
-      marginTop: 5
+      marginTop: 5,
     },
     buttonText: {
       fontSize: 17,
       fontWeight: "bold",
       textAlign: "center",
-      color: "#ffffff"
+      color: "#ffffff",
     },
     dividerText: { marginHorizontal: 10, color: "#666", textAlign: "center" },
     signUpLink: {
@@ -155,7 +160,7 @@ export default function Login() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
-        style={{ flex: 1, padding: 20, backgroundColor: bg}}
+        style={{ flex: 1, padding: 20, backgroundColor: bg }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         enabled

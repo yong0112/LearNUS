@@ -171,7 +171,7 @@ export default function BookingPage() {
       alignSelf: "center",
       marginTop: 8,
       marginBottom: 10,
-      color: text
+      color: text,
     },
     searchBar: {
       borderRadius: 20,
@@ -190,7 +190,7 @@ export default function BookingPage() {
       fontSize: 20,
       fontWeight: "bold",
       marginBottom: 3,
-      color: text
+      color: text,
     },
     contentText: {
       fontSize: 16,
@@ -220,141 +220,145 @@ export default function BookingPage() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color={text}
-          onPress={() => router.push("/tutor_find")}
-        />
-        <Text style={styles.headerText}>Session Booking</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View
-        style={{
-          justifyContent: "flex-start",
-          flexDirection: "column",
-          paddingTop: 20,
-          paddingHorizontal: 10,
-        }}
-      >
-        <View style={{ flexDirection: "column" }}>
-          <Image
-            source={{ uri: tutorProfile?.profilePicture }}
-            style={styles.avatar}
+      <View style={styles.container}>
+        <View style={styles.background} />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={text}
+            onPress={() => router.push("/tutor_find")}
           />
-          <Text style={styles.name}>
-            {tutorProfile?.firstName} {tutorProfile?.lastName}
-          </Text>
+          <Text style={styles.headerText}>Session Booking</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        <View style={{ marginHorizontal: 10 }}>
-          <Text style={{ fontSize: 18, color: "#888888", fontWeight: "bold" }}>
-            About the lesson
-          </Text>
-          <Text style={{ fontSize: 18, color: "#888888" }}>{description}</Text>
-        </View>
-
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.titleText}>Course Code</Text>
-          <View style={styles.searchBar}>
-            <MaterialIcons name="subject" size={25} color={"#ffc04d"} />
-            <Text style={styles.textStyle}>{course}</Text>
+        <View
+          style={{
+            justifyContent: "flex-start",
+            flexDirection: "column",
+            paddingTop: 20,
+            paddingHorizontal: 10,
+          }}
+        >
+          <View style={{ flexDirection: "column" }}>
+            <Image
+              source={{ uri: tutorProfile?.profilePicture }}
+              style={styles.avatar}
+            />
+            <Text style={styles.name}>
+              {tutorProfile?.firstName} {tutorProfile?.lastName}
+            </Text>
           </View>
-        </View>
 
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.titleText}>Day and Time</Text>
-          <Text style={styles.contentText}>
-            *Choose only time slots when tutors are available
-          </Text>
-          <Text style={styles.contentText}>{availability}</Text>
-          <View style={styles.searchBar}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.textStyle}
-              selectedTextStyle={styles.textStyle}
-              data={dayOptions}
-              maxHeight={200}
-              labelField="label"
-              valueField="value"
-              placeholder={"Select a day"}
-              value={date}
-              onChange={(item) => {
-                setDate(item.value);
+          <View style={{ marginHorizontal: 10 }}>
+            <Text
+              style={{ fontSize: 18, color: "#888888", fontWeight: "bold" }}
+            >
+              About the lesson
+            </Text>
+            <Text style={{ fontSize: 18, color: "#888888" }}>
+              {description}
+            </Text>
+          </View>
+
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.titleText}>Course Code</Text>
+            <View style={styles.searchBar}>
+              <MaterialIcons name="subject" size={25} color={"#ffc04d"} />
+              <Text style={styles.textStyle}>{course}</Text>
+            </View>
+          </View>
+
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.titleText}>Day and Time</Text>
+            <Text style={styles.contentText}>
+              *Choose only time slots when tutors are available
+            </Text>
+            <Text style={styles.contentText}>{availability}</Text>
+            <View style={styles.searchBar}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.textStyle}
+                selectedTextStyle={styles.textStyle}
+                data={dayOptions}
+                maxHeight={200}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select a day"}
+                value={date}
+                onChange={(item) => {
+                  setDate(item.value);
+                }}
+                renderLeftIcon={() => (
+                  <Fontisto color={"#ffc04d"} name="date" size={20} />
+                )}
+                search
+                searchPlaceholder="Select a day"
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                paddingHorizontal: 10,
+                marginTop: 10,
+                justifyContent: "center",
+                alignItems: "center",
               }}
-              renderLeftIcon={() => (
-                <Fontisto color={"#ffc04d"} name="date" size={20} />
+            >
+              <Button
+                title={`Start: ${startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                onPress={() => setShowStart(true)}
+                color={"#ffb347"}
+              />
+              {showStart && (
+                <DateTimePicker
+                  mode="time"
+                  value={startTime}
+                  onChange={(_, selected) => {
+                    setShowStart(false);
+                    if (selected) setStartTime(selected);
+                  }}
+                />
               )}
-              search
-              searchPlaceholder="Select a day"
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              paddingHorizontal: 10,
-              marginTop: 10,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Button
-              title={`Start: ${startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
-              onPress={() => setShowStart(true)}
-              color={"#ffb347"}
-            />
-            {showStart && (
-              <DateTimePicker
-                mode="time"
-                value={startTime}
-                onChange={(_, selected) => {
-                  setShowStart(false);
-                  if (selected) setStartTime(selected);
-                }}
+              <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>-</Text>
+              <Button
+                title={`End: ${endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                onPress={() => setShowEnd(true)}
+                color={"#ffb347"}
               />
-            )}
-            <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>-</Text>
-            <Button
-              title={`End: ${endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
-              onPress={() => setShowEnd(true)}
-              color={"#ffb347"}
-            />
-            {showEnd && (
-              <DateTimePicker
-                mode="time"
-                value={endTime}
-                onChange={(_, selected) => {
-                  setShowEnd(false);
-                  if (selected) setEndTime(selected);
-                }}
-              />
-            )}
+              {showEnd && (
+                <DateTimePicker
+                  mode="time"
+                  value={endTime}
+                  onChange={(_, selected) => {
+                    setShowEnd(false);
+                    if (selected) setEndTime(selected);
+                  }}
+                />
+              )}
+            </View>
           </View>
-        </View>
 
-        <View style={{ paddingHorizontal: 5, paddingVertical: 15 }}>
-          <Text style={styles.titleText}>Rate</Text>
-          <View style={styles.searchBar}>
-            <FontAwesome name="dollar" size={25} color={"#ffc04d"} />
-            <Text style={styles.textStyle}>{rate}</Text>
+          <View style={{ paddingHorizontal: 5, paddingVertical: 15 }}>
+            <Text style={styles.titleText}>Rate</Text>
+            <View style={styles.searchBar}>
+              <FontAwesome name="dollar" size={25} color={"#ffc04d"} />
+              <Text style={styles.textStyle}>{rate}</Text>
+            </View>
           </View>
-        </View>
 
-        <TouchableOpacity style={styles.bookButton} onPress={handleBooking}>
-          <Text style={styles.buttonText}>Book!</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.bookButton} onPress={handleBooking}>
+            <Text style={styles.buttonText}>Book!</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
     </ThemedView>
   );
 }

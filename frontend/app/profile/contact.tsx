@@ -74,7 +74,14 @@ export default function contact() {
         </View>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Entypo name="old-phone" size={30} color={"orange"} />
-          <Text style={{ fontSize: 18, fontWeight: "500", marginLeft: 10, color: text }}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "500",
+              marginLeft: 10,
+              color: text,
+            }}
+          >
             +65 9019 1786
           </Text>
         </View>

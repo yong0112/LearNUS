@@ -162,13 +162,13 @@ export default function TutorPost() {
       fontWeight: "bold",
       alignItems: "center",
       justifyContent: "center",
-      color: text
+      color: text,
     },
     title: {
-      fontSize: 20, 
-      fontWeight: "bold", 
+      fontSize: 20,
+      fontWeight: "bold",
       marginBottom: 5,
-      color: text
+      color: text,
     },
     searchBar: {
       borderRadius: 20,
@@ -210,144 +210,134 @@ export default function TutorPost() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color={isDarkMode ? "white" : "orange"}
-          onPress={() => router.push("/(tabs)/home")}
-        />
-        <Text style={styles.headerText}>Tutor Posting</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <View style={styles.container}>
+        <View style={styles.background} />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={isDarkMode ? "white" : "orange"}
+            onPress={() => router.push("/(tabs)/home")}
+          />
+          <Text style={styles.headerText}>Tutor Posting</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      <View
-        style={{
-          justifyContent: "flex-start",
-          flexDirection: "column",
-          paddingTop: 20,
-          paddingHorizontal: 10,
-        }}
-      >
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>
-            Course Code
-          </Text>
-          <View style={styles.searchBar}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={courseOptions}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={"Select a course"}
-              value={selectedCourse}
-              onChange={(item) => {
-                setSelectedCourse(item.value);
-              }}
-              renderLeftIcon={() => (
-                <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
-              )}
-              search
-              searchPlaceholder="Search course"
-            />
+        <View
+          style={{
+            justifyContent: "flex-start",
+            flexDirection: "column",
+            paddingTop: 20,
+            paddingHorizontal: 10,
+          }}
+        >
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>Course Code</Text>
+            <View style={styles.searchBar}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                data={courseOptions}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select a course"}
+                value={selectedCourse}
+                onChange={(item) => {
+                  setSelectedCourse(item.value);
+                }}
+                renderLeftIcon={() => (
+                  <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+                )}
+                search
+                searchPlaceholder="Search course"
+              />
+            </View>
           </View>
-        </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>
-            Location
-          </Text>
-          <View style={styles.searchBar}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={locationOptions}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={"Physical / Online"}
-              value={selectedLocation}
-              onChange={(item) => {
-                setSelectedLocation(item.value);
-              }}
-              renderLeftIcon={() => (
-                <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
-              )}
-            />
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>Location</Text>
+            <View style={styles.searchBar}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                data={locationOptions}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Physical / Online"}
+                value={selectedLocation}
+                onChange={(item) => {
+                  setSelectedLocation(item.value);
+                }}
+                renderLeftIcon={() => (
+                  <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+                )}
+              />
+            </View>
           </View>
-        </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>
-            About the lesson
-          </Text>
-          <View style={styles.searchBar}>
-            <MaterialIcons name="keyboard" size={25} color="orange" />
-            <TextInput
-              style={{
-                color: "#222222",
-                fontSize: 17,
-                marginLeft: 10,
-                flex: 1,
-              }}
-              placeholder="Brief description about the lesson..."
-              placeholderTextColor="#888888"
-              onChangeText={setDescription}
-            />
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>About the lesson</Text>
+            <View style={styles.searchBar}>
+              <MaterialIcons name="keyboard" size={25} color="orange" />
+              <TextInput
+                style={{
+                  color: "#222222",
+                  fontSize: 17,
+                  marginLeft: 10,
+                  flex: 1,
+                }}
+                placeholder="Brief description about the lesson..."
+                placeholderTextColor="#888888"
+                onChangeText={setDescription}
+              />
+            </View>
           </View>
-        </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>
-            Availability, eg.(Monday 7-9pm)
-          </Text>
-          <View style={styles.searchBar}>
-            <MaterialIcons name="keyboard" size={25} color="orange" />
-            <TextInput
-              style={{
-                color: "#222222",
-                fontSize: 17,
-                marginLeft: 10,
-                flex: 1,
-              }}
-              placeholder="Time slots"
-              placeholderTextColor="#888888"
-              onChangeText={setAvailability}
-            />
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>Availability, eg.(Monday 7-9pm)</Text>
+            <View style={styles.searchBar}>
+              <MaterialIcons name="keyboard" size={25} color="orange" />
+              <TextInput
+                style={{
+                  color: "#222222",
+                  fontSize: 17,
+                  marginLeft: 10,
+                  flex: 1,
+                }}
+                placeholder="Time slots"
+                placeholderTextColor="#888888"
+                onChangeText={setAvailability}
+              />
+            </View>
           </View>
-        </View>
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>
-            Hourly Rate
-          </Text>
-          <View style={styles.searchBar}>
-            <FontAwesome name="dollar" size={25} color="orange" />
-            <TextInput
-              style={{ color: "#222222", fontSize: 17, marginLeft: 10 }}
-              keyboardType="numeric"
-              placeholder="Singapore dollar"
-              placeholderTextColor="#888888"
-              onChangeText={(text) => {
-                const num = parseFloat(text);
-                setRate(isNaN(num) ? undefined : num);
-              }}
-            />
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>Hourly Rate</Text>
+            <View style={styles.searchBar}>
+              <FontAwesome name="dollar" size={25} color="orange" />
+              <TextInput
+                style={{ color: "#222222", fontSize: 17, marginLeft: 10 }}
+                keyboardType="numeric"
+                placeholder="Singapore dollar"
+                placeholderTextColor="#888888"
+                onChangeText={(text) => {
+                  const num = parseFloat(text);
+                  setRate(isNaN(num) ? undefined : num);
+                }}
+              />
+            </View>
           </View>
+          <TouchableOpacity style={styles.postButton} onPress={handlePosting}>
+            <Text style={styles.buttonText}>Post!</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.postButton} onPress={handlePosting}>
-          <Text style={styles.buttonText}>Post!</Text>
-        </TouchableOpacity>
       </View>
-    </View>
     </ThemedView>
   );
 }
