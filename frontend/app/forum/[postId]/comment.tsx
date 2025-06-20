@@ -1,3 +1,5 @@
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth, db } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -8,6 +10,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -27,6 +30,10 @@ export default function Comment() {
   const [commentContent, setCommentContent] = useState("");
   const [charCount, setCharCount] = useState(0);
   const [authorName, setAuthorName] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   const BASE_URL = "https://learnus.onrender.com";
   const MAX_COMMENT_LENGTH = 500;
@@ -107,90 +114,94 @@ export default function Comment() {
     setCharCount(text.length);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    headerText: {
+      fontSize: 24,
+      fontWeight: "600",
+      color: text,
+    },
+    postButtonText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: "orange",
+    },
+    postTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginVertical: 16,
+      color: text,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: "#ccc",
+      marginBottom: 16,
+    },
+    commentInput: {
+      flex: 1,
+      borderRadius: 10,
+      backgroundColor: "#d1d5db",
+      padding: 16,
+      fontSize: 16,
+      color: "#222",
+      textAlignVertical: "top",
+    },
+    charCount: {
+      fontSize: 14,
+      color: "#888",
+      textAlign: "right",
+      marginTop: 8,
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Ionicons
-          name="arrow-back"
-          size={30}
-          color="orange"
-          onPress={() => router.push(`../../forum/${postId}`)}
+    <ThemedView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Ionicons
+            name="arrow-back"
+            size={30}
+            color="orange"
+            onPress={() => router.push(`../../forum/${postId}`)}
+          />
+          <Text style={styles.headerText}>Add comment</Text>
+          <TouchableOpacity onPress={handlePostComment}>
+            <Text style={styles.postButtonText}>Post</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Post Title */}
+        {post && <Text style={styles.postTitle}>{post.title}</Text>}
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Comment Input */}
+        <TextInput
+          style={styles.commentInput}
+          placeholder="Write your comment here..."
+          placeholderTextColor="#888"
+          multiline
+          value={commentContent}
+          onChangeText={handleCommentChange}
+          maxLength={MAX_COMMENT_LENGTH}
         />
-        <Text style={styles.headerText}>Add comment</Text>
-        <TouchableOpacity onPress={handlePostComment}>
-          <Text style={styles.postButtonText}>Post</Text>
-        </TouchableOpacity>
+
+        {/* Character Count */}
+        <Text style={styles.charCount}>
+          {charCount}/{MAX_COMMENT_LENGTH}
+        </Text>
       </View>
-
-      {/* Post Title */}
-      {post && <Text style={styles.postTitle}>{post.title}</Text>}
-
-      {/* Divider */}
-      <View style={styles.divider} />
-
-      {/* Comment Input */}
-      <TextInput
-        style={styles.commentInput}
-        placeholder="Write your comment here..."
-        placeholderTextColor="#888"
-        multiline
-        value={commentContent}
-        onChangeText={handleCommentChange}
-        maxLength={MAX_COMMENT_LENGTH}
-      />
-
-      {/* Character Count */}
-      <Text style={styles.charCount}>
-        {charCount}/{MAX_COMMENT_LENGTH}
-      </Text>
-    </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "600",
-  },
-  postButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "orange",
-  },
-  postTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginVertical: 16,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#ccc",
-    marginBottom: 16,
-  },
-  commentInput: {
-    flex: 1,
-    borderRadius: 10,
-    backgroundColor: "#d1d5db",
-    padding: 16,
-    fontSize: 16,
-    color: "#222",
-    textAlignVertical: "top",
-  },
-  charCount: {
-    fontSize: 14,
-    color: "#888",
-    textAlign: "right",
-    marginTop: 8,
-  },
-});

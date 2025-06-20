@@ -1,10 +1,49 @@
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 export default function achievements() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 10000,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "black",
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: "bold",
+      alignSelf: "center",
+      marginBottom: 10,
+      color: text,
+    },
+    subtitle: {
+      fontSize: 20,
+      fontWeight: "500",
+      alignSelf: "center",
+      color: text,
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -38,35 +77,3 @@ export default function achievements() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 10000,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    alignSelf: "center",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "500",
-    alignSelf: "center",
-  },
-});
