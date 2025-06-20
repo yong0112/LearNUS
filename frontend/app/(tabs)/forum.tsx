@@ -246,7 +246,7 @@ export default function Forum() {
   // Handle search
   const handleSearch = () => {
     setSearchText(seraching);
-  }
+  };
 
   // Handle filter button toggle
   const handleFilterToggle = () => {
@@ -276,7 +276,12 @@ export default function Forum() {
       {/* Search Bar */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <View style={styles.searchBar}>
-          <TouchableOpacity onPress={() => {setSearchText(""); setSearching("");}}>
+          <TouchableOpacity
+            onPress={() => {
+              setSearchText("");
+              setSearching("");
+            }}
+          >
             <Entypo name="cross" size={25} color="#444444" />
           </TouchableOpacity>
           <TextInput
