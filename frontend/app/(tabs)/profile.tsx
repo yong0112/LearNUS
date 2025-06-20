@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import {
@@ -18,11 +19,17 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { auth } from "../../lib/firebase";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function Profile() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
   const [error, setError] = useState(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -78,7 +85,80 @@ export default function Profile() {
     { label: "Contact Us", route: "../profile/contact" },
   ];
 
+  const styles = StyleSheet.create({
+    container: {
+      paddingVertical: 40,
+    },
+    circleBackground: {
+      position: "absolute",
+      top: -450,
+      left: -150,
+      width: 700,
+      height: 650,
+      borderRadius: 300,
+      backgroundColor: "#FF8C00", // dark orange
+      zIndex: -1,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingBottom: 10,
+      flex: 1,
+      paddingTop: 10,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: isDarkMode ? "white" : "black",
+    },
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      alignSelf: "center",
+      marginTop: 20,
+    },
+    name: {
+      fontSize: 30,
+      fontWeight: "600",
+      alignSelf: "center",
+      marginTop: 8,
+      marginBottom: 10,
+      color: text
+    },
+    menu: {
+      marginTop: 20,
+    },
+    menuItem: {
+      backgroundColor: isDarkMode ? "#222222" : "#f2f2f2",
+      padding: 10,
+      borderRadius: 10,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    menuText: {
+      fontSize: 20,
+      fontWeight: "500",
+      color: text
+    },
+    arrow: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: "#888",
+    },
+    divider: {
+      height: 1,
+      backgroundColor: "#ccc",
+      marginVertical: 5,
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.circleBackground} />
 
@@ -133,75 +213,6 @@ export default function Profile() {
         ))}
       </View>
     </ScrollView>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 40,
-  },
-  circleBackground: {
-    position: "absolute",
-    top: -450,
-    left: -150,
-    width: 700,
-    height: 650,
-    borderRadius: 300,
-    backgroundColor: "#FF8C00", // dark orange
-    zIndex: -1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingBottom: 10,
-    flex: 1,
-    paddingTop: 10,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "white",
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: "center",
-    marginTop: 20,
-  },
-  name: {
-    fontSize: 30,
-    fontWeight: "600",
-    alignSelf: "center",
-    marginTop: 8,
-    marginBottom: 10,
-  },
-  menu: {
-    marginTop: 20,
-  },
-  menuItem: {
-    backgroundColor: "#f2f2f2",
-    padding: 10,
-    borderRadius: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  menuText: {
-    fontSize: 20,
-    fontWeight: "500",
-  },
-  arrow: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#888",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#ccc",
-    marginVertical: 5,
-  },
-});

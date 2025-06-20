@@ -1,3 +1,5 @@
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -8,6 +10,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
@@ -31,6 +34,10 @@ export default function TutorPost() {
   const [description, setDescription] = useState("");
   const [availability, setAvailability] = useState("");
   const [rate, setRate] = useState<number>();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -134,7 +141,75 @@ export default function TutorPost() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+      justifyContent: "flex-start",
+    },
+    background: {
+      position: "absolute",
+      top: -450,
+      left: -150,
+      width: 700,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: text
+    },
+    title: {
+      fontSize: 20, 
+      fontWeight: "bold", 
+      marginBottom: 5,
+      color: text
+    },
+    searchBar: {
+      borderRadius: 20,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: 8,
+    },
+    dropdown: {
+      height: 50,
+      flex: 1,
+      paddingRight: 8,
+    },
+    placeholderStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#888888",
+    },
+    selectedTextStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#222222",
+    },
+    postButton: {
+      marginTop: 20,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "orange",
+    },
+    buttonText: {
+      marginHorizontal: 4,
+      fontSize: 28,
+      fontWeight: "600",
+      marginBottom: 2,
+      color: "white",
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       <View style={styles.background} />
       <View
@@ -147,7 +222,7 @@ export default function TutorPost() {
         <Ionicons
           name="arrow-back-circle"
           size={40}
-          color="white"
+          color={isDarkMode ? "white" : "orange"}
           onPress={() => router.push("/(tabs)/home")}
         />
         <Text style={styles.headerText}>Tutor Posting</Text>
@@ -163,7 +238,7 @@ export default function TutorPost() {
         }}
       >
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
+          <Text style={styles.title}>
             Course Code
           </Text>
           <View style={styles.searchBar}>
@@ -189,7 +264,7 @@ export default function TutorPost() {
           </View>
         </View>
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
+          <Text style={styles.title}>
             Location
           </Text>
           <View style={styles.searchBar}>
@@ -213,7 +288,7 @@ export default function TutorPost() {
           </View>
         </View>
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
+          <Text style={styles.title}>
             About the lesson
           </Text>
           <View style={styles.searchBar}>
@@ -232,7 +307,7 @@ export default function TutorPost() {
           </View>
         </View>
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
+          <Text style={styles.title}>
             Availability, eg.(Monday 7-9pm)
           </Text>
           <View style={styles.searchBar}>
@@ -251,7 +326,7 @@ export default function TutorPost() {
           </View>
         </View>
         <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 5 }}>
+          <Text style={styles.title}>
             Hourly Rate
           </Text>
           <View style={styles.searchBar}>
@@ -273,76 +348,6 @@ export default function TutorPost() {
         </TouchableOpacity>
       </View>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    justifyContent: "flex-start",
-  },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 700,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-  searchBar: {
-    borderRadius: 20,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 8,
-  },
-  label: {
-    position: "absolute",
-    backgroundColor: "#f5f5f5",
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
-  },
-  dropdown: {
-    height: 50,
-    flex: 1,
-    paddingRight: 8,
-  },
-  placeholderStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#888888",
-  },
-  selectedTextStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#222222",
-  },
-  postButton: {
-    marginTop: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "orange",
-  },
-  buttonText: {
-    marginHorizontal: 4,
-    fontSize: 28,
-    fontWeight: "600",
-    marginBottom: 2,
-    color: "white",
-  },
-});

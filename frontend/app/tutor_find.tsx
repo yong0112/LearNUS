@@ -1,3 +1,5 @@
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import {
   AntDesign,
@@ -18,6 +20,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import {
@@ -42,6 +45,10 @@ export default function tutoring() {
   const [selectedTutor, setSelectedTutor] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   const displayedTutors = filteredTutors.filter(
     (tutor: {
@@ -244,10 +251,106 @@ export default function tutoring() {
     Alert.alert("Sorry, feature under development");
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 10,
+      justifyContent: "flex-start",
+    },
+    searchBar: {
+      flex: 1,
+      paddingHorizontal: 10,
+      borderRadius: 20,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      marginLeft: 8,
+      justifyContent: "space-between"
+    },
+    filterButton: {
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 6,
+    },
+    filterSelectedButton: {
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 6,
+      backgroundColor: "orange",
+    },
+    buttonText: {
+      marginHorizontal: 4,
+      fontSize: 14,
+      fontWeight: "400",
+      marginBottom: 2,
+      color: text
+    },
+    buttonSelectedText: {
+      marginHorizontal: 4,
+      fontSize: 14,
+      fontWeight: "400",
+      marginBottom: 2,
+      color: "white",
+    },
+    tutorCard: {
+      marginBottom: 20,
+      flexDirection: "column",
+      borderBottomWidth: 2,
+      borderBottomColor: "gray",
+    },
+    image: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+      paddingBottom: 10,
+      paddingHorizontal: 5,
+      borderBottomWidth: 2,
+      borderBottomColor: "#444444",
+      height: 150,
+    },
+    modalOverlay: {
+      padding: 20,
+      alignItems: "center",
+      flex: 1,
+    },
+    modalContent: {
+      width: "97%",
+      height: screenHeight * 0.95,
+      backgroundColor: isDarkMode ? "#999999" : "white",
+      borderRadius: 20,
+      padding: 15,
+      alignItems: "flex-start",
+      overflow: "hidden",
+      elevation: 10,
+      shadowColor: "#000",
+      shadowOpacity: 0.8,
+      shadowOffset: { width: 0, height: 4 },
+      shadowRadius: 8,
+      alignSelf: "center",
+    },
+    modalImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 50,
+      alignSelf: "center",
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       {/*Search Bar*/}
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start" }}>
         <Ionicons
           name="arrow-back-circle"
           size={40}
@@ -287,14 +390,14 @@ export default function tutoring() {
           <MaterialCommunityIcons
             name="filter-outline"
             size={20}
-            color={"black"}
+            color={text}
           />
           <Text style={styles.buttonText}>Filter</Text>
         </TouchableOpacity>
 
         <Menu onSelect={handleSort}>
           <MenuTrigger style={styles.filterButton}>
-            <MaterialCommunityIcons name="sort" size={20} color="black" />
+            <MaterialCommunityIcons name="sort" size={20} color={text} />
             <Text style={styles.buttonText}>Sort</Text>
             <FontAwesome name="angle-down" size={20} color="#9ca3af" />
           </MenuTrigger>
@@ -325,7 +428,7 @@ export default function tutoring() {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {displayedTutors.length === 0 ? (
           <Text
-            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center" }}
+            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center", color: text }}
           >
             No tutors yet.
           </Text>
@@ -366,7 +469,7 @@ export default function tutoring() {
                       justifyContent: "space-between",
                     }}
                   >
-                    <Text style={{ fontSize: 24, fontWeight: "800" }}>
+                    <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>
                       {tutorProfile[tutor.tutor].firstName}
                     </Text>
                     <View
@@ -377,7 +480,7 @@ export default function tutoring() {
                       }}
                     >
                       <AntDesign name="star" size={20} color={"yellow"} />
-                      <Text style={{ fontSize: 24, fontWeight: "800" }}>
+                      <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>
                         {tutorProfile[tutor.tutor].ratings}
                       </Text>
                     </View>
@@ -459,7 +562,7 @@ export default function tutoring() {
                 >
                   {selectedTutor.course}
                 </Text>
-                <Text style={{ fontSize: 18, color: "#888888", marginTop: 10 }}>
+                <Text style={{ fontSize: 18, color: isDarkMode ? "#222222" : "#888888", marginTop: 10 }}>
                   {selectedTutor.description}
                 </Text>
                 <Text
@@ -467,7 +570,7 @@ export default function tutoring() {
                 >
                   Availability
                 </Text>
-                <Text style={{ fontSize: 18, color: "#888888", marginTop: 5 }}>
+                <Text style={{ fontSize: 18, color: isDarkMode ? "#222222" : "#888888", marginTop: 5 }}>
                   {selectedTutor.availability}
                 </Text>
                 <View
@@ -480,7 +583,7 @@ export default function tutoring() {
                 >
                   <View
                     style={{
-                      backgroundColor: "lightgray",
+                      backgroundColor: isDarkMode ? "#999999" : "white",
                       justifyContent: "center",
                       alignItems: "center",
                       width: 50,
@@ -509,7 +612,7 @@ export default function tutoring() {
                 >
                   <View
                     style={{
-                      backgroundColor: "#f0f0f0",
+                      backgroundColor: isDarkMode ? "#999999" : "white",
                       justifyContent: "center",
                       alignItems: "center",
                       width: 50,
@@ -583,98 +686,6 @@ export default function tutoring() {
         </View>
       </Modal>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 10,
-    justifyContent: "flex-start",
-  },
-  searchBar: {
-    flex: 1,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 8,
-  },
-  filterButton: {
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 6,
-  },
-  filterSelectedButton: {
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 6,
-    backgroundColor: "orange",
-  },
-  buttonText: {
-    marginHorizontal: 4,
-    fontSize: 14,
-    fontWeight: "400",
-    marginBottom: 2,
-  },
-  buttonSelectedText: {
-    marginHorizontal: 4,
-    fontSize: 14,
-    fontWeight: "400",
-    marginBottom: 2,
-    color: "white",
-  },
-  tutorCard: {
-    marginBottom: 20,
-    flexDirection: "column",
-    borderBottomWidth: 2,
-    borderBottomColor: "gray",
-  },
-  image: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    paddingBottom: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 2,
-    borderBottomColor: "#444444",
-    height: 150,
-  },
-  modalOverlay: {
-    padding: 20,
-    alignItems: "center",
-    flex: 1,
-  },
-  modalContent: {
-    width: "97%",
-    height: screenHeight * 0.95,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 15,
-    alignItems: "flex-start",
-    overflow: "hidden",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    alignSelf: "center",
-  },
-  modalImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 50,
-    alignSelf: "center",
-  },
-});

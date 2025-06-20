@@ -8,9 +8,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@/components/ThemedView";
 
 interface ForumPost {
   id: string;
@@ -56,6 +59,10 @@ export default function ForumPostDetails() {
     Record<string, UpvoteStatus>
   >({});
   const [error, setError] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   const BASE_URL = "https://learnus.onrender.com";
 
@@ -215,6 +222,65 @@ export default function ForumPostDetails() {
     ).toLocaleString();
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 10,
+    },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 700,
+      height: 650,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 10,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: text,
+    },
+    postCard: {
+      marginTop: 20,
+      marginBottom: 20,
+      flexDirection: "column",
+      borderBottomWidth: 2,
+      borderBottomColor: "gray",
+      paddingBottom: 10,
+    },
+    commentCard: {
+      marginBottom: 16,
+      padding: 10,
+      backgroundColor: isDarkMode ? "#999999" : "white",
+      borderRadius: 10,
+    },
+    profilePicture: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+    },
+    commentBar: {
+      position: "absolute",
+      bottom: 30,
+      left: 0,
+      right: 0,
+      backgroundColor: "#d1d5db",
+      padding: 16,
+      borderTopWidth: 1,
+      borderTopColor: "#ccc",
+      alignItems: "center",
+      borderRadius: 10
+    },
+  });
+
   if (!post) {
     return (
       <View style={styles.container}>
@@ -224,6 +290,7 @@ export default function ForumPostDetails() {
   }
 
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.background} />
@@ -231,7 +298,7 @@ export default function ForumPostDetails() {
         <Ionicons
           name="arrow-back-circle"
           size={40}
-          color="white"
+          color={text}
           onPress={() => router.push("/(tabs)/forum")}
         />
         <Text style={styles.headerText}>Post Details</Text>
@@ -258,13 +325,13 @@ export default function ForumPostDetails() {
               }
               style={styles.profilePicture}
             />
-            <Text style={{ fontSize: 16, fontWeight: "600", marginLeft: 8 }}>
+            <Text style={{ fontSize: 16, fontWeight: "600", marginLeft: 8, color: text }}>
               {userProfiles[post.author]?.firstName}
             </Text>
           </View>
 
           {/* Title and Course Tag */}
-          <Text style={{ fontSize: 24, fontWeight: "800" }}>{post.title}</Text>
+          <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>{post.title}</Text>
           {post.courseTag && (
             <Text style={{ fontSize: 16, color: "#888888", marginVertical: 8 }}>
               {post.courseTag}
@@ -272,12 +339,12 @@ export default function ForumPostDetails() {
           )}
 
           {/* Content */}
-          <Text style={{ fontSize: 18, color: "#888888", marginVertical: 8 }}>
+          <Text style={{ fontSize: 18, color: isDarkMode ? "#999999" : "#888888", marginVertical: 8 }}>
             {post.content}
           </Text>
 
           {/* Timestamp */}
-          <Text style={{ fontSize: 14, color: "#888888" }}>
+          <Text style={{ fontSize: 14, color: isDarkMode ? "#999999" : "#888888" }}>
             {formatTimestamp(post.createdAt)}
           </Text>
 
@@ -300,13 +367,13 @@ export default function ForumPostDetails() {
                 size={20}
                 color="#ffc04d"
               />
-              <Text style={{ marginLeft: 4 }}>
+              <Text style={{ marginLeft: 4, color: text }}>
                 {postUpvoteStatus?.upvoteCount || post.upvoteCount}
               </Text>
             </TouchableOpacity>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Ionicons name="chatbubble-outline" size={20} color="#ffc04d" />
-              <Text style={{ marginLeft: 4 }}>{comments.length}</Text>
+              <Text style={{ marginLeft: 4, color: text }}>{comments.length}</Text>
             </View>
           </View>
         </View>
@@ -318,12 +385,13 @@ export default function ForumPostDetails() {
             fontWeight: "bold",
             marginTop: 16,
             marginBottom: 8,
+            color: text
           }}
         >
           Comments
         </Text>
         {comments.length === 0 ? (
-          <Text style={{ fontSize: 16, color: "#888888" }}>
+          <Text style={{ fontSize: 18, color: "#888888" }}>
             No comments yet.
           </Text>
         ) : (
@@ -334,6 +402,7 @@ export default function ForumPostDetails() {
                   flexDirection: "row",
                   alignItems: "center",
                   marginBottom: 8,
+                  backgroundColor: isDarkMode ? "#999999" : "white"
                 }}
               >
                 <Image
@@ -350,10 +419,10 @@ export default function ForumPostDetails() {
                   {userProfiles[comment.author]?.firstName}
                 </Text>
               </View>
-              <Text style={{ fontSize: 16, color: "#888888", marginBottom: 8 }}>
+              <Text style={{ fontSize: 16, color: isDarkMode ? "#222222" : "#888888", marginBottom: 8 }}>
                 {comment.content}
               </Text>
-              <Text style={{ fontSize: 14, color: "#888888", marginBottom: 8 }}>
+              <Text style={{ fontSize: 14, color: isDarkMode ? "#222222" : "#888888", marginBottom: 8 }}>
                 {formatTimestamp(comment.createdAt)}
               </Text>
               <TouchableOpacity
@@ -387,63 +456,6 @@ export default function ForumPostDetails() {
         <Text style={{ fontSize: 16, color: "#888888" }}>Add your comment</Text>
       </TouchableOpacity>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 10,
-  },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 700,
-    height: 650,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "black",
-  },
-  postCard: {
-    marginTop: 20,
-    marginBottom: 20,
-    flexDirection: "column",
-    borderBottomWidth: 2,
-    borderBottomColor: "gray",
-    paddingBottom: 10,
-  },
-  commentCard: {
-    marginBottom: 16,
-    padding: 10,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-  },
-  profilePicture: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  commentBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#d1d5db",
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-    alignItems: "center",
-  },
-});

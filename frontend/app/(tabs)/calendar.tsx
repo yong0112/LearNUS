@@ -10,6 +10,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
@@ -17,6 +18,8 @@ import { MarkedDates } from "react-native-calendars/src/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@/components/ThemedView";
 const screenHeight = Dimensions.get("window").height;
 
 export default function CalendarPage() {
@@ -34,6 +37,10 @@ export default function CalendarPage() {
     new Date(currTime.getTime() + 2 * 60 * 60 * 1000),
   );
   const [showEnd, setShowEnd] = useState<boolean>(false);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   const handleAddButton = () => {
     setModalVisible(true);
@@ -234,7 +241,86 @@ export default function CalendarPage() {
     });
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+    },
+    header: {
+      fontSize: 30,
+      fontWeight: "600",
+      marginBottom: 10,
+      color: text
+    },
+    calendar: {
+      borderWidth: 1,
+      borderColor: "gray",
+      height: 350,
+    },
+    plus: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+    },
+    classList: {
+      paddingBottom: 20,
+    },
+    classBox: {
+      marginVertical: 10,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: "gray",
+      flexDirection: "column",
+      justifyContent: "space-around",
+    },
+    modalContent: {
+      width: "97%",
+      height: screenHeight * 0.85,
+      backgroundColor: isDarkMode ? "#999999" : "white",
+      borderRadius: 20,
+      padding: 15,
+      flexDirection: "column",
+      overflow: "hidden",
+      elevation: 10,
+      shadowColor: "#000",
+      shadowOpacity: 0.8,
+      shadowOffset: { width: 0, height: 4 },
+      shadowRadius: 8,
+      alignSelf: "center",
+    },
+    inputBar: {
+      borderRadius: 10,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: 8,
+      marginBottom: 40,
+    },
+    timeBar: {
+      borderRadius: 10,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: 5,
+      padding: 10,
+      justifyContent: "space-between",
+      marginVertical: 2,
+    },
+    timeButton: {
+      borderRadius: 5,
+      padding: 2,
+      paddingHorizontal: 5,
+      alignSelf: "center",
+      backgroundColor: "#9ca3af",
+      color: "black",
+      fontSize: 16,
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       <Text style={styles.header}>Calendar</Text>
       <View style={{ flex: 1, justifyContent: "space-between" }}>
@@ -271,17 +357,17 @@ export default function CalendarPage() {
           {classesForSelectedDate.length > 0 ? (
             classesForSelectedDate.map((cls, index) => (
               <View key={index} style={styles.classBox}>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 18, fontWeight: "bold", color: text }}>
                   {cls.course}
                 </Text>
-                <Text style={{ fontSize: 16 }}>
+                <Text style={{ fontSize: 16, color: text }}>
                   {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
                 </Text>
               </View>
             ))
           ) : selected ? (
             <View style={{ alignSelf: "center", alignItems: "center" }}>
-              <Text style={{ fontSize: 20, fontWeight: "semibold" }}>
+              <Text style={{ fontSize: 20, fontWeight: "semibold", color: text }}>
                 No classes for today
               </Text>
             </View>
@@ -292,10 +378,10 @@ export default function CalendarPage() {
           {eventsForSelectedDate.length > 0 ? (
             eventsForSelectedDate.map((event, index) => (
               <View key={index} style={styles.classBox}>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 18, fontWeight: "bold", color: text }}>
                   {event.title}
                 </Text>
-                <Text style={{ fontSize: 16 }}>
+                <Text style={{ fontSize: 16, color: text }}>
                   {formatTime(event.startTime)} - {formatTime(event.endTime)}
                 </Text>
               </View>
@@ -452,82 +538,6 @@ export default function CalendarPage() {
         </View>
       </Modal>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  header: {
-    fontSize: 30,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  calendar: {
-    borderWidth: 1,
-    borderColor: "gray",
-    height: 350,
-  },
-  plus: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  classList: {
-    paddingBottom: 20,
-  },
-  classBox: {
-    marginBottom: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "gray",
-    flexDirection: "column",
-    justifyContent: "space-around",
-  },
-  modalContent: {
-    width: "97%",
-    height: screenHeight * 0.85,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 15,
-    flexDirection: "column",
-    overflow: "hidden",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    alignSelf: "center",
-  },
-  inputBar: {
-    borderRadius: 10,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 8,
-    marginBottom: 40,
-  },
-  timeBar: {
-    borderRadius: 10,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 5,
-    padding: 10,
-    justifyContent: "space-between",
-    marginVertical: 2,
-  },
-  timeButton: {
-    borderRadius: 5,
-    padding: 2,
-    paddingHorizontal: 5,
-    alignSelf: "center",
-    backgroundColor: "#9ca3af",
-    color: "black",
-    fontSize: 16,
-  },
-});

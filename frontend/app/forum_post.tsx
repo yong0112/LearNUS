@@ -1,3 +1,5 @@
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import {
   Ionicons,
@@ -15,6 +17,7 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  useColorScheme,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
@@ -29,6 +32,10 @@ export default function ForumPost() {
   const [selectedCourse, setSelectedCourse] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
 
   useEffect(() => {
     fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
@@ -72,14 +79,115 @@ export default function ForumPost() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+    },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 700,
+      height: 650,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: text,
+    },
+    inputGroup: {
+      paddingHorizontal: 5,
+      paddingVertical: 20,
+    },
+    label: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginBottom: 5,
+      color: text
+    },
+    searchBar: {
+      borderRadius: 20,
+      backgroundColor: "#d1d5db",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: 8,
+      paddingRight: 8,
+    },
+    input: {
+      color: "#222",
+      fontSize: 17,
+      marginLeft: 10,
+      flex: 1,
+    },
+    dropdown: {
+      height: 50,
+      flex: 1,
+      paddingRight: 8,
+    },
+    placeholderStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#888",
+    },
+    selectedTextStyle: {
+      fontSize: 17,
+      marginLeft: 10,
+      color: "#222",
+    },
+    clearFilterContainer: {
+      marginTop: 20,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderWidth: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginHorizontal: 6,
+      alignSelf: "flex-start",
+      borderColor: text
+    },
+    filterButtonText: {
+      marginHorizontal: 4,
+      fontSize: 14,
+      fontWeight: "400",
+      marginBottom: 2,
+      color: text
+    },
+    postButton: {
+      marginTop: 20,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "orange",
+      paddingVertical: 12,
+      height: 60,
+    },
+    buttonText: {
+      fontSize: 28,
+      fontWeight: "600",
+      color: "white",
+    },
+  });
+  
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       <View style={styles.background} />
       <View style={styles.header}>
         <Ionicons
           name="arrow-back-circle"
           size={40}
-          color="white"
+          color={text}
           onPress={() => router.push("/(tabs)/forum")}
         />
         <Text style={styles.headerText}>Create A Post</Text>
@@ -154,7 +262,7 @@ export default function ForumPost() {
               setSelectedCourse("");
             }}
           >
-            <MaterialCommunityIcons name="close" size={20} color="black" />
+            <MaterialCommunityIcons name="close" size={20} color={text} />
             <Text style={styles.filterButtonText}>Clear Tag</Text>
           </TouchableOpacity>
         </View>
@@ -164,102 +272,6 @@ export default function ForumPost() {
         </TouchableOpacity>
       </ScrollView>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 700,
-    height: 650,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "black",
-  },
-  inputGroup: {
-    paddingHorizontal: 5,
-    paddingVertical: 20,
-  },
-  label: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  searchBar: {
-    borderRadius: 20,
-    backgroundColor: "#d1d5db",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 8,
-    paddingRight: 8,
-  },
-  input: {
-    color: "#222",
-    fontSize: 17,
-    marginLeft: 10,
-    flex: 1,
-  },
-  dropdown: {
-    height: 50,
-    flex: 1,
-    paddingRight: 8,
-  },
-  placeholderStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#888",
-  },
-  selectedTextStyle: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "#222",
-  },
-  clearFilterContainer: {
-    marginTop: 12,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 6,
-    alignSelf: "flex-start",
-  },
-  filterButtonText: {
-    marginHorizontal: 4,
-    fontSize: 14,
-    fontWeight: "400",
-    marginBottom: 2,
-  },
-  postButton: {
-    marginTop: 50,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "orange",
-    paddingVertical: 12,
-    height: 60,
-  },
-  buttonText: {
-    fontSize: 28,
-    fontWeight: "600",
-    color: "white",
-  },
-});

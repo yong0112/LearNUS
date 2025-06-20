@@ -1,3 +1,5 @@
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { useRouter } from "expo-router";
@@ -7,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -23,6 +26,11 @@ export default function TutorFilter() {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [ratings, setRatings] = useState<number[]>();
   const [rate, setRate] = useState([0, 100]);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
+  
 
   useEffect(() => {
     const fetchConstants = async () => {
@@ -60,7 +68,92 @@ export default function TutorFilter() {
     });
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+      justifyContent: "flex-start",
+    },
+    background: {
+      position: "absolute",
+      top: -550,
+      left: -150,
+      width: 700,
+      height: 650,
+      borderRadius: 0,
+      backgroundColor: "#ffc04d",
+      zIndex: -1,
+    },
+    headerText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      alignItems: "center",
+      justifyContent: "center",
+      color: text,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: "bold",
+      marginBottom: 5,
+      color: text
+    },
+    optionContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+      marginTop: 10,
+    },
+    optionBox: {
+      padding: 12,
+      borderRadius: 10,
+      backgroundColor: "#f0f0f0",
+      borderWidth: 2,
+      borderColor: "#ccc",
+    },
+    optionBoxSelected: {
+      backgroundColor: "#ffc04d",
+      borderColor: "#ff9900",
+    },
+    optionText: {
+      fontSize: 12,
+      fontWeight: "500",
+      color: "gray",
+    },
+    optionTextSelected: {
+      color: "white",
+      fontWeight: "700",
+    },
+    rate: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: text
+    },
+    applyButton: {
+      backgroundColor: "#ffbf00",
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 10,
+      width: 150,
+    },
+    clearButton: {
+      borderWidth: 2,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 10,
+      width: 150,
+      backgroundColor: isDarkMode ? "#999999" : "transparent"
+    },
+    buttonText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "black",
+      textAlign: "center",
+    },
+  });
+
   return (
+    <ThemedView style={{ flex: 1 }}>
     <View style={styles.container}>
       {/*Header*/}
       <View style={styles.background} />
@@ -74,7 +167,7 @@ export default function TutorFilter() {
         <Ionicons
           name="arrow-back-circle"
           size={40}
-          color="white"
+          color={isDarkMode ? "white" : "orange"}
           onPress={() => router.push("/tutor_find")}
         />
         <Text style={styles.headerText}>Filter</Text>
@@ -136,7 +229,7 @@ export default function TutorFilter() {
           />
 
           <View style={{ padding: 20, justifyContent: "flex-start" }}>
-            <Text style={{ fontSize: 18, fontWeight: "600" }}>
+            <Text style={{ fontSize: 18, fontWeight: "600", color: text }}>
               Rating above {ratings ? ratings[0].toFixed(1) : "0.0"}
             </Text>
           </View>
@@ -195,86 +288,6 @@ export default function TutorFilter() {
         </View>
       </View>
     </View>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    justifyContent: "flex-start",
-  },
-  background: {
-    position: "absolute",
-    top: -550,
-    left: -150,
-    width: 700,
-    height: 650,
-    borderRadius: 0,
-    backgroundColor: "#ffc04d",
-    zIndex: -1,
-  },
-  headerText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "black",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  optionContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: 10,
-  },
-  optionBox: {
-    padding: 12,
-    borderRadius: 10,
-    backgroundColor: "#f0f0f0",
-    borderWidth: 2,
-    borderColor: "#ccc",
-  },
-  optionBoxSelected: {
-    backgroundColor: "#ffc04d",
-    borderColor: "#ff9900",
-  },
-  optionText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "gray",
-  },
-  optionTextSelected: {
-    color: "white",
-    fontWeight: "700",
-  },
-  rate: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  applyButton: {
-    backgroundColor: "#ffbf00",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    width: 150,
-  },
-  clearButton: {
-    borderWidth: 2,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    width: 150,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "black",
-    textAlign: "center",
-  },
-});
