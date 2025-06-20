@@ -255,7 +255,12 @@ export default function tutoring() {
           onPress={() => router.push("/(tabs)/home")}
         />
         <View style={styles.searchBar}>
-          <TouchableOpacity onPress={() => {setSearchText(""); setSearching("")}}>
+          <TouchableOpacity
+            onPress={() => {
+              setSearchText("");
+              setSearching("");
+            }}
+          >
             <Entypo name="cross" size={25} color="#444444" />
           </TouchableOpacity>
           <TextInput
