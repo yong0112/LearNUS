@@ -34,7 +34,6 @@ export default function Comment() {
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
-  
 
   const BASE_URL = "https://learnus.onrender.com";
   const MAX_COMMENT_LENGTH = 500;
@@ -129,7 +128,7 @@ export default function Comment() {
     headerText: {
       fontSize: 24,
       fontWeight: "600",
-      color: text
+      color: text,
     },
     postButtonText: {
       fontSize: 18,
@@ -140,7 +139,7 @@ export default function Comment() {
       fontSize: 20,
       fontWeight: "bold",
       marginVertical: 16,
-      color: text
+      color: text,
     },
     divider: {
       height: 1,
@@ -166,43 +165,43 @@ export default function Comment() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Ionicons
-          name="arrow-back"
-          size={30}
-          color="orange"
-          onPress={() => router.push(`../../forum/${postId}`)}
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Ionicons
+            name="arrow-back"
+            size={30}
+            color="orange"
+            onPress={() => router.push(`../../forum/${postId}`)}
+          />
+          <Text style={styles.headerText}>Add comment</Text>
+          <TouchableOpacity onPress={handlePostComment}>
+            <Text style={styles.postButtonText}>Post</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Post Title */}
+        {post && <Text style={styles.postTitle}>{post.title}</Text>}
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Comment Input */}
+        <TextInput
+          style={styles.commentInput}
+          placeholder="Write your comment here..."
+          placeholderTextColor="#888"
+          multiline
+          value={commentContent}
+          onChangeText={handleCommentChange}
+          maxLength={MAX_COMMENT_LENGTH}
         />
-        <Text style={styles.headerText}>Add comment</Text>
-        <TouchableOpacity onPress={handlePostComment}>
-          <Text style={styles.postButtonText}>Post</Text>
-        </TouchableOpacity>
+
+        {/* Character Count */}
+        <Text style={styles.charCount}>
+          {charCount}/{MAX_COMMENT_LENGTH}
+        </Text>
       </View>
-
-      {/* Post Title */}
-      {post && <Text style={styles.postTitle}>{post.title}</Text>}
-
-      {/* Divider */}
-      <View style={styles.divider} />
-
-      {/* Comment Input */}
-      <TextInput
-        style={styles.commentInput}
-        placeholder="Write your comment here..."
-        placeholderTextColor="#888"
-        multiline
-        value={commentContent}
-        onChangeText={handleCommentChange}
-        maxLength={MAX_COMMENT_LENGTH}
-      />
-
-      {/* Character Count */}
-      <Text style={styles.charCount}>
-        {charCount}/{MAX_COMMENT_LENGTH}
-      </Text>
-    </View>
     </ThemedView>
   );
 }

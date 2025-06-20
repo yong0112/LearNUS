@@ -136,7 +136,7 @@ export default function history() {
     subject: {
       fontSize: 22,
       fontWeight: "bold",
-      color: text
+      color: text,
     },
     avatar: {
       width: 80,
@@ -148,73 +148,78 @@ export default function history() {
   });
 
   return (
-    <ThemedView style={{ flex: 1 }} >
-    <View style={styles.container}>
-      {/*Header*/}
-      <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 20,
-        }}
-      >
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color={isDarkMode ? "white" : "orange"}
-          onPress={() => router.push("/(tabs)/profile")}
-        />
-        <Text style={styles.headerText}>Tutoring History</Text>
-        <View style={{ width: 40 }} />
-      </View>
+    <ThemedView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/*Header*/}
+        <View style={styles.background} />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={isDarkMode ? "white" : "orange"}
+            onPress={() => router.push("/(tabs)/profile")}
+          />
+          <Text style={styles.headerText}>Tutoring History</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      {/*List*/}
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {classes.length === 0 ? (
-          <Text
-            style={{ fontSize: 24, fontWeight: "bold", alignSelf: "center", color: text }}
-          >
-            No classes yet.
-          </Text>
-        ) : (
-          classes.map(
-            (cls: {
-              id: React.Key | null | undefined;
-              course: string;
-              date: number;
-              role: string;
-              startTime: string;
-              endTime: string;
-              people: string;
-              rate: string;
-              status: string;
-            }) => (
-              <View key={cls.id} style={styles.classCard}>
-                <View
-                  style={{
-                    flexDirection: "column",
-                    justifyContent: "space-evenly",
-                  }}
-                >
-                  <Text style={styles.subject}>
-                    {cls.course} ({cls.role})
-                  </Text>
-                  <Text style={{ fontSize: 18, color: text }}>
-                    {formatDate(cls.date, cls.startTime)}
-                  </Text>
+        {/*List*/}
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          {classes.length === 0 ? (
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "bold",
+                alignSelf: "center",
+                color: text,
+              }}
+            >
+              No classes yet.
+            </Text>
+          ) : (
+            classes.map(
+              (cls: {
+                id: React.Key | null | undefined;
+                course: string;
+                date: number;
+                role: string;
+                startTime: string;
+                endTime: string;
+                people: string;
+                rate: string;
+                status: string;
+              }) => (
+                <View key={cls.id} style={styles.classCard}>
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      justifyContent: "space-evenly",
+                    }}
+                  >
+                    <Text style={styles.subject}>
+                      {cls.course} ({cls.role})
+                    </Text>
+                    <Text style={{ fontSize: 18, color: text }}>
+                      {formatDate(cls.date, cls.startTime)}
+                    </Text>
+                  </View>
+                  <Image
+                    source={{ uri: profiles[cls.people] }}
+                    style={styles.avatar}
+                  />
                 </View>
-                <Image
-                  source={{ uri: profiles[cls.people] }}
-                  style={styles.avatar}
-                />
-              </View>
-            ),
-          )
-        )}
-      </ScrollView>
-    </View>
+              ),
+            )
+          )}
+        </ScrollView>
+      </View>
     </ThemedView>
   );
 }

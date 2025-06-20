@@ -120,13 +120,19 @@ export default function Signup() {
       paddingVertical: 20,
     },
     // innerContainer: { flex: 1, justifyContent: 'center' },
-    title: { fontSize: 25, fontWeight: "bold", marginLeft: 10, marginTop: 50, color: text },
+    title: {
+      fontSize: 25,
+      fontWeight: "bold",
+      marginLeft: 10,
+      marginTop: 50,
+      color: text,
+    },
     headings: {
       fontSize: 28,
       fontWeight: "bold",
       marginTop: 80,
       marginBottom: 10,
-      color: text
+      color: text,
     },
     input: {
       borderWidth: 1,
@@ -135,7 +141,7 @@ export default function Signup() {
       marginVertical: 10,
       borderRadius: 5,
       opacity: 0.5,
-      color: text
+      color: text,
     },
     button: {
       justifyContent: "center",
@@ -143,13 +149,13 @@ export default function Signup() {
       paddingVertical: 8,
       borderRadius: 5,
       backgroundColor: "orange",
-      marginTop: 5
+      marginTop: 5,
     },
     buttonText: {
       fontSize: 17,
       fontWeight: "bold",
       textAlign: "center",
-      color: "#ffffff"
+      color: "#ffffff",
     },
     dividerText: { marginHorizontal: 10, color: "#666", textAlign: "center" },
     link: {

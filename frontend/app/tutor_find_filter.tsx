@@ -30,7 +30,6 @@ export default function TutorFilter() {
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
-  
 
   useEffect(() => {
     const fetchConstants = async () => {
@@ -96,7 +95,7 @@ export default function TutorFilter() {
       fontSize: 22,
       fontWeight: "bold",
       marginBottom: 5,
-      color: text
+      color: text,
     },
     optionContainer: {
       flexDirection: "row",
@@ -127,7 +126,7 @@ export default function TutorFilter() {
     rate: {
       fontSize: 16,
       fontWeight: "600",
-      color: text
+      color: text,
     },
     applyButton: {
       backgroundColor: "#ffbf00",
@@ -142,7 +141,7 @@ export default function TutorFilter() {
       paddingHorizontal: 20,
       borderRadius: 10,
       width: 150,
-      backgroundColor: isDarkMode ? "#999999" : "transparent"
+      backgroundColor: isDarkMode ? "#999999" : "transparent",
     },
     buttonText: {
       fontSize: 16,
@@ -154,140 +153,144 @@ export default function TutorFilter() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      {/*Header*/}
-      <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color={isDarkMode ? "white" : "orange"}
-          onPress={() => router.push("/tutor_find")}
-        />
-        <Text style={styles.headerText}>Filter</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View
-        style={{
-          justifyContent: "flex-start",
-          flexDirection: "column",
-          paddingTop: 20,
-          paddingHorizontal: 10,
-        }}
-      >
-        {/**Location */}
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>Location</Text>
-          <View style={styles.optionContainer}>
-            {locationOption.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.optionBox,
-                  selectedLocation == option.value && styles.optionBoxSelected,
-                ]}
-                onPress={() => setSelectedLocation(option.value)}
-              >
-                <Text
-                  style={[
-                    styles.optionText,
-                    selectedLocation == option.value &&
-                      styles.optionTextSelected,
-                  ]}
-                >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/**Ratings */}
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>Ratings</Text>
-          <MultiSlider
-            values={ratings}
-            sliderLength={screenWidth * 0.8}
-            onValuesChange={setRatings}
-            min={0}
-            max={5.0}
-            step={0.1}
-            selectedStyle={{ backgroundColor: "orange" }}
-            unselectedStyle={{ backgroundColor: "#e0e0e0" }}
-            markerStyle={{
-              backgroundColor: "orange",
-              height: 24,
-              width: 24,
-            }}
-          />
-
-          <View style={{ padding: 20, justifyContent: "flex-start" }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: text }}>
-              Rating above {ratings ? ratings[0].toFixed(1) : "0.0"}
-            </Text>
-          </View>
-        </View>
-
-        {/**Hourly Rate */}
-        <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-          <Text style={styles.title}>Hourly Rate (in SGD)</Text>
-          <MultiSlider
-            values={rate}
-            sliderLength={screenWidth * 0.8}
-            onValuesChange={setRate}
-            min={0}
-            max={100}
-            step={1}
-            selectedStyle={{ backgroundColor: "orange" }}
-            unselectedStyle={{ backgroundColor: "#e0e0e0" }}
-            markerStyle={{
-              backgroundColor: "orange",
-              height: 24,
-              width: 24,
-            }}
-          />
-
-          <View
-            style={{
-              flexDirection: "row",
-              padding: 20,
-              justifyContent: "space-between",
-              width: screenWidth * 0.8,
-            }}
-          >
-            <Text style={styles.rate}>Min: S${rate[0]}</Text>
-            <Text style={styles.rate}>Max: S${rate[1]}</Text>
-          </View>
-        </View>
-
-        {/**Buttons */}
+      <View style={styles.container}>
+        {/*Header*/}
+        <View style={styles.background} />
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "space-between",
             alignItems: "center",
-            marginTop: 50,
+            justifyContent: "space-between",
           }}
         >
-          <TouchableOpacity style={styles.clearButton} onPress={handleClearing}>
-            <Text style={styles.buttonText}>Clear all</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.applyButton}
-            onPress={handleFiltering}
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={isDarkMode ? "white" : "orange"}
+            onPress={() => router.push("/tutor_find")}
+          />
+          <Text style={styles.headerText}>Filter</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        <View
+          style={{
+            justifyContent: "flex-start",
+            flexDirection: "column",
+            paddingTop: 20,
+            paddingHorizontal: 10,
+          }}
+        >
+          {/**Location */}
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>Location</Text>
+            <View style={styles.optionContainer}>
+              {locationOption.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionBox,
+                    selectedLocation == option.value &&
+                      styles.optionBoxSelected,
+                  ]}
+                  onPress={() => setSelectedLocation(option.value)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedLocation == option.value &&
+                        styles.optionTextSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/**Ratings */}
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>Ratings</Text>
+            <MultiSlider
+              values={ratings}
+              sliderLength={screenWidth * 0.8}
+              onValuesChange={setRatings}
+              min={0}
+              max={5.0}
+              step={0.1}
+              selectedStyle={{ backgroundColor: "orange" }}
+              unselectedStyle={{ backgroundColor: "#e0e0e0" }}
+              markerStyle={{
+                backgroundColor: "orange",
+                height: 24,
+                width: 24,
+              }}
+            />
+
+            <View style={{ padding: 20, justifyContent: "flex-start" }}>
+              <Text style={{ fontSize: 18, fontWeight: "600", color: text }}>
+                Rating above {ratings ? ratings[0].toFixed(1) : "0.0"}
+              </Text>
+            </View>
+          </View>
+
+          {/**Hourly Rate */}
+          <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
+            <Text style={styles.title}>Hourly Rate (in SGD)</Text>
+            <MultiSlider
+              values={rate}
+              sliderLength={screenWidth * 0.8}
+              onValuesChange={setRate}
+              min={0}
+              max={100}
+              step={1}
+              selectedStyle={{ backgroundColor: "orange" }}
+              unselectedStyle={{ backgroundColor: "#e0e0e0" }}
+              markerStyle={{
+                backgroundColor: "orange",
+                height: 24,
+                width: 24,
+              }}
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                padding: 20,
+                justifyContent: "space-between",
+                width: screenWidth * 0.8,
+              }}
+            >
+              <Text style={styles.rate}>Min: S${rate[0]}</Text>
+              <Text style={styles.rate}>Max: S${rate[1]}</Text>
+            </View>
+          </View>
+
+          {/**Buttons */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 50,
+            }}
           >
-            <Text style={styles.buttonText}>Apply</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={handleClearing}
+            >
+              <Text style={styles.buttonText}>Clear all</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.applyButton}
+              onPress={handleFiltering}
+            >
+              <Text style={styles.buttonText}>Apply</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
     </ThemedView>
   );
 }

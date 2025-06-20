@@ -35,13 +35,13 @@ export default function achievements() {
       fontWeight: "bold",
       alignSelf: "center",
       marginBottom: 10,
-      color: text
+      color: text,
     },
     subtitle: {
       fontSize: 20,
       fontWeight: "500",
       alignSelf: "center",
-      color: text
+      color: text,
     },
   });
 

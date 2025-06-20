@@ -112,7 +112,7 @@ export default function ForumPost() {
       fontSize: 20,
       fontWeight: "bold",
       marginBottom: 5,
-      color: text
+      color: text,
     },
     searchBar: {
       borderRadius: 20,
@@ -154,14 +154,14 @@ export default function ForumPost() {
       justifyContent: "center",
       marginHorizontal: 6,
       alignSelf: "flex-start",
-      borderColor: text
+      borderColor: text,
     },
     filterButtonText: {
       marginHorizontal: 4,
       fontSize: 14,
       fontWeight: "400",
       marginBottom: 2,
-      color: text
+      color: text,
     },
     postButton: {
       marginTop: 20,
@@ -178,100 +178,100 @@ export default function ForumPost() {
       color: "white",
     },
   });
-  
+
   return (
     <ThemedView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <View style={styles.background} />
-      <View style={styles.header}>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color={text}
-          onPress={() => router.push("/(tabs)/forum")}
-        />
-        <Text style={styles.headerText}>Create A Post</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}
-      >
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Title</Text>
-          <View style={styles.searchBar}>
-            <MaterialIcons name="title" size={25} color="orange" />
-            <TextInput
-              style={styles.input}
-              placeholder="Enter post title"
-              placeholderTextColor="#888"
-              onChangeText={setTitle}
-            />
-          </View>
+      <View style={styles.container}>
+        <View style={styles.background} />
+        <View style={styles.header}>
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={text}
+            onPress={() => router.push("/(tabs)/forum")}
+          />
+          <Text style={styles.headerText}>Create A Post</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Content</Text>
-          <View
-            style={[
-              styles.searchBar,
-              { height: 250, alignItems: "flex-start" },
-            ]}
-          >
-            <TextInput
-              style={{
-                flex: 1,
-                width: "100%",
-                textAlignVertical: "top",
-                color: "#222222",
-                fontSize: 17,
+        <ScrollView
+          contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}
+        >
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Title</Text>
+            <View style={styles.searchBar}>
+              <MaterialIcons name="title" size={25} color="orange" />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter post title"
+                placeholderTextColor="#888"
+                onChangeText={setTitle}
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Content</Text>
+            <View
+              style={[
+                styles.searchBar,
+                { height: 250, alignItems: "flex-start" },
+              ]}
+            >
+              <TextInput
+                style={{
+                  flex: 1,
+                  width: "100%",
+                  textAlignVertical: "top",
+                  color: "#222222",
+                  fontSize: 17,
+                }}
+                placeholder="Write your post here..."
+                placeholderTextColor="#888"
+                multiline
+                onChangeText={setContent}
+                scrollEnabled
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Course Tag (optional)</Text>
+            <View style={styles.searchBar}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                data={courseOptions}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder="Select a course"
+                value={selectedCourse}
+                onChange={(item) => setSelectedCourse(item.value)}
+                renderLeftIcon={() => (
+                  <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+                )}
+                search
+                searchPlaceholder="Search course"
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.clearFilterContainer}
+              onPress={() => {
+                setSelectedCourse("");
               }}
-              placeholder="Write your post here..."
-              placeholderTextColor="#888"
-              multiline
-              onChangeText={setContent}
-              scrollEnabled
-            />
+            >
+              <MaterialCommunityIcons name="close" size={20} color={text} />
+              <Text style={styles.filterButtonText}>Clear Tag</Text>
+            </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Course Tag (optional)</Text>
-          <View style={styles.searchBar}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={courseOptions}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder="Select a course"
-              value={selectedCourse}
-              onChange={(item) => setSelectedCourse(item.value)}
-              renderLeftIcon={() => (
-                <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
-              )}
-              search
-              searchPlaceholder="Search course"
-            />
-          </View>
-          <TouchableOpacity
-            style={styles.clearFilterContainer}
-            onPress={() => {
-              setSelectedCourse("");
-            }}
-          >
-            <MaterialCommunityIcons name="close" size={20} color={text} />
-            <Text style={styles.filterButtonText}>Clear Tag</Text>
+          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+            <Text style={styles.buttonText}>Post!</Text>
           </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.postButton} onPress={handlePost}>
-          <Text style={styles.buttonText}>Post!</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
     </ThemedView>
   );
 }

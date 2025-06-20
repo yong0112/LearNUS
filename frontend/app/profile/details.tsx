@@ -142,73 +142,77 @@ export default function Details() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      {/*Header*/}
-      <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color={isDarkMode ? "white" : "orange"}
-          onPress={() => router.push("/(tabs)/profile")}
-        />
-        <Text style={styles.headerText}>Personal Details</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {/*Avatar*/}
-      <View style={{ paddingVertical: 20, marginBottom: 40 }}>
-        <Image
-          source={{ uri: userProfile?.profilePicture }}
-          style={styles.avatar}
-        />
-        <TouchableOpacity
-          style={{ alignSelf: "center", marginLeft: 100 }}
-          onPress={handleChangeProfilePic}
+      <View style={styles.container}>
+        {/*Header*/}
+        <View style={styles.background} />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
         >
-          <MaterialCommunityIcons name="progress-pencil" size={30} color={text} />
-        </TouchableOpacity>
-      </View>
+          <Ionicons
+            name="arrow-back-circle"
+            size={40}
+            color={isDarkMode ? "white" : "orange"}
+            onPress={() => router.push("/(tabs)/profile")}
+          />
+          <Text style={styles.headerText}>Personal Details</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      {/*Info List*/}
-      <View style={styles.info}>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>First Name</Text>
-          <Text style={styles.field}>{userProfile?.firstName}</Text>
-        </View>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>Last Name</Text>
-          <Text style={styles.field}>{userProfile?.lastName}</Text>
-        </View>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>Gender</Text>
-          <Text style={styles.field}>Unknown</Text>
-        </View>
-        <View style={{ paddingBottom: 35 }}>
-          <Text style={styles.label}>Email</Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              borderBottomColor: "#aaaaaa",
-              borderBottomWidth: 2,
-            }}
+        {/*Avatar*/}
+        <View style={{ paddingVertical: 20, marginBottom: 40 }}>
+          <Image
+            source={{ uri: userProfile?.profilePicture }}
+            style={styles.avatar}
+          />
+          <TouchableOpacity
+            style={{ alignSelf: "center", marginLeft: 100 }}
+            onPress={handleChangeProfilePic}
           >
-            <Text
-              style={{ fontSize: 16, marginHorizontal: 5, color: "#666666" }}
+            <MaterialCommunityIcons
+              name="progress-pencil"
+              size={30}
+              color={text}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/*Info List*/}
+        <View style={styles.info}>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>First Name</Text>
+            <Text style={styles.field}>{userProfile?.firstName}</Text>
+          </View>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>Last Name</Text>
+            <Text style={styles.field}>{userProfile?.lastName}</Text>
+          </View>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>Gender</Text>
+            <Text style={styles.field}>Unknown</Text>
+          </View>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>Email</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                borderBottomColor: "#aaaaaa",
+                borderBottomWidth: 2,
+              }}
             >
-              {userProfile?.email}
-            </Text>
+              <Text
+                style={{ fontSize: 16, marginHorizontal: 5, color: "#666666" }}
+              >
+                {userProfile?.email}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
     </ThemedView>
   );
 }
