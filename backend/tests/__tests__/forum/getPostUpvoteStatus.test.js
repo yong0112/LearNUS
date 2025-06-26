@@ -1,7 +1,9 @@
 const request = require("supertest");
 const express = require("express");
 const { getPostUpvoteStatus } = require("../../../controllers/forumController");
-const { getPostUpvoteStatus: getPostUpvoteStatusModel } = require("../../../models/forumModel");
+const {
+  getPostUpvoteStatus: getPostUpvoteStatusModel,
+} = require("../../../models/forumModel");
 
 // Set up Express app for testing
 const app = express();
@@ -27,7 +29,9 @@ describe("GET /api/forum/:postId/upvote/:userId", () => {
     const result = { upvoted: true, upvotes: 1 };
     getPostUpvoteStatusModel.mockResolvedValue(result);
 
-    const response = await request(app).get(`/api/forum/${postId}/upvote/${userId}`);
+    const response = await request(app).get(
+      `/api/forum/${postId}/upvote/${userId}`,
+    );
     expect(response.status).toBe(200);
     expect(response.body).toEqual(result);
     expect(getPostUpvoteStatusModel).toHaveBeenCalledWith(postId, userId);
@@ -38,7 +42,9 @@ describe("GET /api/forum/:postId/upvote/:userId", () => {
     const userId = "user123";
     getPostUpvoteStatusModel.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).get(`/api/forum/${postId}/upvote/${userId}`);
+    const response = await request(app).get(
+      `/api/forum/${postId}/upvote/${userId}`,
+    );
     expect(response.status).toBe(500);
     expect(response.body).toEqual({ error: "Database error" });
     expect(getPostUpvoteStatusModel).toHaveBeenCalledWith(postId, userId);

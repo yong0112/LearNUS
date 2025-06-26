@@ -1,12 +1,19 @@
 const request = require("supertest");
 const express = require("express");
-const { getCommentUpvoteStatus } = require("../../../controllers/forumController");
-const { getCommentUpvoteStatus: getCommentUpvoteStatusModel } = require("../../../models/forumModel");
+const {
+  getCommentUpvoteStatus,
+} = require("../../../controllers/forumController");
+const {
+  getCommentUpvoteStatus: getCommentUpvoteStatusModel,
+} = require("../../../models/forumModel");
 
 // Set up Express app for testing
 const app = express();
 app.use(express.json());
-app.get("/api/forum/:postId/comments/:commentId/upvote/:userId", getCommentUpvoteStatus);
+app.get(
+  "/api/forum/:postId/comments/:commentId/upvote/:userId",
+  getCommentUpvoteStatus,
+);
 
 // Mock the model
 jest.mock("../../../models/forumModel");
@@ -29,11 +36,15 @@ describe("GET /api/forum/:postId/comments/:commentId/upvote/:userId", () => {
     getCommentUpvoteStatusModel.mockResolvedValue(result);
 
     const response = await request(app).get(
-      `/api/forum/${postId}/comments/${commentId}/upvote/${userId}`
+      `/api/forum/${postId}/comments/${commentId}/upvote/${userId}`,
     );
     expect(response.status).toBe(200);
     expect(response.body).toEqual(result);
-    expect(getCommentUpvoteStatusModel).toHaveBeenCalledWith(postId, commentId, userId);
+    expect(getCommentUpvoteStatusModel).toHaveBeenCalledWith(
+      postId,
+      commentId,
+      userId,
+    );
   });
 
   it("returns 500 for server error", async () => {
@@ -43,10 +54,14 @@ describe("GET /api/forum/:postId/comments/:commentId/upvote/:userId", () => {
     getCommentUpvoteStatusModel.mockRejectedValue(new Error("Database error"));
 
     const response = await request(app).get(
-      `/api/forum/${postId}/comments/${commentId}/upvote/${userId}`
+      `/api/forum/${postId}/comments/${commentId}/upvote/${userId}`,
     );
     expect(response.status).toBe(500);
     expect(response.body).toEqual({ error: "Database error" });
-    expect(getCommentUpvoteStatusModel).toHaveBeenCalledWith(postId, commentId, userId);
+    expect(getCommentUpvoteStatusModel).toHaveBeenCalledWith(
+      postId,
+      commentId,
+      userId,
+    );
   });
 });

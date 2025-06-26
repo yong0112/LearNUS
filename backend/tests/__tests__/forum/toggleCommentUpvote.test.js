@@ -1,7 +1,9 @@
 const request = require("supertest");
 const express = require("express");
 const { toggleCommentUpvote } = require("../../../controllers/forumController");
-const { toggleCommentUpvote: toggleCommentUpvoteModel } = require("../../../models/forumModel");
+const {
+  toggleCommentUpvote: toggleCommentUpvoteModel,
+} = require("../../../models/forumModel");
 
 // Set up Express app for testing
 const app = express();
@@ -32,8 +34,15 @@ describe("POST /api/forum/:postId/comments/:commentId/upvote", () => {
       .post(`/api/forum/${postId}/comments/${commentId}/upvote`)
       .send(input);
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ message: "Comment upvote toggled", ...result });
-    expect(toggleCommentUpvoteModel).toHaveBeenCalledWith(postId, commentId, input.userId);
+    expect(response.body).toEqual({
+      message: "Comment upvote toggled",
+      ...result,
+    });
+    expect(toggleCommentUpvoteModel).toHaveBeenCalledWith(
+      postId,
+      commentId,
+      input.userId,
+    );
   });
 
   it("returns 400 for missing userId", async () => {
@@ -61,6 +70,10 @@ describe("POST /api/forum/:postId/comments/:commentId/upvote", () => {
       .send(input);
     expect(response.status).toBe(500);
     expect(response.body).toEqual({ error: "Database error" });
-    expect(toggleCommentUpvoteModel).toHaveBeenCalledWith(postId, commentId, input.userId);
+    expect(toggleCommentUpvoteModel).toHaveBeenCalledWith(
+      postId,
+      commentId,
+      input.userId,
+    );
   });
 });
