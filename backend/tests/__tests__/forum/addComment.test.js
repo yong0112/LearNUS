@@ -31,7 +31,9 @@ describe("POST /api/forum/comments/:postId", () => {
     const newComment = { id: "comment1", ...input };
     postComment.mockResolvedValue(newComment);
 
-    const response = await request(app).post(`/api/forum/comments/${postId}`).send(input);
+    const response = await request(app)
+      .post(`/api/forum/comments/${postId}`)
+      .send(input);
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ message: "Comment added", newComment });
     expect(postComment).toHaveBeenCalledWith(postId, input);
@@ -44,7 +46,9 @@ describe("POST /api/forum/comments/:postId", () => {
       authorName: "Test User",
     };
 
-    const response = await request(app).post(`/api/forum/comments/${postId}`).send(input);
+    const response = await request(app)
+      .post(`/api/forum/comments/${postId}`)
+      .send(input);
     expect(response.status).toBe(400);
     expect(response.body).toEqual({ error: "Missing content" });
     expect(postComment).not.toHaveBeenCalled();
@@ -59,7 +63,9 @@ describe("POST /api/forum/comments/:postId", () => {
     };
     postComment.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).post(`/api/forum/comments/${postId}`).send(input);
+    const response = await request(app)
+      .post(`/api/forum/comments/${postId}`)
+      .send(input);
     expect(response.status).toBe(500);
     expect(response.body).toEqual({ error: "Server error" });
     expect(postComment).toHaveBeenCalledWith(postId, input);
