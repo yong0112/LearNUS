@@ -24,8 +24,8 @@ describe("GET /api/forum/:uid", () => {
   it("returns posts for valid uid", async () => {
     const uid = "user123";
     const mockPosts = [
-      { id: "post1", title: "Post 1", content: "Content 1" },
-      { id: "post2", title: "Post 2", content: "Content 2" },
+      { id: "post1", author: "Author 1", title: "Post 1", content: "Content 1" },
+      { id: "post2", author: "Author 2", title: "Post 2", content: "Content 2" },
     ];
     getForumPosts.mockResolvedValue(mockPosts);
 

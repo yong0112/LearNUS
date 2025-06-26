@@ -273,7 +273,7 @@ export default function Signup() {
               lowercase letter
             </Text>
           </View>
-          <TouchableOpacity style={styles.button} onPress={handleSignup}>
+          <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={!isPasswordValid}>
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>
 
