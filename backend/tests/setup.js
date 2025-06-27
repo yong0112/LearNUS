@@ -1,4 +1,3 @@
-// LearNUS/backend/tests/setup.js
 jest.mock("firebase-admin", () => ({
   initializeApp: jest.fn(),
   credential: {
