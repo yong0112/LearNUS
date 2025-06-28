@@ -12,7 +12,9 @@ export default function ratings() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
   const [reviews, setReviews] = useState<any | undefined>([]);
-  const [reviewers, setReviewers] = useState<Record<string, any | undefined>>({});
+  const [reviewers, setReviewers] = useState<Record<string, any | undefined>>(
+    {},
+  );
   const [error, setError] = useState(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -55,13 +57,14 @@ export default function ratings() {
                       const res = await fetch(
                         `https://learnus.onrender.com/api/users/${review.people}`,
                       );
-                      if (!res.ok) throw new Error("Failed to fetch user profile");
+                      if (!res.ok)
+                        throw new Error("Failed to fetch user profile");
                       const userData = await res.json();
                       people[review.people] = userData;
                     } catch (err) {
                       console.error(err);
                     }
-                  })
+                  }),
                 );
                 setReviewers(people);
               });
@@ -99,7 +102,7 @@ export default function ratings() {
       flexDirection: "row",
       alignItems: "center",
       marginBottom: 20,
-      justifyContent: "space-between"
+      justifyContent: "space-between",
     },
     avatar: {
       width: 40,
@@ -200,7 +203,7 @@ export default function ratings() {
               (review: {
                 id: React.Key | null | undefined;
                 rating: number;
-                date: {_seconds: number, _nanoseconds: number};
+                date: { _seconds: number; _nanoseconds: number };
                 comment: string;
                 people: string;
               }) => (
@@ -209,13 +212,17 @@ export default function ratings() {
                   style={{
                     borderBottomWidth: 2,
                     borderBottomColor: "darkgray",
-                    marginTop: 20
+                    marginTop: 20,
                   }}
                 >
                   <View style={styles.review}>
                     <View style={{ flexDirection: "row", padding: 10 }}>
                       <Image
-                        source={{ uri: reviewers[review.people] ? reviewers[review.people].profilePicture : userProfile.profilePicture }}
+                        source={{
+                          uri: reviewers[review.people]
+                            ? reviewers[review.people].profilePicture
+                            : userProfile.profilePicture,
+                        }}
                         style={styles.avatar}
                       />
                       <Text
@@ -226,7 +233,9 @@ export default function ratings() {
                           color: text,
                         }}
                       >
-                        {reviewers[review.people] ? reviewers[review.people].firstName : "User not found"}
+                        {reviewers[review.people]
+                          ? reviewers[review.people].firstName
+                          : "User not found"}
                       </Text>
                       <Text
                         style={{
@@ -235,10 +244,14 @@ export default function ratings() {
                           alignSelf: "center",
                           color: "darkgray",
                           marginRight: 20,
-                          marginLeft: 5
+                          marginLeft: 5,
                         }}
                       >
-                        • {format(new Date(review.date._seconds * 1000), "dd MMM yyyy")}
+                        •{" "}
+                        {format(
+                          new Date(review.date._seconds * 1000),
+                          "dd MMM yyyy",
+                        )}
                       </Text>
                     </View>
                     <View style={{ flexDirection: "row" }}>
