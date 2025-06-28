@@ -153,7 +153,7 @@ export default function Signup() {
       marginVertical: 10,
       borderRadius: 5,
       opacity: 0.75,
-      color: text
+      color: text,
     },
     button: {
       justifyContent: "center",
