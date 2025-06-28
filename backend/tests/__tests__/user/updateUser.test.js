@@ -6,12 +6,12 @@ const { updateUserProfile } = require("../../../models/userModel");
 // Set up Express app for testing
 const app = express();
 app.use(express.json());
-app.put("/api/users", updateUser);
+app.post("/api/users", updateUser);
 
 // Mock the model
 jest.mock("../../../models/userModel");
 
-describe("PUT /api/users", () => {
+describe("POST /api/users", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -28,7 +28,7 @@ describe("PUT /api/users", () => {
     };
     updateUserProfile.mockResolvedValue(true);
 
-    const response = await request(app).put("/api/users").send(input);
+    const response = await request(app).post("/api/users").send(input);
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       message: "User profile updates successfully ",
@@ -44,7 +44,7 @@ describe("PUT /api/users", () => {
       email: "newuser@example.com",
     };
 
-    const response = await request(app).put("/api/users").send(input);
+    const response = await request(app).post("/api/users").send(input);
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ error: "UID is required" });
     expect(updateUserProfile).not.toHaveBeenCalled();
@@ -57,7 +57,7 @@ describe("PUT /api/users", () => {
     };
     updateUserProfile.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).put("/api/users").send(input);
+    const response = await request(app).post("/api/users").send(input);
     expect(response.status).toBe(500);
     expect(response.body).toEqual({
       error: "Failed to update user profile",
