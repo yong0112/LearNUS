@@ -51,6 +51,14 @@ export default function ForumPost() {
   }, []);
 
   const handlePost = async () => {
+    const trimmedTitle = title.trim();
+    const trimmedContent = content.trim();
+
+    if (!trimmedTitle || !trimmedContent) {
+      Alert.alert("Error", "Title and content cannot be empty.");
+      return;
+    }
+
     try {
       const currUser = auth.currentUser;
       const response = await fetch("https://learnus.onrender.com/api/forum", {
@@ -59,8 +67,8 @@ export default function ForumPost() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: title,
-          content: content,
+          title: trimmedTitle,
+          content: trimmedContent,
           courseTag: selectedCourse || null,
           author: currUser?.uid,
         }),
