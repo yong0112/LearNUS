@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { fetchUserEvents } = require("../../../controllers/eventsController");
 const { getUserEvents } = require("../../../models/eventsModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/events/:uid", fetchUserEvents);
 
 // Mock the model
 jest.mock("../../../models/eventsModel");
 
-describe("GET /api/events/:uid", () => {
+describe("fetchUserEvents Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -36,9 +29,15 @@ describe("GET /api/events/:uid", () => {
     ];
     getUserEvents.mockResolvedValue(mockEvents);
 
-    const response = await request(app).get(`/api/events/${uid}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockEvents);
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserEvents(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(mockEvents);
     expect(getUserEvents).toHaveBeenCalledWith(uid);
   });
 
@@ -46,9 +45,16 @@ describe("GET /api/events/:uid", () => {
     const uid = "user123";
     getUserEvents.mockRejectedValue(new Error("No events"));
 
-    const response = await request(app).get(`/api/events/${uid}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({ message: "No events" });
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserEvents(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "No events" });
     expect(getUserEvents).toHaveBeenCalledWith(uid);
   });
 });

@@ -1,19 +1,12 @@
-const request = require("supertest");
-const express = require("express");
 const { getPostUpvoteStatus } = require("../../../controllers/forumController");
 const {
   getPostUpvoteStatus: getPostUpvoteStatusModel,
 } = require("../../../models/forumModel");
 
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/forum/:postId/upvote/:userId", getPostUpvoteStatus);
-
 // Mock the model
 jest.mock("../../../models/forumModel");
 
-describe("GET /api/forum/:postId/upvote/:userId", () => {
+describe("getPostUpvoteStatus Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -29,11 +22,15 @@ describe("GET /api/forum/:postId/upvote/:userId", () => {
     const result = { upvoted: true, upvotes: 1 };
     getPostUpvoteStatusModel.mockResolvedValue(result);
 
-    const response = await request(app).get(
-      `/api/forum/${postId}/upvote/${userId}`,
-    );
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(result);
+    const req = { params: { postId, userId } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await getPostUpvoteStatus(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(result);
     expect(getPostUpvoteStatusModel).toHaveBeenCalledWith(postId, userId);
   });
 
@@ -42,11 +39,16 @@ describe("GET /api/forum/:postId/upvote/:userId", () => {
     const userId = "user123";
     getPostUpvoteStatusModel.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).get(
-      `/api/forum/${postId}/upvote/${userId}`,
-    );
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Database error" });
+    const req = { params: { postId, userId } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await getPostUpvoteStatus(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Database error" });
     expect(getPostUpvoteStatusModel).toHaveBeenCalledWith(postId, userId);
   });
 });

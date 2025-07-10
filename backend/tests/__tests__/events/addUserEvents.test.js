@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { addUserEvents } = require("../../../controllers/eventsController");
 const { postUserEvents } = require("../../../models/eventsModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.post("/api/events/:uid", addUserEvents);
 
 // Mock the model
 jest.mock("../../../models/eventsModel");
 
-describe("POST /api/events/:uid", () => {
+describe("addUserEvents Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -32,9 +25,19 @@ describe("POST /api/events/:uid", () => {
     const eventClass = { id: "event1", ...input };
     postUserEvents.mockResolvedValue(eventClass);
 
-    const response = await request(app).post(`/api/events/${uid}`).send(input);
-    expect(response.status).toBe(201);
-    expect(response.body).toEqual({ message: "Event added", eventClass });
+    const req = { params: { uid }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addUserEvents(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Event added",
+      eventClass,
+    });
     expect(postUserEvents).toHaveBeenCalledWith({
       user: uid,
       title: input.title,
@@ -52,9 +55,16 @@ describe("POST /api/events/:uid", () => {
       // Missing startTime, endTime
     };
 
-    const response = await request(app).post(`/api/events/${uid}`).send(input);
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: "Missing required fields" });
+    const req = { params: { uid }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addUserEvents(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing required fields" });
     expect(postUserEvents).not.toHaveBeenCalled();
   });
 
@@ -68,9 +78,16 @@ describe("POST /api/events/:uid", () => {
     };
     postUserEvents.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).post(`/api/events/${uid}`).send(input);
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Server error" });
+    const req = { params: { uid }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addUserEvents(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
     expect(postUserEvents).toHaveBeenCalledWith({
       user: uid,
       title: input.title,

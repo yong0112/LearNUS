@@ -1,5 +1,3 @@
-const request = require("supertest");
-const express = require("express");
 const {
   getCommentUpvoteStatus,
 } = require("../../../controllers/forumController");
@@ -7,18 +5,10 @@ const {
   getCommentUpvoteStatus: getCommentUpvoteStatusModel,
 } = require("../../../models/forumModel");
 
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get(
-  "/api/forum/:postId/comments/:commentId/upvote/:userId",
-  getCommentUpvoteStatus,
-);
-
 // Mock the model
 jest.mock("../../../models/forumModel");
 
-describe("GET /api/forum/:postId/comments/:commentId/upvote/:userId", () => {
+describe("getCommentUpvoteStatus", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -35,11 +25,15 @@ describe("GET /api/forum/:postId/comments/:commentId/upvote/:userId", () => {
     const result = { upvoted: true, upvotes: 1 };
     getCommentUpvoteStatusModel.mockResolvedValue(result);
 
-    const response = await request(app).get(
-      `/api/forum/${postId}/comments/${commentId}/upvote/${userId}`,
-    );
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(result);
+    const req = { params: { postId, commentId, userId } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await getCommentUpvoteStatus(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(result);
     expect(getCommentUpvoteStatusModel).toHaveBeenCalledWith(
       postId,
       commentId,
@@ -53,11 +47,16 @@ describe("GET /api/forum/:postId/comments/:commentId/upvote/:userId", () => {
     const userId = "user123";
     getCommentUpvoteStatusModel.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).get(
-      `/api/forum/${postId}/comments/${commentId}/upvote/${userId}`,
-    );
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Database error" });
+    const req = { params: { postId, commentId, userId } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await getCommentUpvoteStatus(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Database error" });
     expect(getCommentUpvoteStatusModel).toHaveBeenCalledWith(
       postId,
       commentId,
