@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { fetchUserProfile } = require("../../../controllers/userController");
 const { getUserProfile } = require("../../../models/userModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/users/:uid", fetchUserProfile);
 
 // Mock the model
 jest.mock("../../../models/userModel");
 
-describe("GET /api/users/:uid", () => {
+describe("fetchUserProfile Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -26,9 +19,15 @@ describe("GET /api/users/:uid", () => {
     };
     getUserProfile.mockResolvedValue(mockUser);
 
-    const response = await request(app).get(`/api/users/${uid}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockUser);
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserProfile(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(mockUser);
     expect(getUserProfile).toHaveBeenCalledWith(uid);
   });
 
@@ -36,9 +35,16 @@ describe("GET /api/users/:uid", () => {
     const uid = "user123";
     getUserProfile.mockRejectedValue(new Error("404 User not found"));
 
-    const response = await request(app).get(`/api/users/${uid}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({ error: "404 User not found" });
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: "404 User not found" });
     expect(getUserProfile).toHaveBeenCalledWith(uid);
   });
 });

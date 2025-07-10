@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { fetchComments } = require("../../../controllers/forumController");
 const { getComments } = require("../../../models/forumModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/forum/comments/:postId", fetchComments);
 
 // Mock the model
 jest.mock("../../../models/forumModel");
 
-describe("GET /api/forum/comments/:postId", () => {
+describe("fetchComment Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -24,9 +17,15 @@ describe("GET /api/forum/comments/:postId", () => {
     ];
     getComments.mockResolvedValue(mockComments);
 
-    const response = await request(app).get(`/api/forum/comments/${postId}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockComments);
+    const req = { params: { postId } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchComments(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(mockComments);
     expect(getComments).toHaveBeenCalledWith(postId);
   });
 
@@ -34,9 +33,16 @@ describe("GET /api/forum/comments/:postId", () => {
     const postId = "post123";
     getComments.mockRejectedValue(new Error("No comments found"));
 
-    const response = await request(app).get(`/api/forum/comments/${postId}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({ message: "No comments found" });
+    const req = { params: { postId } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchComments(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "No comments found" });
     expect(getComments).toHaveBeenCalledWith(postId);
   });
 });

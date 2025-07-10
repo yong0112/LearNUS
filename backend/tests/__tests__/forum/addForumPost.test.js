@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { addForumPost } = require("../../../controllers/forumController");
 const { postForum } = require("../../../models/forumModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.post("/api/forum", addForumPost);
 
 // Mock the model
 jest.mock("../../../models/forumModel");
 
-describe("POST /api/forum", () => {
+describe("addForumPost Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -31,9 +24,16 @@ describe("POST /api/forum", () => {
     const newPost = { id: "post1", ...input };
     postForum.mockResolvedValue(newPost);
 
-    const response = await request(app).post("/api/forum").send(input);
-    expect(response.status).toBe(201);
-    expect(response.body).toEqual({ message: "Post added", newPost });
+    const req = { body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addForumPost(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ message: "Post added", newPost });
     expect(postForum).toHaveBeenCalledWith(input);
   });
 
@@ -44,9 +44,16 @@ describe("POST /api/forum", () => {
       author: "user123",
     };
 
-    const response = await request(app).post("/api/forum").send(input);
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: "Missing title" });
+    const req = { body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addForumPost(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing title" });
     expect(postForum).not.toHaveBeenCalled();
   });
 
@@ -57,9 +64,16 @@ describe("POST /api/forum", () => {
       author: "user123",
     };
 
-    const response = await request(app).post("/api/forum").send(input);
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: "Missing content" });
+    const req = { body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addForumPost(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing content" });
     expect(postForum).not.toHaveBeenCalled();
   });
 
@@ -72,9 +86,16 @@ describe("POST /api/forum", () => {
     };
     postForum.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).post("/api/forum").send(input);
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Server error" });
+    const req = { body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addForumPost(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
     expect(postForum).toHaveBeenCalledWith(input);
   });
 });
