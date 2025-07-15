@@ -165,16 +165,16 @@ export default function Home() {
   const handleBooking = () => {
     if (selectedTutor) {
       router.push({
-      pathname: "/booking",
-      params: {
-        tutor: selectedTutor.tutor,
-        course: selectedTutor.course,
-        description: selectedTutor.description,
-        location: selectedTutor.location,
-        availability: selectedTutor.availability,
-        rate: selectedTutor.rate,
-      },
-    });
+        pathname: "/booking",
+        params: {
+          tutor: selectedTutor.tutor,
+          course: selectedTutor.course,
+          description: selectedTutor.description,
+          location: selectedTutor.location,
+          availability: selectedTutor.availability,
+          rate: selectedTutor.rate,
+        },
+      });
     }
   };
 
@@ -453,42 +453,38 @@ export default function Home() {
               No tutors yet.
             </Text>
           ) : (
-            tutors.map(
-              (cls: Tutor) => (
-                <TouchableOpacity
-                  key={cls.id}
-                  style={styles.tutorProfile}
-                  onPress={() => handleTutorProfile(cls)}
+            tutors.map((cls: Tutor) => (
+              <TouchableOpacity
+                key={cls.id}
+                style={styles.tutorProfile}
+                onPress={() => handleTutorProfile(cls)}
+              >
+                {tutorProfiles[cls.tutor]?.profilePicture ? (
+                  <Image
+                    source={{ uri: tutorProfiles[cls.tutor].profilePicture }}
+                    style={{ width: 80, height: 100, alignSelf: "center" }}
+                  />
+                ) : (
+                  <Image
+                    source={require("../../assets/images/person.jpg")}
+                    style={{ width: 80, height: 100, alignSelf: "center" }}
+                  />
+                )}
+                <Text style={{ fontSize: 16, fontWeight: "bold", color: text }}>
+                  {cls.course}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "500",
+                    fontStyle: "italic",
+                    color: text,
+                  }}
                 >
-                  {tutorProfiles[cls.tutor]?.profilePicture ? (
-                    <Image
-                      source={{ uri: tutorProfiles[cls.tutor].profilePicture }}
-                      style={{ width: 80, height: 100, alignSelf: "center" }}
-                    />
-                  ) : (
-                    <Image
-                      source={require("../../assets/images/person.jpg")}
-                      style={{ width: 80, height: 100, alignSelf: "center" }}
-                    />
-                  )}
-                  <Text
-                    style={{ fontSize: 16, fontWeight: "bold", color: text }}
-                  >
-                    {cls.course}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "500",
-                      fontStyle: "italic",
-                      color: text,
-                    }}
-                  >
-                    S${cls.rate} hourly
-                  </Text>
-                </TouchableOpacity>
-              ),
-            )
+                  S${cls.rate} hourly
+                </Text>
+              </TouchableOpacity>
+            ))
           )}
         </ScrollView>
 
