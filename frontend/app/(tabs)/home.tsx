@@ -33,19 +33,20 @@ import {
 import { auth } from "../../lib/firebase";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { Class, Tutor, UserProfile } from "../types";
 
 const screenHeight = Dimensions.get("window").height;
 
 export default function Home() {
   const router = useRouter();
-  const [classes, setClasses] = useState<any[]>([]);
-  const [todayClass, setTodayClass] = useState<any[]>([]);
-  const [tutors, setTutors] = useState<any>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [todayClass, setTodayClass] = useState<Class[]>([]);
+  const [tutors, setTutors] = useState<Tutor[]>([]);
   const [tutorProfiles, setTutorProfiles] = useState<
-    Record<string, any | undefined>
+    Record<string, UserProfile>
   >({});
   const [error, setError] = useState(null);
-  const [selectedTutor, setSelectedTutor] = useState<any>();
+  const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -63,7 +64,7 @@ export default function Home() {
             if (!res.ok) throw new Error("Failed to fetch classes");
             return res.json();
           })
-          .then(async (data) => {
+          .then(async (data: Class[]) => {
             console.log("Classes:", data);
             setClasses(data);
             setTodayClass(
@@ -92,19 +93,19 @@ export default function Home() {
             if (!res.ok) throw new Error("Failed to fetch tutors");
             return res.json();
           })
-          .then(async (data) => {
+          .then(async (data: Tutor[]) => {
             console.log("Tutors:", data);
             setTutors(data);
-            const tutorProfile: Record<string, string> = {};
+            const tutorProfile: Record<string, UserProfile> = {};
             await Promise.all(
-              data.map(async (cls: any) => {
+              data.map(async (cls: Tutor) => {
                 try {
                   const res = await fetch(
                     `https://learnus.onrender.com/api/users/${cls.tutor}`,
                   );
                   if (!res.ok) throw new Error("Failed to fetch tutor");
                   const userData = await res.json();
-                  tutorProfile[cls.tutor] = userData;
+                  tutorProfile[cls.tutor] = userData as UserProfile;
                 } catch (err) {
                   console.error(err);
                 }
@@ -124,15 +125,7 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
-  const handleTutorProfile = (tutor: {
-    id: React.Key | null | undefined;
-    tutor: string;
-    course: string;
-    location: string;
-    description: string;
-    availability: string;
-    rate: number;
-  }) => {
+  const handleTutorProfile = (tutor: Tutor) => {
     setSelectedTutor(tutor);
     setModalVisible(true);
   };
@@ -170,7 +163,8 @@ export default function Home() {
   };
 
   const handleBooking = () => {
-    router.push({
+    if (selectedTutor) {
+      router.push({
       pathname: "/booking",
       params: {
         tutor: selectedTutor.tutor,
@@ -181,6 +175,7 @@ export default function Home() {
         rate: selectedTutor.rate,
       },
     });
+    }
   };
 
   const handleContact = () => {
@@ -459,15 +454,7 @@ export default function Home() {
             </Text>
           ) : (
             tutors.map(
-              (cls: {
-                id: React.Key | null | undefined;
-                tutor: string;
-                availability: string;
-                course: string;
-                description: string;
-                location: string;
-                rate: number;
-              }) => (
+              (cls: Tutor) => (
                 <TouchableOpacity
                   key={cls.id}
                   style={styles.tutorProfile}

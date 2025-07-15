@@ -20,15 +20,11 @@ import {
   useColorScheme,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-
-type courseOption = {
-  label: string;
-  value: string;
-};
+import { CourseOption } from "./types";
 
 export default function ForumPost() {
   const router = useRouter();
-  const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
+  const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
