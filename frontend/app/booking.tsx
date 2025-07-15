@@ -22,20 +22,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
-
-type Session = {
-  tutor: string;
-  course: string;
-  description: string;
-  location: string;
-  availability: string;
-  rate: number;
-};
-
-type Day = {
-  label: string;
-  value: number;
-};
+import { Session, Day, UserProfile } from "./types";
 
 export default function BookingPage() {
   const router = useRouter();
@@ -46,7 +33,7 @@ export default function BookingPage() {
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
   const [status, setStatus] = useState<string>("pending");
-  const [tutorProfile, setTutorProfile] = useState<any>();
+  const [tutorProfile, setTutorProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<any>();
   const { tutor, course, description, location, availability, rate } =
     useLocalSearchParams() as unknown as Session;

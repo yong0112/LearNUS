@@ -14,22 +14,13 @@ import {
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-
-type courseOption = {
-  label: string;
-  value: string;
-};
-
-type locationOption = {
-  label: string;
-  value: string;
-};
+import { CourseOption, LocationOption } from "./types";
 
 export default function TutorPost() {
   const router = useRouter();
-  const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
+  const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
-  const [locationOptions, setLocationOptions] = useState<locationOption[]>([]);
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [description, setDescription] = useState("");
   const [availability, setAvailability] = useState("");

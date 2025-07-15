@@ -42,3 +42,22 @@ export interface Tutor {
   availability: string;
   rate: number;
 }
+
+export interface LocationOption {
+  label: string;
+  value: string;
+}
+
+export interface Session {
+  tutor: string;
+  course: string;
+  description: string;
+  location: string;
+  availability: string;
+  rate: number;
+}
+
+export interface Day {
+  label: string;
+  value: number;
+}
