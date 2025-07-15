@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { addComment } = require("../../../controllers/forumController");
 const { postComment } = require("../../../models/forumModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.post("/api/forum/comments/:postId", addComment);
 
 // Mock the model
 jest.mock("../../../models/forumModel");
 
-describe("POST /api/forum/comments/:postId", () => {
+describe("addComment Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -31,11 +24,19 @@ describe("POST /api/forum/comments/:postId", () => {
     const newComment = { id: "comment1", ...input };
     postComment.mockResolvedValue(newComment);
 
-    const response = await request(app)
-      .post(`/api/forum/comments/${postId}`)
-      .send(input);
-    expect(response.status).toBe(201);
-    expect(response.body).toEqual({ message: "Comment added", newComment });
+    const req = { params: { postId }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addComment(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Comment added",
+      newComment,
+    });
     expect(postComment).toHaveBeenCalledWith(postId, input);
   });
 
@@ -46,11 +47,16 @@ describe("POST /api/forum/comments/:postId", () => {
       authorName: "Test User",
     };
 
-    const response = await request(app)
-      .post(`/api/forum/comments/${postId}`)
-      .send(input);
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: "Missing content" });
+    const req = { params: { postId }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addComment(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing content" });
     expect(postComment).not.toHaveBeenCalled();
   });
 
@@ -63,11 +69,16 @@ describe("POST /api/forum/comments/:postId", () => {
     };
     postComment.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app)
-      .post(`/api/forum/comments/${postId}`)
-      .send(input);
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Server error" });
+    const req = { params: { postId }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addComment(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
     expect(postComment).toHaveBeenCalledWith(postId, input);
   });
 });

@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { fetchUserReviews } = require("../../../controllers/reviewsController");
 const { getUserReviews } = require("../../../models/reviewsModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/reviews/:uid", fetchUserReviews);
 
 // Mock the model
 jest.mock("../../../models/reviewsModel");
 
-describe("GET /api/reviews/:uid", () => {
+describe("fetchUserReviews Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -36,9 +29,15 @@ describe("GET /api/reviews/:uid", () => {
     ];
     getUserReviews.mockResolvedValue(mockReviews);
 
-    const response = await request(app).get(`/api/reviews/${uid}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockReviews);
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserReviews(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(mockReviews);
     expect(getUserReviews).toHaveBeenCalledWith(uid);
   });
 
@@ -46,9 +45,16 @@ describe("GET /api/reviews/:uid", () => {
     const uid = "user123";
     getUserReviews.mockRejectedValue(new Error("No reviews"));
 
-    const response = await request(app).get(`/api/reviews/${uid}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({ message: "No reviews" });
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserReviews(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "No reviews" });
     expect(getUserReviews).toHaveBeenCalledWith(uid);
   });
 });

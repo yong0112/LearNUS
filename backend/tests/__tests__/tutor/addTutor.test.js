@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { addTutor } = require("../../../controllers/tutorController");
 const { postTutor } = require("../../../models/tutorModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.post("/api/tutors", addTutor);
 
 // Mock the model
 jest.mock("../../../models/tutorModel");
 
-describe("POST /api/tutors", () => {
+describe("addTutor Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -33,9 +26,16 @@ describe("POST /api/tutors", () => {
     const newTutor = { id: "tutor1", ...input };
     postTutor.mockResolvedValue(newTutor);
 
-    const response = await request(app).post("/api/tutors").send(input);
-    expect(response.status).toBe(201);
-    expect(response.body).toEqual({ message: "Tutor added", newTutor });
+    const req = { body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addTutor(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ message: "Tutor added", newTutor });
     expect(postTutor).toHaveBeenCalledWith(input);
   });
 
@@ -47,9 +47,16 @@ describe("POST /api/tutors", () => {
       // Missing description, availability, rate
     };
 
-    const response = await request(app).post("/api/tutors").send(input);
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: "Missing required fields" });
+    const req = { body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addTutor(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing required fields" });
     expect(postTutor).not.toHaveBeenCalled();
   });
 
@@ -64,9 +71,16 @@ describe("POST /api/tutors", () => {
     };
     postTutor.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).post("/api/tutors").send(input);
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Server error" });
+    const req = { body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addTutor(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
     expect(postTutor).toHaveBeenCalledWith(input);
   });
 });
