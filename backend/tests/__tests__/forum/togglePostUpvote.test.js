@@ -1,19 +1,12 @@
-const request = require("supertest");
-const express = require("express");
 const { togglePostUpvote } = require("../../../controllers/forumController");
 const {
   togglePostUpvote: togglePostUpvoteModel,
 } = require("../../../models/forumModel");
 
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.post("/api/forum/:postId/upvote", togglePostUpvote);
-
 // Mock the model
 jest.mock("../../../models/forumModel");
 
-describe("POST /api/forum/:postId/upvote", () => {
+describe("togglePostUpvote Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -29,11 +22,18 @@ describe("POST /api/forum/:postId/upvote", () => {
     const result = { upvoted: true, upvotes: 1 };
     togglePostUpvoteModel.mockResolvedValue(result);
 
-    const response = await request(app)
-      .post(`/api/forum/${postId}/upvote`)
-      .send(input);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ message: "Upvote toggled", ...result });
+    const req = { params: { postId }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await togglePostUpvote(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Upvote toggled",
+      ...result,
+    });
     expect(togglePostUpvoteModel).toHaveBeenCalledWith(postId, input.userId);
   });
 
@@ -41,11 +41,16 @@ describe("POST /api/forum/:postId/upvote", () => {
     const postId = "post123";
     const input = {};
 
-    const response = await request(app)
-      .post(`/api/forum/${postId}/upvote`)
-      .send(input);
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: "Missing userId" });
+    const req = { params: { postId }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await togglePostUpvote(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing userId" });
     expect(togglePostUpvoteModel).not.toHaveBeenCalled();
   });
 
@@ -54,11 +59,16 @@ describe("POST /api/forum/:postId/upvote", () => {
     const input = { userId: "user123" };
     togglePostUpvoteModel.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app)
-      .post(`/api/forum/${postId}/upvote`)
-      .send(input);
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Database error" });
+    const req = { params: { postId }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await togglePostUpvote(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Database error" });
     expect(togglePostUpvoteModel).toHaveBeenCalledWith(postId, input.userId);
   });
 });

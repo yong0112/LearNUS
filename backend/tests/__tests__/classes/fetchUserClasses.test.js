@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { fetchUserClasses } = require("../../../controllers/classesController");
 const { getUserClasses } = require("../../../models/classesModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/classes/:uid", fetchUserClasses);
 
 // Mock the model
 jest.mock("../../../models/classesModel");
 
-describe("GET /api/classes/:uid", () => {
+describe("fetchUserClasses Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -44,9 +37,15 @@ describe("GET /api/classes/:uid", () => {
     ];
     getUserClasses.mockResolvedValue(mockClasses);
 
-    const response = await request(app).get(`/api/classes/${uid}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockClasses);
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserClasses(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(mockClasses);
     expect(getUserClasses).toHaveBeenCalledWith(uid);
   });
 
@@ -54,9 +53,16 @@ describe("GET /api/classes/:uid", () => {
     const uid = "user123";
     getUserClasses.mockRejectedValue(new Error("No classes"));
 
-    const response = await request(app).get(`/api/classes/${uid}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({ message: "No classes" });
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchUserClasses(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "No classes" });
     expect(getUserClasses).toHaveBeenCalledWith(uid);
   });
 });

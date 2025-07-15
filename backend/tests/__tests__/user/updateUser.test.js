@@ -11,7 +11,7 @@ app.post("/api/users", updateUser);
 // Mock the model
 jest.mock("../../../models/userModel");
 
-describe("POST /api/users", () => {
+describe("updateUser Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});

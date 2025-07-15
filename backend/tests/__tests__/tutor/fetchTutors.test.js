@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { fetchTutors } = require("../../../controllers/tutorController");
 const { getTutors } = require("../../../models/tutorModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/tutors/:uid", fetchTutors);
 
 // Mock the model
 jest.mock("../../../models/tutorModel");
 
-describe("GET /api/tutors/:uid", () => {
+describe("fetchTutors Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "log").mockImplementation(() => {});
@@ -45,9 +38,15 @@ describe("GET /api/tutors/:uid", () => {
     ];
     getTutors.mockResolvedValue(mockTutors);
 
-    const response = await request(app).get(`/api/tutors/${uid}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockTutors);
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchTutors(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(mockTutors);
     expect(getTutors).toHaveBeenCalledWith(uid);
     expect(console.log).toHaveBeenCalledWith("Received POST");
   });
@@ -56,9 +55,16 @@ describe("GET /api/tutors/:uid", () => {
     const uid = "user123";
     getTutors.mockRejectedValue(new Error("No tutors found"));
 
-    const response = await request(app).get(`/api/tutors/${uid}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({ message: "No tutors found" });
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchTutors(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "No tutors found" });
     expect(getTutors).toHaveBeenCalledWith(uid);
     expect(console.log).toHaveBeenCalledWith("Received POST");
   });
