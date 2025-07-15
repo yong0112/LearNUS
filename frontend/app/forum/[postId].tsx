@@ -14,35 +14,7 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
-
-interface ForumPost {
-  id: string;
-  title: string;
-  content: string;
-  courseTag?: string;
-  author: string;
-  createdAt: { _seconds: number; _nanoseconds: number };
-  upvoteCount: number;
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  author: string;
-  authorName: string;
-  createdAt: { _seconds: number; _nanoseconds: number };
-  upvoteCount: number;
-}
-
-interface UserProfile {
-  firstName: string;
-  profilePicture?: string;
-}
-
-interface UpvoteStatus {
-  upvoteCount: number;
-  hasUpvoted: boolean;
-}
+import { ForumPost, Comment, UserProfile, UpvoteStatus } from "../types";
 
 export default function ForumPostDetails() {
   const { postId } = useLocalSearchParams();
@@ -101,15 +73,7 @@ export default function ForumPostDetails() {
               const userRes = await fetch(`${BASE_URL}/api/users/${authorId}`);
               if (!userRes.ok) return;
               const userData: UserProfile = await userRes.json();
-              const userDoc = await getDoc(doc(db, "users", authorId));
-              if (userDoc.exists()) {
-                profiles[authorId] = {
-                  ...userData,
-                  profilePicture: userDoc.data().profilePicture,
-                };
-              } else {
-                profiles[authorId] = userData;
-              }
+              profiles[authorId] = userData;
             } catch (err) {
               console.error(err);
             }
