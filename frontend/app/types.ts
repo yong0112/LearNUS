@@ -61,3 +61,12 @@ export interface Day {
   label: string;
   value: number;
 }
+
+export interface Comment {
+  id: string;
+  content: string;
+  author: string;
+  authorName: string;
+  createdAt: { _seconds: number; _nanoseconds: number };
+  upvoteCount: number;
+}
