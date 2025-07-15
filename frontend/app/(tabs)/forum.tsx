@@ -15,36 +15,12 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { doc, getDoc } from "firebase/firestore";
+import { CourseOption, ForumPost, UserProfile, UpvoteStatus } from "../types";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
 
 const screenHeight = Dimensions.get("window").height;
-
-interface CourseOption {
-  label: string;
-  value: string;
-}
-
-interface ForumPost {
-  id: string;
-  title: string;
-  content: string;
-  courseTag?: string;
-  author: string;
-  createdAt: { _seconds: number; _nanoseconds: number };
-  upvoteCount: number;
-}
-
-interface UserProfile {
-  firstName: string;
-  profilePicture?: string;
-}
-
-interface UpvoteStatus {
-  upvoteCount: number;
-  hasUpvoted: boolean;
-}
 
 export default function Forum() {
   const router = useRouter();
@@ -110,15 +86,7 @@ export default function Forum() {
                   if (!userRes.ok)
                     throw new Error("Failed to fetch user profile");
                   const userData: UserProfile = await userRes.json();
-                  const userDoc = await getDoc(doc(db, "users", post.author));
-                  if (userDoc.exists()) {
-                    profiles[post.author] = {
-                      ...userData,
-                      profilePicture: userDoc.data().profilePicture,
-                    };
-                  } else {
-                    profiles[post.author] = userData;
-                  }
+                  profiles[post.author] = userData;
                 } catch (err) {
                   console.error(err);
                 }
