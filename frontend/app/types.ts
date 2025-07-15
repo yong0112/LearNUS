@@ -26,16 +26,16 @@ export interface UpvoteStatus {
 }
 
 export interface Class {
-    id: string;
-    course: string;
-    startTime: string;
-    endTime: string;
-    date: number; 
+  id: string;
+  course: string;
+  startTime: string;
+  endTime: string;
+  date: number;
 }
 
 export interface Tutor {
   id: string;
-  tutor: string; 
+  tutor: string;
   course: string;
   location: string;
   description: string;

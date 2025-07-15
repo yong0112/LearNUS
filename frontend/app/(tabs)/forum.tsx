@@ -86,7 +86,7 @@ export default function Forum() {
                   if (!userRes.ok)
                     throw new Error("Failed to fetch user profile");
                   const userData: UserProfile = await userRes.json();
-                  profiles[post.author] = userData;  
+                  profiles[post.author] = userData;
                 } catch (err) {
                   console.error(err);
                 }
