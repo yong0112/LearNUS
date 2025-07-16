@@ -29,6 +29,7 @@ import {
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
+import { Tutor, UserProfile } from "./types";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -36,13 +37,13 @@ export default function tutoring() {
   const router = useRouter();
   const [searching, setSearching] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [tutors, setTutors] = useState<any>([]);
+  const [tutors, setTutors] = useState<Tutor[]>([]);
   const [tutorProfile, setTutorProfiles] = useState<
-    Record<string, any | undefined>
+    Record<string, UserProfile | undefined>
   >({});
   const [error, setError] = useState(null);
-  const [filteredTutors, setFilteredTutors] = useState<any>([]);
-  const [selectedTutor, setSelectedTutor] = useState<any>(null);
+  const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
+  const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
   const colorScheme = useColorScheme();
@@ -51,15 +52,7 @@ export default function tutoring() {
   const text = useThemeColor({}, "text");
 
   const displayedTutors = filteredTutors.filter(
-    (tutor: {
-      id: React.Key | null | undefined;
-      tutor: string;
-      course: string;
-      location: string;
-      description: string;
-      availability: string;
-      rate: number;
-    }) => {
+    (tutor: Tutor) => {
       const profile = tutorProfile[tutor.tutor];
       if (!profile) return null;
 
@@ -106,10 +99,10 @@ export default function tutoring() {
             if (!res.ok) throw new Error("Failed to fetch tutors");
             return res.json();
           })
-          .then(async (data) => {
+          .then(async (data: Tutor[]) => {
             console.log("Tutors:", data);
             setTutors(data);
-            const tutorProfile: Record<string, any | undefined> = {};
+            const tutorProfile: Record<string, UserProfile | undefined> = {};
             await Promise.all(
               data.map(async (cls: any) => {
                 try {
@@ -170,8 +163,8 @@ export default function tutoring() {
         return (
           locationMatch &&
           (!ratings ||
-            parseFloat(profile.ratings as string) >=
-              Number(parseFloat(ratings as string))) &&
+            (profile.ratings !== undefined &&
+            profile.ratings >= Number(parseFloat(ratings as string)))) &&
           (!minRate || tutor.rate >= Number(parseInt(minRate as string))) &&
           (!maxRate || tutor.rate <= Number(parseInt(maxRate as string)))
         );
@@ -181,18 +174,14 @@ export default function tutoring() {
   }, [location, ratings, minRate, maxRate, tutors, tutorProfile]);
 
   const sortTutors = (criteria: "rating" | "rate", order: "asc" | "desc") => {
-    const sorted = [...tutors].sort(
-      (
-        x: { tutor: string; rate: string | number },
-        y: { tutor: string; rate: string | number },
-      ) => {
-        let xValue: number | string;
-        let yValue: number | string;
+    const sorted = [...tutors].sort((x, y) => {
+        let xValue: number
+        let yValue: number 
 
         switch (criteria) {
           case "rating":
-            xValue = parseFloat(tutorProfile[x.tutor]?.ratings);
-            yValue = parseFloat(tutorProfile[y.tutor]?.ratings);
+            xValue = tutorProfile[x.tutor]?.ratings ?? 0;
+            yValue = tutorProfile[y.tutor]?.ratings ?? 0;
             break;
           case "rate":
             xValue = x.rate;
@@ -211,15 +200,10 @@ export default function tutoring() {
     setTutors(sorted);
   };
 
-  const handleTutorProfile = (tutor: {
-    id: React.Key | null | undefined;
-    tutor: string;
-    course: string;
-    location: string;
-    description: string;
-    availability: string;
-    rate: number;
-  }) => {
+  const handleTutorProfile = (tutor: Tutor) => {
+    if (!tutorProfile[tutor.tutor]) {
+      return;
+    }
     setSelectedTutor(tutor);
     setModalVisible(true);
   };
@@ -234,6 +218,7 @@ export default function tutoring() {
   };
 
   const handleBooking = () => {
+    if (!selectedTutor || !tutorProfile[selectedTutor.tutor]) return;
     router.push({
       pathname: "/booking",
       params: {
@@ -444,16 +429,7 @@ export default function tutoring() {
               No tutors yet.
             </Text>
           ) : (
-            displayedTutors.map(
-              (tutor: {
-                id: React.Key | null | undefined;
-                tutor: string;
-                course: string;
-                location: string;
-                description: string;
-                availability: string;
-                rate: number;
-              }) => {
+            displayedTutors.map((tutor: Tutor) => {
                 const profile = tutorProfile[tutor.tutor];
                 if (!profile) return null;
 
@@ -463,19 +439,13 @@ export default function tutoring() {
                     style={styles.tutorCard}
                     onPress={() => handleTutorProfile(tutor)}
                   >
-                    {tutorProfile[tutor.tutor]?.profilePicture ? (
-                      <Image
-                        source={{
-                          uri: tutorProfile[tutor.tutor].profilePicture,
-                        }}
-                        style={styles.image}
+                    <Image
+                      source ={
+                        profile.profilePicture
+                          ? { uri: profile.profilePicture }
+                          : require("../assets/images/person.jpg")
+                      }
                       />
-                    ) : (
-                      <Image
-                        source={require("../assets/images/person.jpg")}
-                        style={styles.image}
-                      />
-                    )}
                     <View
                       style={{
                         flexDirection: "row",
@@ -485,7 +455,7 @@ export default function tutoring() {
                       <Text
                         style={{ fontSize: 24, fontWeight: "800", color: text }}
                       >
-                        {tutorProfile[tutor.tutor].firstName}
+                        {profile.firstName}
                       </Text>
                       <View
                         style={{
@@ -502,7 +472,7 @@ export default function tutoring() {
                             color: text,
                           }}
                         >
-                          {tutorProfile[tutor.tutor].ratings}
+                          {profile.ratings ?? "N/A"}
                         </Text>
                       </View>
                     </View>
@@ -540,7 +510,10 @@ export default function tutoring() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              {selectedTutor && (
+              {selectedTutor && (() => {
+                const profile = tutorProfile[selectedTutor.tutor];
+                if (!profile) return null;
+              return (
                 <>
                   <View
                     style={{
@@ -567,9 +540,11 @@ export default function tutoring() {
                     </View>
                   </View>
                   <Image
-                    source={{
-                      uri: tutorProfile[selectedTutor.tutor].profilePicture,
-                    }}
+                    source={
+                      profile.profilePicture
+                        ? { uri: profile.profilePicture }
+                        : require("../assets/images/person.jpg")
+                    }
                     style={styles.modalImage}
                   />
                   <Text
@@ -579,8 +554,8 @@ export default function tutoring() {
                       alignSelf: "center",
                     }}
                   >
-                    {tutorProfile[selectedTutor.tutor].firstName}{" "}
-                    {tutorProfile[selectedTutor.tutor].lastName}
+                    {profile.firstName}{" "}
+                    {profile.lastName}
                   </Text>
                   <Text
                     style={{ fontSize: 24, fontWeight: "600", marginTop: 25 }}
@@ -636,7 +611,7 @@ export default function tutoring() {
                         marginHorizontal: 10,
                       }}
                     >
-                      {tutorProfile[selectedTutor.tutor].ratings}/5.0 stars
+                      {profile.ratings}/5.0 stars
                     </Text>
                   </View>
                   <View
@@ -718,7 +693,8 @@ export default function tutoring() {
                     </Text>
                   </TouchableOpacity>
                 </>
-              )}
+              );
+              })()}
             </View>
           </View>
         </Modal>
