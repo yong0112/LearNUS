@@ -14,14 +14,25 @@ const fetchTutors = async (req, res) => {
 };
 
 const addTutor = async (req, res) => {
-  const { tutor, course, location, description, availability, rate } = req.body;
+  const {
+    tutor,
+    course,
+    location,
+    description,
+    dayOfWeek,
+    startTime,
+    endTime,
+    rate,
+  } = req.body;
 
   if (
     !tutor ||
     !course ||
     !location ||
     !description ||
-    !availability ||
+    !dayOfWeek ||
+    !startTime ||
+    !endTime ||
     !rate
   ) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -33,7 +44,9 @@ const addTutor = async (req, res) => {
       course,
       location,
       description,
-      availability,
+      dayOfWeek,
+      startTime,
+      endTime,
       rate,
     });
     res.status(201).json({ message: "Tutor added", newTutor });
