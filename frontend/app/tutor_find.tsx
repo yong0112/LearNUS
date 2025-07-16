@@ -218,7 +218,7 @@ export default function tutoring() {
   };
 
   const handleBooking = () => {
-    if (!selectedTutor || !tutorProfile[selectedTutor.tutor]) return;
+    if (!selectedTutor) return;
     router.push({
       pathname: "/booking",
       params: {
