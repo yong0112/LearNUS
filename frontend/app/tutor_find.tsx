@@ -29,7 +29,7 @@ import {
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { Tutor, UserProfile } from "./types";
+import { Tutor, UserProfile, Day } from "./types";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -42,9 +42,9 @@ export default function tutoring() {
     Record<string, UserProfile | undefined>
   >({});
   const [error, setError] = useState(null);
-  const [filteredTutors, setFilteredTutors] = useState<any>([]);
-  const [selectedTutor, setSelectedTutor] = useState<any>(null);
-  const [daysDict, setDaysDict] = useState<any>();
+  const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
+  const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
+  const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
   const colorScheme = useColorScheme();
@@ -52,20 +52,6 @@ export default function tutoring() {
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
-  const displayedTutors = filteredTutors.filter(
-    (tutor: {
-      id: React.Key | null | undefined;
-      tutor: string;
-      course: string;
-      location: string;
-      description: string;
-      dayOfWeek: number;
-      startTime: string;
-      endTime: string;
-      rate: number;
-    }) => {
-      const profile = tutorProfile[tutor.tutor];
-      if (!profile) return null;
   const displayedTutors = filteredTutors.filter((tutor: Tutor) => {
     const profile = tutorProfile[tutor.tutor];
     if (!profile) return null;
@@ -142,51 +128,6 @@ export default function tutoring() {
       }
     });
 
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!tutors.length || Object.keys(tutorProfile).length === 0) return;
-
-    const filtered = tutors.filter(
-      (tutor: {
-        id: React.Key | null | undefined;
-        tutor: string;
-        course: string;
-        location: string;
-        description: string;
-        dayOfWeek: number;
-        startTime: string;
-        endTime: string;
-        rate: number;
-      }) => {
-        const locationValue = location ?? "Any";
-        const profile = tutorProfile[tutor.tutor];
-        if (!profile) return null;
-
-        const locationMatch =
-          locationValue === "Any"
-            ? true
-            : typeof locationValue === "string"
-              ? tutor.location
-                  .toLowerCase()
-                  .includes(locationValue.toLowerCase())
-              : tutor.location
-                  .toLowerCase()
-                  .includes(locationValue[0].toLowerCase());
-
-        return (
-          locationMatch &&
-          (!ratings ||
-            (profile.ratings !== undefined &&
-              profile.ratings >= Number(parseFloat(ratings as string)))) &&
-          (!minRate || tutor.rate >= Number(parseInt(minRate as string))) &&
-          (!maxRate || tutor.rate <= Number(parseInt(maxRate as string)))
-        );
-      },
-    );
-    setFilteredTutors(filtered);
-
     const fetchConstants = async () => {
       fetch("https://learnus.onrender.com/api/constants")
         .then((res) => {
@@ -194,13 +135,44 @@ export default function tutoring() {
           return res.json();
         })
         .then((data) => {
-          setDaysDict(data.DAYS);
+          setDayOptions(data.DAYS);
         })
         .catch((err) => {
           console.error(err);
         });
     };
+
     fetchConstants();
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!tutors.length || Object.keys(tutorProfile).length === 0) return;
+
+    const filtered = tutors.filter((tutor: Tutor) => {
+      const locationValue = location ?? "Any";
+      const profile = tutorProfile[tutor.tutor];
+      if (!profile) return null;
+
+      const locationMatch =
+        locationValue === "Any"
+          ? true
+          : typeof locationValue === "string"
+            ? tutor.location.toLowerCase().includes(locationValue.toLowerCase())
+            : tutor.location
+                .toLowerCase()
+                .includes(locationValue[0].toLowerCase());
+
+      return (
+        locationMatch &&
+        (!ratings ||
+          (profile.ratings !== undefined &&
+            profile.ratings >= Number(parseFloat(ratings as string)))) &&
+        (!minRate || tutor.rate >= Number(parseInt(minRate as string))) &&
+        (!maxRate || tutor.rate <= Number(parseInt(maxRate as string)))
+      );
+    });
+    setFilteredTutors(filtered);
   }, [location, ratings, minRate, maxRate, tutors, tutorProfile]);
 
   const sortTutors = (criteria: "rating" | "rate", order: "asc" | "desc") => {
@@ -267,8 +239,8 @@ export default function tutoring() {
     Alert.alert("Sorry, feature under development");
   };
 
-  function formatAvailability(dayOfWeek: Number, start: Date, end: Date) {
-    const day = daysDict.find(
+  function formatAvailability(dayOfWeek: Number, start: string, end: string) {
+    const day = dayOptions.find(
       (d: { label: String; value: Number }) => d.value == dayOfWeek,
     );
     const startTime = new Date(start);
@@ -283,7 +255,7 @@ export default function tutoring() {
       minute: "2-digit",
       hour12: true,
     });
-    return `${day.label} (${formattedStart} - ${formattedEnd})`;
+    return `${day?.label} (${formattedStart} - ${formattedEnd})`;
   }
 
   const styles = StyleSheet.create({
@@ -490,6 +462,7 @@ export default function tutoring() {
                   onPress={() => handleTutorProfile(tutor)}
                 >
                   <Image
+                    style={styles.image}
                     source={
                       profile.profilePicture
                         ? { uri: profile.profilePicture }
@@ -559,189 +532,211 @@ export default function tutoring() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              {selectedTutor && (
-                <>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      alignSelf: "stretch",
-                      marginBottom: 30,
-                    }}
-                  >
-                    <View>
-                      <TouchableOpacity onPress={closeModal}>
-                        <AntDesign
-                          name="arrowleft"
-                          size={30}
-                          color={"orange"}
-                        />
+              {selectedTutor &&
+                (() => {
+                  const profile = tutorProfile[selectedTutor.tutor];
+                  if (!profile) return null;
+                  return (
+                    <>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          alignSelf: "stretch",
+                          marginBottom: 30,
+                        }}
+                      >
+                        <View>
+                          <TouchableOpacity onPress={closeModal}>
+                            <AntDesign
+                              name="arrowleft"
+                              size={30}
+                              color={"orange"}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                        <View>
+                          <TouchableOpacity onPress={handleProfileSharing}>
+                            <FontAwesome
+                              name="share"
+                              size={30}
+                              color={"orange"}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                      <Image
+                        source={
+                          profile.profilePicture
+                            ? { uri: profile.profilePicture }
+                            : require("../assets/images/person.jpg")
+                        }
+                        style={styles.modalImage}
+                      />
+                      <Text
+                        style={{
+                          fontSize: 28,
+                          fontWeight: "600",
+                          alignSelf: "center",
+                        }}
+                      >
+                        {profile.firstName} {profile.lastName}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 24,
+                          fontWeight: "600",
+                          marginTop: 25,
+                        }}
+                      >
+                        {selectedTutor.course}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          color: isDarkMode ? "#222222" : "#888888",
+                          marginTop: 10,
+                        }}
+                      >
+                        {selectedTutor.description}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 22,
+                          fontWeight: "600",
+                          marginTop: 15,
+                        }}
+                      >
+                        Availability
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          color: isDarkMode ? "#222222" : "#888888",
+                          marginTop: 5,
+                        }}
+                      >
+                        {formatAvailability(
+                          selectedTutor.dayOfWeek,
+                          selectedTutor.startTime,
+                          selectedTutor.endTime,
+                        )}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "flex-start",
+                          marginTop: 20,
+                          alignItems: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: isDarkMode ? "#999999" : "white",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: 50,
+                            height: 50,
+                          }}
+                        >
+                          <AntDesign name="star" size={30} color={"yellow"} />
+                        </View>
+                        <Text
+                          style={{
+                            fontSize: 20,
+                            color: "gray",
+                            marginHorizontal: 10,
+                          }}
+                        >
+                          {profile.ratings}/5.0 stars
+                        </Text>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "flex-start",
+                          marginTop: 20,
+                          alignItems: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: isDarkMode ? "#999999" : "white",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: 50,
+                            height: 50,
+                          }}
+                        >
+                          <FontAwesome
+                            name="dollar"
+                            size={30}
+                            color={"black"}
+                          />
+                        </View>
+                        <Text
+                          style={{
+                            fontSize: 20,
+                            color: "gray",
+                            marginHorizontal: 10,
+                          }}
+                        >
+                          {selectedTutor.rate} per hour
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={{
+                          marginTop: 40,
+                          borderRadius: 10,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "orange",
+                          alignSelf: "stretch",
+                        }}
+                        onPress={handleBooking}
+                      >
+                        <Text
+                          style={{
+                            marginHorizontal: 4,
+                            fontSize: 28,
+                            fontWeight: "600",
+                            marginBottom: 2,
+                            color: "white",
+                          }}
+                        >
+                          Book now!
+                        </Text>
                       </TouchableOpacity>
-                    </View>
-                    <View>
-                      <TouchableOpacity onPress={handleProfileSharing}>
-                        <FontAwesome name="share" size={30} color={"orange"} />
+                      <TouchableOpacity
+                        style={{
+                          marginTop: 20,
+                          borderRadius: 10,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "white",
+                          alignSelf: "stretch",
+                          flexDirection: "row",
+                          borderWidth: 3,
+                        }}
+                        onPress={handleContact}
+                      >
+                        <Entypo name="old-phone" size={25} color={"black"} />
+                        <Text
+                          style={{
+                            marginHorizontal: 4,
+                            fontSize: 28,
+                            fontWeight: "600",
+                            marginBottom: 2,
+                            color: "black",
+                          }}
+                        >
+                          Contact me!
+                        </Text>
                       </TouchableOpacity>
-                    </View>
-                  </View>
-                  <Image
-                    source={{
-                      uri: tutorProfile[selectedTutor.tutor].profilePicture,
-                    }}
-                    style={styles.modalImage}
-                  />
-                  <Text
-                    style={{
-                      fontSize: 28,
-                      fontWeight: "600",
-                      alignSelf: "center",
-                    }}
-                  >
-                    {tutorProfile[selectedTutor.tutor].firstName}{" "}
-                    {tutorProfile[selectedTutor.tutor].lastName}
-                  </Text>
-                  <Text
-                    style={{ fontSize: 24, fontWeight: "600", marginTop: 25 }}
-                  >
-                    {selectedTutor.course}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 18,
-                      color: isDarkMode ? "#222222" : "#888888",
-                      marginTop: 10,
-                    }}
-                  >
-                    {selectedTutor.description}
-                  </Text>
-                  <Text
-                    style={{ fontSize: 22, fontWeight: "600", marginTop: 15 }}
-                  >
-                    Availability
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 18,
-                      color: isDarkMode ? "#222222" : "#888888",
-                      marginTop: 5,
-                    }}
-                  >
-                    {formatAvailability(
-                      selectedTutor.dayOfWeek,
-                      selectedTutor.startTime,
-                      selectedTutor.endTime,
-                    )}
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      marginTop: 20,
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: isDarkMode ? "#999999" : "white",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: 50,
-                        height: 50,
-                      }}
-                    >
-                      <AntDesign name="star" size={30} color={"yellow"} />
-                    </View>
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        color: "gray",
-                        marginHorizontal: 10,
-                      }}
-                    >
-                      {tutorProfile[selectedTutor.tutor].ratings}/5.0 stars
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      marginTop: 20,
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: isDarkMode ? "#999999" : "white",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: 50,
-                        height: 50,
-                      }}
-                    >
-                      <FontAwesome name="dollar" size={30} color={"black"} />
-                    </View>
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        color: "gray",
-                        marginHorizontal: 10,
-                      }}
-                    >
-                      {selectedTutor.rate} per hour
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={{
-                      marginTop: 40,
-                      borderRadius: 10,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "orange",
-                      alignSelf: "stretch",
-                    }}
-                    onPress={handleBooking}
-                  >
-                    <Text
-                      style={{
-                        marginHorizontal: 4,
-                        fontSize: 28,
-                        fontWeight: "600",
-                        marginBottom: 2,
-                        color: "white",
-                      }}
-                    >
-                      Book now!
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      marginTop: 20,
-                      borderRadius: 10,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "white",
-                      alignSelf: "stretch",
-                      flexDirection: "row",
-                      borderWidth: 3,
-                    }}
-                    onPress={handleContact}
-                  >
-                    <Entypo name="old-phone" size={25} color={"black"} />
-                    <Text
-                      style={{
-                        marginHorizontal: 4,
-                        fontSize: 28,
-                        fontWeight: "600",
-                        marginBottom: 2,
-                        color: "black",
-                      }}
-                    >
-                      Contact me!
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              )}
+                    </>
+                  );
+                })()}
             </View>
           </View>
         </Modal>

@@ -27,16 +27,18 @@ import { Session, Day, UserProfile } from "./types";
 export default function BookingPage() {
   const router = useRouter();
   const [dayOptions, setDayOptions] = useState<Day[]>([]);
-  const [date, setDate] = useState<string>();
-  const [startTime, setStartTime] = useState<Date>(new Date());
-  const [endTime, setEndTime] = useState<Date>(new Date());
-  const [showStart, setShowStart] = useState(false);
-  const [showEnd, setShowEnd] = useState(false);
-  const [status, setStatus] = useState<string>("pending");
   const [tutorProfile, setTutorProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<any>();
-  const { tutor, course, description, location, availability, rate } =
-    useLocalSearchParams() as unknown as Session;
+  const {
+    tutor,
+    course,
+    description,
+    location,
+    dayOfWeek,
+    startTime,
+    endTime,
+    rate,
+  } = useLocalSearchParams() as unknown as Session;
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -99,11 +101,11 @@ export default function BookingPage() {
             people: tutor,
             role: "Student",
             course: course,
-            date: date,
+            dayOfWeek: dayOfWeek,
             startTime: startTime,
             endTime: endTime,
             rate: rate,
-            status: status,
+            status: "Pending",
           }),
         },
       );
@@ -120,6 +122,25 @@ export default function BookingPage() {
       Alert.alert("Booking failed: " + error.message);
     }
   };
+
+  function formatAvailability(dayOfWeek: Number, start: string, end: string) {
+    const day = dayOptions.find(
+      (d: { label: String; value: Number }) => d.value == dayOfWeek,
+    );
+    const startTime = new Date(start);
+    const formattedStart = startTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const endTime = new Date(end);
+    const formattedEnd = endTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${day?.label} (${formattedStart} - ${formattedEnd})`;
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -191,6 +212,7 @@ export default function BookingPage() {
     },
     bookButton: {
       marginTop: 20,
+      paddingVertical: 5,
       borderRadius: 10,
       alignItems: "center",
       justifyContent: "center",
@@ -198,7 +220,7 @@ export default function BookingPage() {
     },
     buttonText: {
       marginHorizontal: 4,
-      fontSize: 28,
+      fontSize: 24,
       fontWeight: "600",
       marginBottom: 2,
       color: "white",
@@ -265,71 +287,11 @@ export default function BookingPage() {
 
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
             <Text style={styles.titleText}>Day and Time</Text>
-            <Text style={styles.contentText}>
-              *Choose only time slots when tutors are available
-            </Text>
-            <Text style={styles.contentText}>{availability}</Text>
             <View style={styles.searchBar}>
-              <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.textStyle}
-                selectedTextStyle={styles.textStyle}
-                data={dayOptions}
-                maxHeight={200}
-                labelField="label"
-                valueField="value"
-                placeholder={"Select a day"}
-                value={date}
-                onChange={(item) => {
-                  setDate(item.value);
-                }}
-                renderLeftIcon={() => (
-                  <Fontisto color={"#ffc04d"} name="date" size={20} />
-                )}
-                search
-                searchPlaceholder="Select a day"
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                paddingHorizontal: 10,
-                marginTop: 10,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Button
-                title={`Start: ${startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
-                onPress={() => setShowStart(true)}
-                color={"#ffb347"}
-              />
-              {showStart && (
-                <DateTimePicker
-                  mode="time"
-                  value={startTime}
-                  onChange={(_, selected) => {
-                    setShowStart(false);
-                    if (selected) setStartTime(selected);
-                  }}
-                />
-              )}
-              <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>-</Text>
-              <Button
-                title={`End: ${endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
-                onPress={() => setShowEnd(true)}
-                color={"#ffb347"}
-              />
-              {showEnd && (
-                <DateTimePicker
-                  mode="time"
-                  value={endTime}
-                  onChange={(_, selected) => {
-                    setShowEnd(false);
-                    if (selected) setEndTime(selected);
-                  }}
-                />
-              )}
+              <Fontisto color={"#ffc04d"} name="date" size={20} />
+              <Text style={styles.textStyle}>
+                {formatAvailability(dayOfWeek, startTime, endTime)}
+              </Text>
             </View>
           </View>
 
@@ -342,7 +304,7 @@ export default function BookingPage() {
           </View>
 
           <TouchableOpacity style={styles.bookButton} onPress={handleBooking}>
-            <Text style={styles.buttonText}>Book!</Text>
+            <Text style={styles.buttonText}>Confirm booking</Text>
           </TouchableOpacity>
         </View>
       </View>
