@@ -12,17 +12,13 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { LocationOption } from "./types";
 
 const screenWidth = Dimensions.get("window").width;
 
-type locationOption = {
-  label: string;
-  value: string;
-};
-
 export default function TutorFilter() {
   const router = useRouter();
-  const [locationOption, setLocationOption] = useState<locationOption[]>([]);
+  const [locationOption, setLocationOption] = useState<LocationOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [ratings, setRatings] = useState<number[]>();
   const [rate, setRate] = useState([0, 100]);
