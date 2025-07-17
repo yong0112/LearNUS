@@ -43,6 +43,7 @@ export default function tutoring() {
   const [error, setError] = useState(null);
   const [filteredTutors, setFilteredTutors] = useState<any>([]);
   const [selectedTutor, setSelectedTutor] = useState<any>(null);
+  const [daysDict, setDaysDict] = useState<any>();
   const [modalVisible, setModalVisible] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
   const colorScheme = useColorScheme();
@@ -57,7 +58,9 @@ export default function tutoring() {
       course: string;
       location: string;
       description: string;
-      availability: string;
+      dayOfWeek: number;
+      startTime: string;
+      endTime: string;
       rate: number;
     }) => {
       const profile = tutorProfile[tutor.tutor];
@@ -149,7 +152,9 @@ export default function tutoring() {
         course: string;
         location: string;
         description: string;
-        availability: string;
+        dayOfWeek: number;
+        startTime: string;
+        endTime: string;
         rate: number;
       }) => {
         const locationValue = location ?? "Any";
@@ -178,6 +183,21 @@ export default function tutoring() {
       },
     );
     setFilteredTutors(filtered);
+
+    const fetchConstants = async () => {
+      fetch("https://learnus.onrender.com/api/constants")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch constants");
+          return res.json();
+        })
+        .then((data) => {
+          setDaysDict(data.DAYS);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+    fetchConstants();
   }, [location, ratings, minRate, maxRate, tutors, tutorProfile]);
 
   const sortTutors = (criteria: "rating" | "rate", order: "asc" | "desc") => {
@@ -217,7 +237,9 @@ export default function tutoring() {
     course: string;
     location: string;
     description: string;
-    availability: string;
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
     rate: number;
   }) => {
     setSelectedTutor(tutor);
@@ -241,7 +263,9 @@ export default function tutoring() {
         course: selectedTutor.course,
         description: selectedTutor.description,
         location: selectedTutor.location,
-        availability: selectedTutor.availability,
+        dayOfWeek: selectedTutor.dayOfWeek,
+        startTime: selectedTutor.startTime,
+        endTime: selectedTutor.endTime,
         rate: selectedTutor.rate,
       },
     });
@@ -250,6 +274,25 @@ export default function tutoring() {
   const handleContact = () => {
     Alert.alert("Sorry, feature under development");
   };
+
+  function formatAvailability(dayOfWeek: Number, start: Date, end: Date) {
+    const day = daysDict.find(
+      (d: { label: String; value: Number }) => d.value == dayOfWeek,
+    );
+    const startTime = new Date(start);
+    const formattedStart = startTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const endTime = new Date(end);
+    const formattedEnd = endTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${day.label} (${formattedStart} - ${formattedEnd})`;
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -451,7 +494,9 @@ export default function tutoring() {
                 course: string;
                 location: string;
                 description: string;
-                availability: string;
+                dayOfWeek: number;
+                startTime: string;
+                endTime: string;
                 rate: number;
               }) => {
                 const profile = tutorProfile[tutor.tutor];
@@ -608,7 +653,11 @@ export default function tutoring() {
                       marginTop: 5,
                     }}
                   >
-                    {selectedTutor.availability}
+                    {formatAvailability(
+                      selectedTutor.dayOfWeek,
+                      selectedTutor.startTime,
+                      selectedTutor.endTime,
+                    )}
                   </Text>
                   <View
                     style={{
