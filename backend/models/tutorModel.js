@@ -20,7 +20,9 @@ const postTutor = async ({
   course,
   location,
   description,
-  availability,
+  dayOfWeek,
+  startTime,
+  endTime,
   rate,
 }) => {
   try {
@@ -29,7 +31,9 @@ const postTutor = async ({
       course,
       location,
       description,
-      availability,
+      dayOfWeek,
+      startTime,
+      endTime,
       rate,
     });
     const savedDoc = await docRef.get();
