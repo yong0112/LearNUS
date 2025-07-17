@@ -33,7 +33,7 @@ import {
 import { auth } from "../../lib/firebase";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Class, Tutor, UserProfile } from "../types";
+import { Class, Tutor, UserProfile, Day } from "../types";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -42,6 +42,7 @@ export default function Home() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [todayClass, setTodayClass] = useState<Class[]>([]);
   const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [tutorProfiles, setTutorProfiles] = useState<
     Record<string, UserProfile>
   >({});
@@ -122,6 +123,21 @@ export default function Home() {
       }
     });
 
+    const fetchConstants = async () => {
+      fetch("https://learnus.onrender.com/api/constants")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch constants");
+          return res.json();
+        })
+        .then((data) => {
+          setDayOptions(data.DAYS);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    fetchConstants();
     return () => unsubscribe();
   }, []);
 
@@ -171,7 +187,9 @@ export default function Home() {
           course: selectedTutor.course,
           description: selectedTutor.description,
           location: selectedTutor.location,
-          availability: selectedTutor.availability,
+          dayOfWeek: selectedTutor.dayOfWeek,
+          startTime: selectedTutor.startTime,
+          endTime: selectedTutor.endTime,
           rate: selectedTutor.rate,
         },
       });
@@ -188,6 +206,25 @@ export default function Home() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  }
+
+  function formatAvailability(dayOfWeek: Number, start: string, end: string) {
+    const day = dayOptions.find(
+      (d: { label: String; value: Number }) => d.value == dayOfWeek,
+    );
+    const startTime = new Date(start);
+    const formattedStart = startTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const endTime = new Date(end);
+    const formattedEnd = endTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${day?.label} (${formattedStart} - ${formattedEnd})`;
   }
 
   const styles = StyleSheet.create({
@@ -564,7 +601,11 @@ export default function Home() {
                       marginTop: 5,
                     }}
                   >
-                    {selectedTutor.availability}
+                    {formatAvailability(
+                      selectedTutor.dayOfWeek,
+                      selectedTutor.startTime,
+                      selectedTutor.endTime,
+                    )}
                   </Text>
                   <View
                     style={{
