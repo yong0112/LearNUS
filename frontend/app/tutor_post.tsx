@@ -1,7 +1,12 @@
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
-import { FontAwesome, Fontisto, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  FontAwesome,
+  Fontisto,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -32,10 +37,12 @@ export default function TutorPost() {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [description, setDescription] = useState("");
   const [dayOptions, setDayOptions] = useState<Day[]>([]);
-  const [day, setDay] = useState<Day>();
+  const [day, setDay] = useState<number>();
   const current = new Date();
   const [startTime, setStartTime] = useState<Date>(convertTimeLocally(current));
-  const [endTime, setEndTime] = useState<Date>(convertTimeLocally(new Date(current.setHours(current.getHours() + 2))));
+  const [endTime, setEndTime] = useState<Date>(
+    convertTimeLocally(new Date(current.setHours(current.getHours() + 2))),
+  );
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
   const [rate, setRate] = useState<Number>();
@@ -356,7 +363,9 @@ export default function TutorPost() {
                     }}
                   />
                 )}
-                <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>-</Text>
+                <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>
+                  -
+                </Text>
                 <Button
                   title={`End: ${endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
                   onPress={() => setShowEnd(true)}
