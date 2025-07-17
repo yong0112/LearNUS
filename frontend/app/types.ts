@@ -3,6 +3,11 @@ export interface CourseOption {
   value: string;
 }
 
+export interface LocationOption {
+  label: string;
+  value: string;
+}
+
 export interface ForumPost {
   id: string;
   title: string;
@@ -41,11 +46,6 @@ export interface Tutor {
   description: string;
   availability: string;
   rate: number;
-}
-
-export interface LocationOption {
-  label: string;
-  value: string;
 }
 
 export interface Session {
