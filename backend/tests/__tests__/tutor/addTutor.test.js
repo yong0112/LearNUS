@@ -20,7 +20,9 @@ describe("addTutor Controller", () => {
       course: "Math 101",
       location: "Online",
       description: "Experienced math tutor",
-      availability: "Weekdays 10:00-14:00",
+      dayOfWeek: 1,
+      startTime: "10:00",
+      endTime: "12:00",
       rate: 50,
     };
     const newTutor = { id: "tutor1", ...input };
@@ -66,7 +68,9 @@ describe("addTutor Controller", () => {
       course: "Math 101",
       location: "Online",
       description: "Experienced math tutor",
-      availability: "Weekdays 10:00-14:00",
+      dayOfWeek: 1,
+      startTime: "10:00",
+      endTime: "12:00",
       rate: 50,
     };
     postTutor.mockRejectedValue(new Error("Database error"));
