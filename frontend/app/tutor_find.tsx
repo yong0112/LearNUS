@@ -29,7 +29,7 @@ import {
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { Tutor, UserProfile } from "./types";
+import { Tutor, UserProfile, Day } from "./types";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -44,6 +44,7 @@ export default function tutoring() {
   const [error, setError] = useState(null);
   const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
+  const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
   const colorScheme = useColorScheme();
@@ -127,47 +128,50 @@ export default function tutoring() {
       }
     });
 
+    const fetchConstants = async () => {
+      fetch("https://learnus.onrender.com/api/constants")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch constants");
+          return res.json();
+        })
+        .then((data) => {
+          setDayOptions(data.DAYS);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    fetchConstants();
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!tutors.length || Object.keys(tutorProfile).length === 0) return;
 
-    const filtered = tutors.filter(
-      (tutor: {
-        id: React.Key | null | undefined;
-        tutor: string;
-        course: string;
-        location: string;
-        description: string;
-        availability: string;
-        rate: number;
-      }) => {
-        const locationValue = location ?? "Any";
-        const profile = tutorProfile[tutor.tutor];
-        if (!profile) return null;
+    const filtered = tutors.filter((tutor: Tutor) => {
+      const locationValue = location ?? "Any";
+      const profile = tutorProfile[tutor.tutor];
+      if (!profile) return null;
 
-        const locationMatch =
-          locationValue === "Any"
-            ? true
-            : typeof locationValue === "string"
-              ? tutor.location
-                  .toLowerCase()
-                  .includes(locationValue.toLowerCase())
-              : tutor.location
-                  .toLowerCase()
-                  .includes(locationValue[0].toLowerCase());
+      const locationMatch =
+        locationValue === "Any"
+          ? true
+          : typeof locationValue === "string"
+            ? tutor.location.toLowerCase().includes(locationValue.toLowerCase())
+            : tutor.location
+                .toLowerCase()
+                .includes(locationValue[0].toLowerCase());
 
-        return (
-          locationMatch &&
-          (!ratings ||
-            (profile.ratings !== undefined &&
-              profile.ratings >= Number(parseFloat(ratings as string)))) &&
-          (!minRate || tutor.rate >= Number(parseInt(minRate as string))) &&
-          (!maxRate || tutor.rate <= Number(parseInt(maxRate as string)))
-        );
-      },
-    );
+      return (
+        locationMatch &&
+        (!ratings ||
+          (profile.ratings !== undefined &&
+            profile.ratings >= Number(parseFloat(ratings as string)))) &&
+        (!minRate || tutor.rate >= Number(parseInt(minRate as string))) &&
+        (!maxRate || tutor.rate <= Number(parseInt(maxRate as string)))
+      );
+    });
     setFilteredTutors(filtered);
   }, [location, ratings, minRate, maxRate, tutors, tutorProfile]);
 
@@ -223,7 +227,9 @@ export default function tutoring() {
         course: selectedTutor.course,
         description: selectedTutor.description,
         location: selectedTutor.location,
-        availability: selectedTutor.availability,
+        dayOfWeek: selectedTutor.dayOfWeek,
+        startTime: selectedTutor.startTime,
+        endTime: selectedTutor.endTime,
         rate: selectedTutor.rate,
       },
     });
@@ -232,6 +238,25 @@ export default function tutoring() {
   const handleContact = () => {
     Alert.alert("Sorry, feature under development");
   };
+
+  function formatAvailability(dayOfWeek: Number, start: string, end: string) {
+    const day = dayOptions.find(
+      (d: { label: String; value: Number }) => d.value == dayOfWeek,
+    );
+    const startTime = new Date(start);
+    const formattedStart = startTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const endTime = new Date(end);
+    const formattedEnd = endTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${day?.label} (${formattedStart} - ${formattedEnd})`;
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -437,6 +462,7 @@ export default function tutoring() {
                   onPress={() => handleTutorProfile(tutor)}
                 >
                   <Image
+                    style={styles.image}
                     source={
                       profile.profilePicture
                         ? { uri: profile.profilePicture }
@@ -591,7 +617,11 @@ export default function tutoring() {
                           marginTop: 5,
                         }}
                       >
-                        {selectedTutor.availability}
+                        {formatAvailability(
+                          selectedTutor.dayOfWeek,
+                          selectedTutor.startTime,
+                          selectedTutor.endTime,
+                        )}
                       </Text>
                       <View
                         style={{

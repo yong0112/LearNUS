@@ -44,7 +44,9 @@ export interface Tutor {
   course: string;
   location: string;
   description: string;
-  availability: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
   rate: number;
 }
 
@@ -53,7 +55,9 @@ export interface Session {
   course: string;
   description: string;
   location: string;
-  availability: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
   rate: number;
 }
 
