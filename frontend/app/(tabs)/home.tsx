@@ -33,7 +33,7 @@ import {
 import { auth } from "../../lib/firebase";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Class, Tutor, UserProfile, Day } from "../types";
+import { Class, Tutor, UserProfile, Day } from "../../constants/types";
 
 const screenHeight = Dimensions.get("window").height;
 
