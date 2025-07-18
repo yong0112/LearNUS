@@ -29,7 +29,7 @@ import {
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { Tutor, UserProfile, Day } from "./types";
+import { Tutor, UserProfile, Day } from "../constants/types";
 
 const screenHeight = Dimensions.get("window").height;
 

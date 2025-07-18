@@ -12,7 +12,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { LocationOption } from "./types";
+import { LocationOption } from "../constants/types";
 
 const screenWidth = Dimensions.get("window").width;
 

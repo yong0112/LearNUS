@@ -23,6 +23,7 @@ export interface UserProfile {
   lastName: string;
   profilePicture?: string;
   ratings?: number;
+  QR: string;
 }
 
 export interface UpvoteStatus {
@@ -36,6 +37,19 @@ export interface Class {
   startTime: string;
   endTime: string;
   date: number;
+}
+
+export interface TemporaryClass {
+  id: string;
+  course: string;
+  date: number;
+  role: string;
+  startTime: string;
+  endTime: string;
+  people: string;
+  rate: string;
+  status: string;
+  paymentProof: string;
 }
 
 export interface Tutor {

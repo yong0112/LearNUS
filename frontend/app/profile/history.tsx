@@ -14,6 +14,8 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { TemporaryClass } from "../../constants/types";
+import { format } from "date-fns";
 
 type DayOptions = {
   label: string;
@@ -24,6 +26,7 @@ export default function history() {
   const router = useRouter();
   const [classes, setClasses] = useState<any>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [name, setNames] = useState<Record<string, string>>({});
   const [dayConstants, setDayConstants] = useState<DayOptions[]>([]);
   const [error, setError] = useState(null);
   const colorScheme = useColorScheme();
@@ -59,6 +62,7 @@ export default function history() {
             console.log("User classes:", data);
             setClasses(data);
             const pics: Record<string, string> = {};
+            const names: Record<string, string> = {};
             await Promise.all(
               data.map(async (cls: any) => {
                 try {
@@ -68,12 +72,15 @@ export default function history() {
                   if (!res.ok) throw new Error("Failed to fetch user profile");
                   const userData = await res.json();
                   pics[cls.people] = userData.profilePicture;
+                  names[cls.people] =
+                    userData.firstName + " " + userData.lastName;
                 } catch (err) {
                   console.error(err);
                 }
               }),
             );
             setProfiles(pics);
+            setNames(names);
           })
           .catch((err) => {
             console.error(err);
@@ -102,9 +109,34 @@ export default function history() {
     return () => unsubscribe();
   }, []);
 
-  const handleTutorProfile = () => {
-    console.log("Press me");
+  const handleTutorProfile = (id: string) => {
+    console.log(id);
+    router.push({
+      pathname: "./booking/bookingStatus",
+      params: {
+        id: id,
+      },
+    });
   };
+
+  function formatAvailability(dayOfWeek: Number, start: string, end: string) {
+    const day = dayConstants.find(
+      (d: { label: String; value: Number }) => d.value == dayOfWeek,
+    );
+    const startTime = new Date(start);
+    const formattedStart = startTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const endTime = new Date(end);
+    const formattedEnd = endTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${day?.label} (${formattedStart} - ${formattedEnd})`;
+  }
 
   const styles = StyleSheet.create({
     container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
@@ -186,7 +218,7 @@ export default function history() {
           ) : (
             classes.map(
               (cls: {
-                id: React.Key | null | undefined;
+                id: React.Key;
                 course: string;
                 date: number;
                 role: string;
@@ -196,7 +228,11 @@ export default function history() {
                 rate: string;
                 status: string;
               }) => (
-                <View key={cls.id} style={styles.classCard}>
+                <TouchableOpacity
+                  key={cls.id}
+                  style={styles.classCard}
+                  onPress={() => handleTutorProfile(cls.id.toString())}
+                >
                   <View
                     style={{
                       flexDirection: "column",
@@ -214,7 +250,7 @@ export default function history() {
                     source={{ uri: profiles[cls.people] }}
                     style={styles.avatar}
                   />
-                </View>
+                </TouchableOpacity>
               ),
             )
           )}

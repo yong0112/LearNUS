@@ -20,7 +20,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { CourseOption } from "./types";
+import { CourseOption } from "../constants/types";
 
 export default function ForumPost() {
   const router = useRouter();

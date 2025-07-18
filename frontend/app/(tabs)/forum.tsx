@@ -15,7 +15,12 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { doc, getDoc } from "firebase/firestore";
-import { CourseOption, ForumPost, UserProfile, UpvoteStatus } from "../types";
+import {
+  CourseOption,
+  ForumPost,
+  UserProfile,
+  UpvoteStatus,
+} from "../../constants/types";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
