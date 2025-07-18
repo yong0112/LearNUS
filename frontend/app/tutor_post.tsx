@@ -21,7 +21,7 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { CourseOption, LocationOption, Day } from "./types";
+import { CourseOption, LocationOption, Day } from "../constants/types";
 
 function convertTimeLocally(current: Date) {
   const newDate = new Date();

@@ -14,7 +14,12 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
-import { ForumPost, Comment, UserProfile, UpvoteStatus } from "../types";
+import {
+  ForumPost,
+  Comment,
+  UserProfile,
+  UpvoteStatus,
+} from "../../constants/types";
 
 export default function ForumPostDetails() {
   const { postId } = useLocalSearchParams();
