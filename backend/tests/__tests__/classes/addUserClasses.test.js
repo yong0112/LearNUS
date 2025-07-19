@@ -19,7 +19,7 @@ describe("addUserClasses Controller", () => {
     const input = {
       people: "tutor123",
       course: "Math 101",
-      date: "2",
+      dayOfWeek: "2",
       startTime: "10:00",
       endTime: "11:00",
       rate: 50,
@@ -57,7 +57,7 @@ describe("addUserClasses Controller", () => {
       user: uid,
       people: input.people,
       course: input.course,
-      date: input.date,
+      dayOfWeek: input.dayOfWeek,
       startTime: input.startTime,
       endTime: input.endTime,
       rate: input.rate,
@@ -68,7 +68,7 @@ describe("addUserClasses Controller", () => {
       user: input.people,
       people: uid,
       course: input.course,
-      date: input.date,
+      dayOfWeek: input.dayOfWeek,
       startTime: input.startTime,
       endTime: input.endTime,
       rate: input.rate,
@@ -82,7 +82,6 @@ describe("addUserClasses Controller", () => {
     const input = {
       people: "tutor123",
       course: "Math 101",
-      date: "2025-07-01",
       startTime: "10:00",
       // Missing endTime, rate, status, role
     };
@@ -105,7 +104,7 @@ describe("addUserClasses Controller", () => {
     const input = {
       people: "tutor123",
       course: "Math 101",
-      date: "2025-07-01",
+      dayOfWeek: "2",
       startTime: "10:00",
       endTime: "11:00",
       rate: 50,
