@@ -13,13 +13,13 @@ const fetchUserClasses = async (req, res) => {
 
 const addUserClasses = async (req, res) => {
   const uid = req.params.uid;
-  const { people, course, date, startTime, endTime, rate, status, role } =
+  const { people, course, dayOfWeek, startTime, endTime, rate, status, role } =
     req.body;
 
   if (
     !people ||
     !course ||
-    !date ||
+    !dayOfWeek ||
     !startTime ||
     !endTime ||
     !rate ||
@@ -33,7 +33,7 @@ const addUserClasses = async (req, res) => {
     user: uid,
     people: people,
     course,
-    date,
+    dayOfWeek,
     startTime,
     endTime,
     rate,
@@ -45,7 +45,7 @@ const addUserClasses = async (req, res) => {
     user: people,
     people: uid,
     course,
-    date,
+    dayOfWeek,
     startTime,
     endTime,
     rate,

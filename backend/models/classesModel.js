@@ -23,7 +23,7 @@ const postUserClasses = async ({
   user,
   people,
   course,
-  date,
+  dayOfWeek,
   startTime,
   endTime,
   rate,
@@ -38,7 +38,7 @@ const postUserClasses = async ({
       .add({
         people,
         course,
-        date,
+        dayOfWeek,
         startTime,
         endTime,
         rate,
