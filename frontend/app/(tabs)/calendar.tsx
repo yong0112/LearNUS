@@ -6,6 +6,7 @@ import {
   Button,
   Dimensions,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -47,6 +48,13 @@ export default function CalendarPage() {
   };
 
   const handleAddEvent = async () => {
+    if (!eventTitle) {
+      Alert.alert(
+        "Event title couldn't be empty. Please fill it in before adding.",
+      );
+      return;
+    }
+
     const newEvent = {
       title: eventTitle,
       date: eventDate,
@@ -80,6 +88,7 @@ export default function CalendarPage() {
       setEvents((events) => [...events, newEvent]);
       Alert.alert("New event added successfully");
       setModalVisible(false);
+      setEventTitle("");
     } catch (err) {
       console.error("Error: ", err);
       Alert.alert("New event failed to be added");
@@ -357,7 +366,7 @@ export default function CalendarPage() {
             }}
           />
 
-          <View style={styles.classList}>
+          <ScrollView style={styles.classList}>
             {classesForSelectedDate.length > 0 ? (
               classesForSelectedDate.map((cls, index) => (
                 <View key={index} style={styles.classBox}>
@@ -399,7 +408,7 @@ export default function CalendarPage() {
             ) : (
               <View />
             )}
-          </View>
+          </ScrollView>
 
           <TouchableOpacity style={styles.plus} onPress={handleAddButton}>
             <AntDesign name="pluscircle" size={50} color={"orange"} />
