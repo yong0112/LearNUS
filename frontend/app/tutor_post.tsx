@@ -144,15 +144,17 @@ export default function TutorPost() {
         }),
       });
 
-      const result = response.json();
+      const result = await response.json();
       if (!response.ok) {
+        const errorMessage = result.error;
+        Alert.alert("Posting failed: ", errorMessage);
         return console.error(result);
       }
       Alert.alert("Tutor post created successfully!");
       router.replace("/(tabs)/home");
     } catch (error: any) {
       console.error("Error: ", error);
-      Alert.alert("Posting failed" + error.message);
+      Alert.alert("Posting failed: ", error.message);
     }
   };
 
