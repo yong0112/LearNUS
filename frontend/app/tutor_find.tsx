@@ -30,6 +30,7 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { Tutor, UserProfile, Day } from "../constants/types";
+import SearchBar from "../components/SearchBar";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -370,25 +371,12 @@ export default function tutoring() {
             color="#ffc04d"
             onPress={() => router.push("/(tabs)/home")}
           />
-          <View style={styles.searchBar}>
-            <TouchableOpacity
-              onPress={() => {
-                setSearchText("");
-                setSearching("");
-              }}
-            >
-              <Entypo name="cross" size={25} color="#444444" />
-            </TouchableOpacity>
-            <TextInput
-              style={{ flex: 1, color: "#888888", fontSize: 15, marginLeft: 5 }}
-              placeholder="Search by tutors name or course code"
-              value={searching}
-              onChangeText={setSearching}
-            />
-            <TouchableOpacity onPress={() => handleSearch(searching)}>
-              <Ionicons name="search-sharp" size={30} color="#ffc04d" />
-            </TouchableOpacity>
-          </View>
+          <SearchBar
+            placeholder="Search by tutors name or course code"
+            onSearch={handleSearch}
+            fontSize={15}
+            style={{ flex: 1, justifyContent: "space-between" }}
+          />
         </View>
 
         {/*Filter and Sort*/}

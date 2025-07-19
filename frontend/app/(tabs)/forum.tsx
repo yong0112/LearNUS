@@ -24,13 +24,14 @@ import {
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
+import SearchBar from "../../components/SearchBar";
 
 const screenHeight = Dimensions.get("window").height;
 
 export default function Forum() {
   const router = useRouter();
   const [searchText, setSearchText] = useState("");
-  const [seraching, setSearching] = useState("");
+  const [searching, setSearching] = useState("");
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [userProfiles, setUserProfiles] = useState<
     Record<string, UserProfile | undefined>
@@ -225,7 +226,7 @@ export default function Forum() {
 
   // Handle search
   const handleSearch = () => {
-    setSearchText(seraching);
+    setSearchText(searching);
   };
 
   // Handle filter button toggle
@@ -240,9 +241,9 @@ export default function Forum() {
   };
 
   //Search and filter
-  const displayedPosts = filteredPosts.filter((post) => {
+  const displayedPosts = filteredPosts.filter((post: ForumPost) => {
     const profile = userProfiles[post.author];
-    if (!profile) return null;
+    if (!profile) return false; // Return false instead of null for filter
     return (
       post.title.toLowerCase().includes(searchText.toLowerCase()) ||
       post.content.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -354,25 +355,12 @@ export default function Forum() {
       <View style={styles.container}>
         {/* Search Bar */}
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View style={styles.searchBar}>
-            <TouchableOpacity
-              onPress={() => {
-                setSearchText("");
-                setSearching("");
-              }}
-            >
-              <Entypo name="cross" size={25} color="#444444" />
-            </TouchableOpacity>
-            <TextInput
-              style={{ flex: 1, color: "#888888", fontSize: 17, marginLeft: 5 }}
-              placeholder="Search posts by title or course"
-              value={seraching}
-              onChangeText={setSearching}
-            />
-            <TouchableOpacity onPress={handleSearch}>
-              <Ionicons name="search-sharp" size={30} color="#ffc04d" />
-            </TouchableOpacity>
-          </View>
+          <SearchBar
+            placeholder="Search posts by title or course"
+            onSearch={setSearchText}
+            fontSize={17}
+            style={{ marginTop: 12, marginBottom: 12 }}
+          />
         </View>
 
         {/* Filter Button */}
