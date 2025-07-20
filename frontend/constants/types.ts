@@ -34,14 +34,6 @@ export interface UpvoteStatus {
 export interface Class {
   id: string;
   course: string;
-  startTime: string;
-  endTime: string;
-  date: number;
-}
-
-export interface TemporaryClass {
-  id: string;
-  course: string;
   date: number;
   role: string;
   startTime: string;
@@ -50,6 +42,7 @@ export interface TemporaryClass {
   rate: string;
   status: string;
   paymentProof: string;
+  updatedAt: string;
 }
 
 export interface Tutor {

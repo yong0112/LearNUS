@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { TemporaryClass } from "../../constants/types";
+import { Class } from "../../constants/types";
 import { format } from "date-fns";
 
 type DayOptions = {
