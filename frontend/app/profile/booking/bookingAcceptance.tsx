@@ -11,12 +11,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, db } from "@/lib/firebase";
-import { Day, TemporaryClass, UserProfile } from "@/constants/types";
+import { Day, Class, UserProfile } from "@/constants/types";
 import { doc, updateDoc } from "firebase/firestore";
 
 export default function bookingAcceptance() {
   const router = useRouter();
-  const [session, setSession] = useState<TemporaryClass>();
+  const [session, setSession] = useState<Class>();
   const [profile, setProfile] = useState<UserProfile>();
   const [dayConstants, setDayConstants] = useState<Day[]>([]);
   const { id } = useLocalSearchParams();

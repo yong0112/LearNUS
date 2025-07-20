@@ -12,12 +12,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "@/lib/firebase";
-import { TemporaryClass, UserProfile } from "@/constants/types";
+import { Class, UserProfile } from "@/constants/types";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function confirmation() {
   const router = useRouter();
-  const [session, setSession] = useState<TemporaryClass>();
+  const [session, setSession] = useState<Class>();
   const [profile, setProfile] = useState<UserProfile>();
   const { id } = useLocalSearchParams();
   const colorScheme = useColorScheme();
