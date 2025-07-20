@@ -1,15 +1,20 @@
+// Mock the model
+jest.mock("../../../models/userModel");
+
 const request = require("supertest");
 const express = require("express");
-const { updateUser } = require("../../../controllers/userController");
+const {
+  updateUserProfilePic,
+  updateUserQR,
+} = require("../../../controllers/userController");
 const { updateUserProfile } = require("../../../models/userModel");
+
+const mockUpdateUserProfile = updateUserProfile;
 
 // Set up Express app for testing
 const app = express();
 app.use(express.json());
-app.post("/api/users", updateUser);
-
-// Mock the model
-jest.mock("../../../models/userModel");
+app.post("/api/users", updateUserProfilePic);
 
 describe("updateUser Controller", () => {
   beforeEach(() => {
@@ -24,47 +29,47 @@ describe("updateUser Controller", () => {
   it("updates user profile with valid input", async () => {
     const input = {
       uid: "user123",
-      email: "newuser@example.com",
+      profilePicture: "https://randomuser.me/api/portraits/men/11.jpg",
     };
-    updateUserProfile.mockResolvedValue(true);
+    mockUpdateUserProfile.mockResolvedValue(true);
 
     const response = await request(app).post("/api/users").send(input);
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      message: "User profile updates successfully ",
+      message: "User profile picture updates successfully ",
     });
-    expect(updateUserProfile).toHaveBeenCalledWith(input.uid, {
-      email: input.email,
+    expect(mockUpdateUserProfile).toHaveBeenCalledWith(input.uid, {
+      profilePicture: input.profilePicture,
       updatedAt: expect.any(Date),
     });
   });
 
   it("returns 404 for missing uid", async () => {
     const input = {
-      email: "newuser@example.com",
+      profilePicture: "https://randomuser.me/api/portraits/men/11.jpg",
     };
 
     const response = await request(app).post("/api/users").send(input);
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ error: "UID is required" });
-    expect(updateUserProfile).not.toHaveBeenCalled();
+    expect(mockUpdateUserProfile).not.toHaveBeenCalled();
   });
 
   it("returns 500 for server error", async () => {
     const input = {
       uid: "user123",
-      email: "newuser@example.com",
+      profilePicture: "https://randomuser.me/api/portraits/men/11.jpg",
     };
-    updateUserProfile.mockRejectedValue(new Error("Database error"));
+    mockUpdateUserProfile.mockRejectedValue(new Error("Database error"));
 
     const response = await request(app).post("/api/users").send(input);
     expect(response.status).toBe(500);
     expect(response.body).toEqual({
-      error: "Failed to update user profile",
+      error: "Failed to update user profile picture",
       details: "Database error",
     });
-    expect(updateUserProfile).toHaveBeenCalledWith(input.uid, {
-      email: input.email,
+    expect(mockUpdateUserProfile).toHaveBeenCalledWith(input.uid, {
+      profilePicture: input.profilePicture,
       updatedAt: expect.any(Date),
     });
   });

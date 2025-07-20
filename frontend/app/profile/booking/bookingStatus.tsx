@@ -1,4 +1,4 @@
-import { TemporaryClass } from "@/constants/types";
+import { Class } from "@/constants/types";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
@@ -16,7 +16,7 @@ import {
 export default function bookingStatus() {
   const router = useRouter();
   const STATUS = ["Pending", "Accepted", "Paid", "Confirmed"];
-  const [session, setSession] = useState<TemporaryClass>();
+  const [session, setSession] = useState<Class>();
   const [curr, setCurr] = useState<number>();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
