@@ -19,6 +19,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Touchable,
   TouchableOpacity,
   useColorScheme,
   View,
@@ -242,6 +243,10 @@ export default function tutoring() {
 
   const handleContact = () => {
     Alert.alert("Sorry, feature under development");
+  };
+
+  const handleEditProfile = () => {
+    console.log("Editing");
   };
 
   function formatAvailability(dayOfWeek: Number, start: string, end: string) {
@@ -677,55 +682,108 @@ export default function tutoring() {
                           {selectedTutor.rate} per hour
                         </Text>
                       </View>
-                      <TouchableOpacity
-                        style={{
-                          marginTop: 40,
-                          borderRadius: 10,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "orange",
-                          alignSelf: "stretch",
-                        }}
-                        onPress={handleBooking}
-                      >
-                        <Text
+                      {selectedTutor.tutor == auth.currentUser?.uid ? (
+                        <View
                           style={{
-                            marginHorizontal: 4,
-                            fontSize: 28,
-                            fontWeight: "600",
-                            marginBottom: 2,
-                            color: "white",
+                            marginTop: 40,
+                            borderRadius: 10,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "orange",
+                            alignSelf: "stretch",
                           }}
                         >
-                          Book now!
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={{
-                          marginTop: 20,
-                          borderRadius: 10,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "white",
-                          alignSelf: "stretch",
-                          flexDirection: "row",
-                          borderWidth: 3,
-                        }}
-                        onPress={handleContact}
-                      >
-                        <Entypo name="old-phone" size={25} color={"black"} />
-                        <Text
+                          <TouchableOpacity
+                            style={{
+                              borderRadius: 10,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "orange",
+                              flexDirection: "row",
+                              paddingVertical: 8,
+                            }}
+                            onPress={handleEditProfile}
+                          >
+                            <Text
+                              style={{
+                                marginHorizontal: 4,
+                                fontSize: 28,
+                                fontWeight: "600",
+                                marginBottom: 2,
+                                color: "white",
+                              }}
+                            >
+                              Edit tutor profile
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <View
                           style={{
-                            marginHorizontal: 4,
-                            fontSize: 28,
-                            fontWeight: "600",
-                            marginBottom: 2,
-                            color: "black",
+                            marginTop: 40,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexDirection: "column",
+                            alignSelf: "stretch",
                           }}
                         >
-                          Contact me!
-                        </Text>
-                      </TouchableOpacity>
+                          <TouchableOpacity
+                            style={{
+                              borderRadius: 10,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "orange",
+                              flexDirection: "row",
+                              paddingVertical: 8,
+                              alignSelf: "stretch",
+                            }}
+                            onPress={handleBooking}
+                          >
+                            <Text
+                              style={{
+                                marginHorizontal: 4,
+                                fontSize: 28,
+                                fontWeight: "600",
+                                marginBottom: 2,
+                                color: "white",
+                              }}
+                            >
+                              Book now!
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={{
+                              borderRadius: 10,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "white",
+                              flexDirection: "row",
+                              marginTop: 10,
+                              paddingVertical: 8,
+                              alignSelf: "stretch",
+                              borderWidth: 1,
+                            }}
+                            onPress={handleContact}
+                          >
+                            <Entypo
+                              name="old-phone"
+                              size={25}
+                              color={"black"}
+                            />
+                            <Text
+                              style={{
+                                marginHorizontal: 4,
+                                fontSize: 28,
+                                fontWeight: "600",
+                                marginBottom: 2,
+                                color: "black",
+                              }}
+                            >
+                              Contact me!
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
                     </>
                   );
                 })()}
