@@ -1,11 +1,17 @@
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
-import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  FontAwesome,
+  Fontisto,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Button,
   StyleSheet,
   Text,
   TextInput,
@@ -14,26 +20,32 @@ import {
   View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { CourseOption, LocationOption, Day } from "../constants/types";
 
-type courseOption = {
-  label: string;
-  value: string;
-};
-
-type locationOption = {
-  label: string;
-  value: string;
-};
+function convertTimeLocally(current: Date) {
+  const newDate = new Date();
+  const formatted = newDate.setHours(current.getHours() + 8);
+  return new Date(formatted);
+}
 
 export default function TutorPost() {
   const router = useRouter();
-  const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
+  const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
-  const [locationOptions, setLocationOptions] = useState<locationOption[]>([]);
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [description, setDescription] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [rate, setRate] = useState<number>();
+  const [dayOptions, setDayOptions] = useState<Day[]>([]);
+  const [day, setDay] = useState<number>();
+  const current = new Date();
+  const [startTime, setStartTime] = useState<Date>(convertTimeLocally(current));
+  const [endTime, setEndTime] = useState<Date>(
+    convertTimeLocally(new Date(current.setHours(current.getHours() + 2))),
+  );
+  const [showStart, setShowStart] = useState(false);
+  const [showEnd, setShowEnd] = useState(false);
+  const [rate, setRate] = useState<Number>();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -101,6 +113,7 @@ export default function TutorPost() {
         })
         .then((data) => {
           setLocationOptions(data.FORMATS);
+          setDayOptions(data.DAYS);
         })
         .catch((err) => {
           console.error(err);
@@ -124,20 +137,24 @@ export default function TutorPost() {
           course: selectedCourse,
           location: selectedLocation,
           description: description,
-          availability: availability,
+          dayOfWeek: day,
+          startTime: startTime,
+          endTime: endTime,
           rate: rate,
         }),
       });
 
-      const result = response.json();
+      const result = await response.json();
       if (!response.ok) {
+        const errorMessage = result.error;
+        Alert.alert("Posting failed: ", errorMessage);
         return console.error(result);
       }
       Alert.alert("Tutor post created successfully!");
       router.replace("/(tabs)/home");
     } catch (error: any) {
       console.error("Error: ", error);
-      Alert.alert("Posting failed" + error.message);
+      Alert.alert("Posting failed: ", error.message);
     }
   };
 
@@ -301,20 +318,72 @@ export default function TutorPost() {
             </View>
           </View>
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
-            <Text style={styles.title}>Availability, eg.(Monday 7-9pm)</Text>
-            <View style={styles.searchBar}>
-              <MaterialIcons name="keyboard" size={25} color="orange" />
-              <TextInput
+            <Text style={styles.title}>Availability (weekly)</Text>
+            <View>
+              <View style={styles.searchBar}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  data={dayOptions}
+                  maxHeight={200}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={"Select a day"}
+                  value={day}
+                  onChange={(item) => {
+                    setDay(item.value);
+                  }}
+                  renderLeftIcon={() => (
+                    <Fontisto color={"#ffc04d"} name="date" size={20} />
+                  )}
+                  search
+                  searchPlaceholder="Select a day"
+                />
+              </View>
+              <View
                 style={{
-                  color: "#222222",
-                  fontSize: 17,
-                  marginLeft: 10,
-                  flex: 1,
+                  flexDirection: "row",
+                  paddingHorizontal: 10,
+                  marginTop: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-                placeholder="Time slots"
-                placeholderTextColor="#888888"
-                onChangeText={setAvailability}
-              />
+              >
+                <Button
+                  title={`Start: ${startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                  onPress={() => setShowStart(true)}
+                  color={"#ffb347"}
+                />
+                {showStart && (
+                  <DateTimePicker
+                    mode="time"
+                    value={startTime}
+                    onChange={(_, selected) => {
+                      setShowStart(false);
+                      if (selected) setStartTime(selected);
+                    }}
+                  />
+                )}
+                <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>
+                  -
+                </Text>
+                <Button
+                  title={`End: ${endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                  onPress={() => setShowEnd(true)}
+                  color={"#ffb347"}
+                />
+                {showEnd && (
+                  <DateTimePicker
+                    mode="time"
+                    value={endTime}
+                    onChange={(_, selected) => {
+                      setShowEnd(false);
+                      if (selected) setEndTime(selected);
+                    }}
+                  />
+                )}
+              </View>
             </View>
           </View>
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>

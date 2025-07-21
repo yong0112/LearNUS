@@ -10,9 +10,9 @@ const getUserProfile = async (uid) => {
   return { id: userDoc.id, ...userDoc.data() };
 };
 
-const updateUserProfile = async (uid, updateDate) => {
+const updateUserProfile = async (uid, updateData) => {
   const userRef = db.collection("users").doc(uid);
-  await userRef.update(updateDate);
+  await userRef.update(updateData);
   return true;
 };
 
