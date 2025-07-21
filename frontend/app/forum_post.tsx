@@ -20,15 +20,11 @@ import {
   useColorScheme,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-
-type courseOption = {
-  label: string;
-  value: string;
-};
+import { CourseOption } from "../constants/types";
 
 export default function ForumPost() {
   const router = useRouter();
-  const [courseOptions, setCourseOptions] = useState<courseOption[]>([]);
+  const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -77,13 +73,15 @@ export default function ForumPost() {
       const result = await response.json();
       if (!response.ok) {
         console.error(result);
+        const errorMessage = result.error;
+        Alert.alert("Failed to post: ", errorMessage);
         return;
       }
       Alert.alert("Forum post created!");
       router.replace("/(tabs)/forum");
     } catch (error: any) {
       console.error("Error:", error);
-      Alert.alert("Failed to post: " + error.message);
+      Alert.alert("Failed to post: ");
     }
   };
 

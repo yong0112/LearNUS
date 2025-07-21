@@ -1,14 +1,13 @@
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
-import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import {
-  EmailAuthCredential,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  sendEmailVerification,
-  updateEmail,
-} from "@firebase/auth";
+  Entypo,
+  FontAwesome,
+  Ionicons,
+  MaterialCommunityIcons,
+  Octicons,
+} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -20,11 +19,26 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import {
+  launchCamera,
+  launchImageLibrary,
+  ImagePickerResponse,
+  Asset,
+  MediaType,
+  PhotoQuality,
+} from "react-native-image-picker";
 
 export default function Details() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
-  const [newProfilePic, setNewProfilePic] = useState<string>("");
+  const [selectedImage, setSelectedImage] = useState<Asset>();
+  const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -56,50 +70,132 @@ export default function Details() {
     return () => unsubscribe();
   }, []);
 
-  const handleChangeProfilePic = async () => {
-    Alert.alert("Sorry, feature under development");
-    {
-      /**Need to add something with Firebase Storage 
-      
-      
-      
-      
-      */
-    }
+  const useCamera = () => {
+    const options: {
+      mediaType: MediaType;
+      quality: PhotoQuality;
+      maxWidth: number;
+      maxHeight: number;
+    } = {
+      mediaType: "photo",
+      quality: 0.8,
+      maxWidth: 1000,
+      maxHeight: 1000,
+    };
 
-    {
-      /**Update the firestore done */
-    }
-    {
-      /**
-    const currUser = auth.currentUser;
+    launchCamera(options, (response) => {
+      if (response.didCancel || response.errorMessage) return;
 
-    if (!currUser) return;
+      if (response.assets && response.assets[0]) {
+        const imageFile = response.assets[0];
+        setSelectedImage(imageFile);
+        uploadToCloud(imageFile);
+      }
+    });
+  };
+
+  const openGallery = () => {
+    const options: {
+      mediaType: MediaType;
+      quality: PhotoQuality;
+      maxWidth: number;
+      maxHeight: number;
+    } = {
+      mediaType: "photo",
+      quality: 0.8,
+      maxWidth: 1000,
+      maxHeight: 1000,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel || response.errorMessage) return;
+
+      if (response.assets && response.assets[0]) {
+        const imageFile = response.assets[0];
+        setSelectedImage(imageFile);
+        uploadToCloud(imageFile);
+      }
+    });
+  };
+
+  const uploadToCloud = async (imageFile: Asset) => {
+    setUploading(true);
 
     try {
-      const response = await fetch("https://learnus.onrender.com/api/update-profile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          uid: currUser.uid,
-          profilePicture: newProfilePic,
-          updatedAt: new Date()
-        })
-      });
+      const currUser = auth.currentUser;
+      const formData = new FormData();
 
-      if (!response.ok) {
-        const text = await response.text();
-        return console.error("Error: ", text);
+      if (imageFile && imageFile.uri && imageFile.type && imageFile.fileName) {
+        formData.append("file", {
+          uri: imageFile.uri,
+          type: imageFile.type,
+          name: imageFile.fileName || `image_${Date.now()}.jpg`,
+        } as any);
       }
+      formData.append("upload_preset", "profile_pictures");
+      formData.append("public_id", `user_${currUser?.uid}`);
 
-      Alert.alert("Profile picture changed successfully");
-      router.push("/(tabs)/profile");
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/difdq7lmt/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const result = await response.json();
+      console.log("Cloudinary response:", result);
+
+      if (response.ok) {
+        const url = result.secure_url;
+        console.log("Image URL", url);
+
+        try {
+          const response = await fetch(
+            `https://learnus.onrender.com/api/update-profile-pic`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                uid: currUser?.uid,
+                profilePicture: url,
+              }),
+            },
+          );
+
+          if (!response.ok) {
+            const text = await response.text();
+            console.log("Error");
+            return console.error("Error", text);
+          }
+          Alert.alert("Profile picture uploaded successfully");
+        } catch (err) {
+          console.error("Upload error", err);
+          Alert.alert("Error: Failed to upload database");
+        }
+
+        router.replace("/profile/details");
+      } else {
+        throw new Error(result.error.message || "Upload failed");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Upload error", err);
+      Alert.alert("Error: Failed to upload image");
+    } finally {
+      setUploading(false);
     }
-      */
+  };
+
+  const handleChangeProfilePic = (option: string) => {
+    switch (option) {
+      case "camera":
+        useCamera();
+        break;
+      case "gallery":
+        openGallery();
+        break;
     }
   };
 
@@ -138,6 +234,18 @@ export default function Details() {
       borderBottomColor: "#aaaaaa",
       borderBottomWidth: 2,
     },
+    menu: {
+      alignItems: "flex-end",
+      width: 60,
+      alignSelf: "center",
+      marginLeft: 50,
+    },
+    option: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      borderBottomWidth: 0.5,
+      borderBottomColor: "gray",
+    },
   });
 
   return (
@@ -168,16 +276,39 @@ export default function Details() {
             source={{ uri: userProfile?.profilePicture }}
             style={styles.avatar}
           />
-          <TouchableOpacity
-            style={{ alignSelf: "center", marginLeft: 100 }}
-            onPress={handleChangeProfilePic}
-          >
-            <MaterialCommunityIcons
-              name="progress-pencil"
-              size={30}
-              color={text}
-            />
-          </TouchableOpacity>
+          <View style={styles.menu}>
+            <Menu onSelect={handleChangeProfilePic}>
+              <MenuTrigger>
+                <MaterialCommunityIcons
+                  name="progress-pencil"
+                  size={30}
+                  color={text}
+                />
+              </MenuTrigger>
+              <MenuOptions
+                customStyles={{
+                  optionsContainer: {
+                    padding: 10,
+                    borderRadius: 6,
+                    backgroundColor: "white",
+                  },
+                }}
+                optionsContainerStyle={{
+                  marginLeft: 130,
+                  marginTop: 20,
+                }}
+              >
+                <MenuOption style={styles.option} value="camera">
+                  <Text>Use camera</Text>
+                  <Entypo name="camera" size={20} />
+                </MenuOption>
+                <MenuOption style={styles.option} value="gallery">
+                  <Text>Open Gallery</Text>
+                  <FontAwesome name="photo" size={20} />
+                </MenuOption>
+              </MenuOptions>
+            </Menu>
+          </View>
         </View>
 
         {/*Info List*/}

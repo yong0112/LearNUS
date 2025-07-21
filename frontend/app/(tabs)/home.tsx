@@ -33,19 +33,21 @@ import {
 import { auth } from "../../lib/firebase";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { Class, Tutor, UserProfile, Day } from "../../constants/types";
 
 const screenHeight = Dimensions.get("window").height;
 
 export default function Home() {
   const router = useRouter();
-  const [classes, setClasses] = useState<any[]>([]);
-  const [todayClass, setTodayClass] = useState<any[]>([]);
-  const [tutors, setTutors] = useState<any>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [todayClass, setTodayClass] = useState<Class[]>([]);
+  const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [tutorProfiles, setTutorProfiles] = useState<
-    Record<string, any | undefined>
+    Record<string, UserProfile>
   >({});
   const [error, setError] = useState(null);
-  const [selectedTutor, setSelectedTutor] = useState<any>();
+  const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -63,7 +65,7 @@ export default function Home() {
             if (!res.ok) throw new Error("Failed to fetch classes");
             return res.json();
           })
-          .then(async (data) => {
+          .then(async (data: Class[]) => {
             console.log("Classes:", data);
             setClasses(data);
             setTodayClass(
@@ -92,19 +94,19 @@ export default function Home() {
             if (!res.ok) throw new Error("Failed to fetch tutors");
             return res.json();
           })
-          .then(async (data) => {
+          .then(async (data: Tutor[]) => {
             console.log("Tutors:", data);
             setTutors(data);
-            const tutorProfile: Record<string, string> = {};
+            const tutorProfile: Record<string, UserProfile> = {};
             await Promise.all(
-              data.map(async (cls: any) => {
+              data.map(async (cls: Tutor) => {
                 try {
                   const res = await fetch(
                     `https://learnus.onrender.com/api/users/${cls.tutor}`,
                   );
                   if (!res.ok) throw new Error("Failed to fetch tutor");
                   const userData = await res.json();
-                  tutorProfile[cls.tutor] = userData;
+                  tutorProfile[cls.tutor] = userData as UserProfile;
                 } catch (err) {
                   console.error(err);
                 }
@@ -121,18 +123,25 @@ export default function Home() {
       }
     });
 
+    const fetchConstants = async () => {
+      fetch("https://learnus.onrender.com/api/constants")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch constants");
+          return res.json();
+        })
+        .then((data) => {
+          setDayOptions(data.DAYS);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    fetchConstants();
     return () => unsubscribe();
   }, []);
 
-  const handleTutorProfile = (tutor: {
-    id: React.Key | null | undefined;
-    tutor: string;
-    course: string;
-    location: string;
-    description: string;
-    availability: string;
-    rate: number;
-  }) => {
+  const handleTutorProfile = (tutor: Tutor) => {
     setSelectedTutor(tutor);
     setModalVisible(true);
   };
@@ -170,17 +179,21 @@ export default function Home() {
   };
 
   const handleBooking = () => {
-    router.push({
-      pathname: "/booking",
-      params: {
-        tutor: selectedTutor.tutor,
-        course: selectedTutor.course,
-        description: selectedTutor.description,
-        location: selectedTutor.location,
-        availability: selectedTutor.availability,
-        rate: selectedTutor.rate,
-      },
-    });
+    if (selectedTutor) {
+      router.push({
+        pathname: "/booking",
+        params: {
+          tutor: selectedTutor.tutor,
+          course: selectedTutor.course,
+          description: selectedTutor.description,
+          location: selectedTutor.location,
+          dayOfWeek: selectedTutor.dayOfWeek,
+          startTime: selectedTutor.startTime,
+          endTime: selectedTutor.endTime,
+          rate: selectedTutor.rate,
+        },
+      });
+    }
   };
 
   const handleContact = () => {
@@ -193,6 +206,25 @@ export default function Home() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  }
+
+  function formatAvailability(dayOfWeek: Number, start: string, end: string) {
+    const day = dayOptions.find(
+      (d: { label: String; value: Number }) => d.value == dayOfWeek,
+    );
+    const startTime = new Date(start);
+    const formattedStart = startTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const endTime = new Date(end);
+    const formattedEnd = endTime.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${day?.label} (${formattedStart} - ${formattedEnd})`;
   }
 
   const styles = StyleSheet.create({
@@ -458,50 +490,38 @@ export default function Home() {
               No tutors yet.
             </Text>
           ) : (
-            tutors.map(
-              (cls: {
-                id: React.Key | null | undefined;
-                tutor: string;
-                availability: string;
-                course: string;
-                description: string;
-                location: string;
-                rate: number;
-              }) => (
-                <TouchableOpacity
-                  key={cls.id}
-                  style={styles.tutorProfile}
-                  onPress={() => handleTutorProfile(cls)}
+            tutors.map((cls: Tutor) => (
+              <TouchableOpacity
+                key={cls.id}
+                style={styles.tutorProfile}
+                onPress={() => handleTutorProfile(cls)}
+              >
+                {tutorProfiles[cls.tutor]?.profilePicture ? (
+                  <Image
+                    source={{ uri: tutorProfiles[cls.tutor].profilePicture }}
+                    style={{ width: 80, height: 100, alignSelf: "center" }}
+                  />
+                ) : (
+                  <Image
+                    source={require("../../assets/images/person.jpg")}
+                    style={{ width: 80, height: 100, alignSelf: "center" }}
+                  />
+                )}
+                <Text style={{ fontSize: 16, fontWeight: "bold", color: text }}>
+                  {cls.course}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "500",
+                    fontStyle: "italic",
+                    color: text,
+                  }}
                 >
-                  {tutorProfiles[cls.tutor]?.profilePicture ? (
-                    <Image
-                      source={{ uri: tutorProfiles[cls.tutor].profilePicture }}
-                      style={{ width: 80, height: 100, alignSelf: "center" }}
-                    />
-                  ) : (
-                    <Image
-                      source={require("../../assets/images/person.jpg")}
-                      style={{ width: 80, height: 100, alignSelf: "center" }}
-                    />
-                  )}
-                  <Text
-                    style={{ fontSize: 16, fontWeight: "bold", color: text }}
-                  >
-                    {cls.course}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "500",
-                      fontStyle: "italic",
-                      color: text,
-                    }}
-                  >
-                    S${cls.rate} hourly
-                  </Text>
-                </TouchableOpacity>
-              ),
-            )
+                  S${cls.rate} hourly
+                </Text>
+              </TouchableOpacity>
+            ))
           )}
         </ScrollView>
 
@@ -581,7 +601,11 @@ export default function Home() {
                       marginTop: 5,
                     }}
                   >
-                    {selectedTutor.availability}
+                    {formatAvailability(
+                      selectedTutor.dayOfWeek,
+                      selectedTutor.startTime,
+                      selectedTutor.endTime,
+                    )}
                   </Text>
                   <View
                     style={{

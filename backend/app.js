@@ -14,6 +14,8 @@ const classesRoutes = require("./routes/classes");
 app.use("/api/users", classesRoutes);
 const reviewsRoutes = require("./routes/reviews");
 app.use("/api/users", reviewsRoutes);
+const sessionRoutes = require("./routes/session");
+app.use("/api/users", sessionRoutes);
 const tutorRoutes = require("./routes/tutors");
 app.use("/api/tutors", tutorRoutes);
 const constantRoutes = require("./routes/constants");

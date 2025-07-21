@@ -67,9 +67,13 @@ export default function CalendarPage() {
         },
       );
 
+      const result = await response.json();
       if (!response.ok) {
         const text = await response.text();
-        return console.error(text);
+        const errorMessage = result.error;
+        Alert.alert("Failed to add: ", errorMessage);
+        console.error(text);
+        return;
       }
 
       console.log(response);

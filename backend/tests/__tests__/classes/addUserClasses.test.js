@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { addUserClasses } = require("../../../controllers/classesController");
 const { postUserClasses } = require("../../../models/classesModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.post("/api/classes/:uid", addUserClasses);
 
 // Mock the model
 jest.mock("../../../models/classesModel");
 
-describe("POST /api/classes/:uid", () => {
+describe("addUserClasses Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
@@ -26,7 +19,7 @@ describe("POST /api/classes/:uid", () => {
     const input = {
       people: "tutor123",
       course: "Math 101",
-      date: "2",
+      dayOfWeek: "2",
       startTime: "10:00",
       endTime: "11:00",
       rate: 50,
@@ -45,9 +38,16 @@ describe("POST /api/classes/:uid", () => {
       .mockResolvedValueOnce(studentClass)
       .mockResolvedValueOnce(tutorClass);
 
-    const response = await request(app).post(`/api/classes/${uid}`).send(input);
-    expect(response.status).toBe(201);
-    expect(response.body).toEqual({
+    const req = { params: { uid }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addUserClasses(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
       message: "Class added",
       studentClass,
       tutorClass,
@@ -57,7 +57,7 @@ describe("POST /api/classes/:uid", () => {
       user: uid,
       people: input.people,
       course: input.course,
-      date: input.date,
+      dayOfWeek: input.dayOfWeek,
       startTime: input.startTime,
       endTime: input.endTime,
       rate: input.rate,
@@ -68,7 +68,7 @@ describe("POST /api/classes/:uid", () => {
       user: input.people,
       people: uid,
       course: input.course,
-      date: input.date,
+      dayOfWeek: input.dayOfWeek,
       startTime: input.startTime,
       endTime: input.endTime,
       rate: input.rate,
@@ -82,14 +82,20 @@ describe("POST /api/classes/:uid", () => {
     const input = {
       people: "tutor123",
       course: "Math 101",
-      date: "2025-07-01",
       startTime: "10:00",
       // Missing endTime, rate, status, role
     };
 
-    const response = await request(app).post(`/api/classes/${uid}`).send(input);
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: "Missing required fields" });
+    const req = { params: { uid }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addUserClasses(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing required fields" });
     expect(postUserClasses).not.toHaveBeenCalled();
   });
 
@@ -98,7 +104,7 @@ describe("POST /api/classes/:uid", () => {
     const input = {
       people: "tutor123",
       course: "Math 101",
-      date: "2025-07-01",
+      dayOfWeek: "2",
       startTime: "10:00",
       endTime: "11:00",
       rate: 50,
@@ -107,9 +113,16 @@ describe("POST /api/classes/:uid", () => {
     };
     postUserClasses.mockRejectedValue(new Error("Database error"));
 
-    const response = await request(app).post(`/api/classes/${uid}`).send(input);
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual({ error: "Server error" });
+    const req = { params: { uid }, body: input };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await addUserClasses(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
     expect(postUserClasses).toHaveBeenCalledTimes(1);
   });
 });

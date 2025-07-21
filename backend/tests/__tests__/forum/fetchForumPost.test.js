@@ -1,17 +1,10 @@
-const request = require("supertest");
-const express = require("express");
 const { fetchForumPosts } = require("../../../controllers/forumController");
 const { getForumPosts } = require("../../../models/forumModel");
-
-// Set up Express app for testing
-const app = express();
-app.use(express.json());
-app.get("/api/forum/:uid", fetchForumPosts);
 
 // Mock the model
 jest.mock("../../../models/forumModel");
 
-describe("GET /api/forum/:uid", () => {
+describe("fetchForumPost Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "log").mockImplementation(() => {});
@@ -39,9 +32,15 @@ describe("GET /api/forum/:uid", () => {
     ];
     getForumPosts.mockResolvedValue(mockPosts);
 
-    const response = await request(app).get(`/api/forum/${uid}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockPosts);
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchForumPosts(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(mockPosts);
     expect(getForumPosts).toHaveBeenCalledWith(uid);
     expect(console.log).toHaveBeenCalledWith("Received POST");
   });
@@ -50,9 +49,16 @@ describe("GET /api/forum/:uid", () => {
     const uid = "user123";
     getForumPosts.mockRejectedValue(new Error("No posts found"));
 
-    const response = await request(app).get(`/api/forum/${uid}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({ message: "No posts found" });
+    const req = { params: { uid } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await fetchForumPosts(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "No posts found" });
     expect(getForumPosts).toHaveBeenCalledWith(uid);
     expect(console.log).toHaveBeenCalledWith("Received POST");
   });
