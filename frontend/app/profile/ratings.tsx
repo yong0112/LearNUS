@@ -7,14 +7,13 @@ import { Rating } from "react-native-ratings";
 import { auth } from "../../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
+import { Review, UserProfile } from "@/constants/types";
 
 export default function ratings() {
   const router = useRouter();
-  const [userProfile, setUserProfile] = useState<any | undefined>(null);
-  const [reviews, setReviews] = useState<any | undefined>([]);
-  const [reviewers, setReviewers] = useState<Record<string, any | undefined>>(
-    {},
-  );
+  const [userProfile, setUserProfile] = useState<UserProfile>();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewers, setReviewers] = useState<Record<string, UserProfile>>({});
   const [error, setError] = useState(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -24,7 +23,6 @@ export default function ratings() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        setUserProfile(null);
         setReviews([]);
         fetch(`https://learnus.onrender.com/api/users/${currentUser.uid}`)
           .then((res) => {
@@ -50,17 +48,17 @@ export default function ratings() {
               .then(async (data) => {
                 console.log("User reviews:", data);
                 setReviews(data);
-                const people: Record<string, any> = {};
+                const people: Record<string, UserProfile> = {};
                 await Promise.all(
-                  data.map(async (review: any) => {
+                  data.map(async (review: Review) => {
                     try {
                       const res = await fetch(
-                        `https://learnus.onrender.com/api/users/${review.people}`,
+                        `https://learnus.onrender.com/api/users/${review.student}`,
                       );
                       if (!res.ok)
                         throw new Error("Failed to fetch user profile");
                       const userData = await res.json();
-                      people[review.people] = userData;
+                      people[review.student] = userData;
                     } catch (err) {
                       console.error(err);
                     }
@@ -70,7 +68,6 @@ export default function ratings() {
               });
           });
       } else {
-        setUserProfile(null);
         setReviews([]);
         setReviewers({});
       }
@@ -199,81 +196,69 @@ export default function ratings() {
               No reviews yet.
             </Text>
           ) : (
-            reviews.map(
-              (review: {
-                id: React.Key | null | undefined;
-                rating: number;
-                date: { _seconds: number; _nanoseconds: number };
-                comment: string;
-                people: string;
-              }) => (
-                <View
-                  key={review.id}
-                  style={{
-                    borderBottomWidth: 2,
-                    borderBottomColor: "darkgray",
-                    marginTop: 20,
-                  }}
-                >
-                  <View style={styles.review}>
-                    <View style={{ flexDirection: "row", padding: 10 }}>
-                      <Image
-                        source={{
-                          uri: reviewers[review.people]
-                            ? reviewers[review.people].profilePicture
-                            : userProfile.profilePicture,
-                        }}
-                        style={styles.avatar}
-                      />
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          fontWeight: "500",
-                          alignSelf: "center",
-                          color: text,
-                        }}
-                      >
-                        {reviewers[review.people]
-                          ? reviewers[review.people].firstName
-                          : "User not found"}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          fontWeight: "500",
-                          alignSelf: "center",
-                          color: "darkgray",
-                          marginRight: 20,
-                          marginLeft: 5,
-                        }}
-                      >
-                        •{" "}
-                        {format(
-                          new Date(review.date._seconds * 1000),
-                          "dd MMM yyyy",
-                        )}
-                      </Text>
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                      <Text
-                        style={{
-                          fontSize: 20,
-                          fontWeight: "800",
-                          alignSelf: "flex-end",
-                          color: text,
-                        }}
-                      >
-                        {review.rating}
-                      </Text>
-                      <AntDesign name="star" size={25} color={"orange"} />
-                    </View>
+            reviews.map((review: Review) => (
+              <View
+                key={review.id}
+                style={{
+                  borderBottomWidth: 2,
+                  borderBottomColor: "darkgray",
+                  marginTop: 20,
+                }}
+              >
+                <View style={styles.review}>
+                  <View style={{ flexDirection: "row", padding: 10 }}>
+                    <Image
+                      source={
+                        reviewers[review.student]
+                          ? { uri: reviewers[review.student].profilePicture }
+                          : require("../../assets/images/profile.png")
+                      }
+                      style={styles.avatar}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "500",
+                        alignSelf: "center",
+                        color: text,
+                      }}
+                    >
+                      {reviewers[review.student]
+                        ? reviewers[review.student].firstName
+                        : "User not found"}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "500",
+                        alignSelf: "center",
+                        color: "darkgray",
+                        marginRight: 20,
+                        marginLeft: 5,
+                      }}
+                    >
+                      • {format(new Date(review.createdAt), "dd MMM yyyy")}
+                    </Text>
                   </View>
-                  <Text style={{ fontSize: 16, marginBottom: 10, color: text }}>
-                    {review.comment}
-                  </Text>
+                  <View style={{ flexDirection: "row" }}>
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        fontWeight: "800",
+                        alignSelf: "flex-end",
+                        color: text,
+                      }}
+                    >
+                      {review.rating}
+                    </Text>
+                    <AntDesign name="star" size={25} color={"orange"} />
+                  </View>
                 </View>
-              ),
-            )
+                <Text style={{ fontSize: 16, marginBottom: 10, color: text }}>
+                  {review.comment}
+                </Text>
+              </View>
+            ))
           )}
         </View>
       </View>
