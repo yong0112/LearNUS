@@ -13,8 +13,18 @@ const fetchUserClasses = async (req, res) => {
 
 const addUserClasses = async (req, res) => {
   const uid = req.params.uid;
-  const { people, course, dayOfWeek, startTime, endTime, rate, status, role } =
-    req.body;
+  const {
+    people,
+    course,
+    dayOfWeek,
+    startTime,
+    endTime,
+    rate,
+    status,
+    role,
+    createdAt,
+    endedAt,
+  } = req.body;
 
   if (
     !people ||
@@ -24,7 +34,9 @@ const addUserClasses = async (req, res) => {
     !endTime ||
     !rate ||
     !status ||
-    !role
+    !role ||
+    !createdAt ||
+    !endedAt
   ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -39,6 +51,8 @@ const addUserClasses = async (req, res) => {
     rate,
     status,
     role: "Student",
+    createdAt,
+    endedAt,
   };
 
   const tutorData = {
@@ -51,6 +65,8 @@ const addUserClasses = async (req, res) => {
     rate,
     status,
     role: "Tutor",
+    createdAt,
+    endedAt,
   };
 
   try {

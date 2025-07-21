@@ -43,6 +43,9 @@ export interface Class {
   status: string;
   paymentProof: string;
   updatedAt: string;
+  profileId: string;
+  createdAt: string;
+  endedAt: string;
 }
 
 export interface Tutor {
@@ -55,6 +58,7 @@ export interface Tutor {
   startTime: string;
   endTime: string;
   rate: number;
+  booked: boolean;
 }
 
 export interface Session {
@@ -66,6 +70,7 @@ export interface Session {
   startTime: string;
   endTime: string;
   rate: number;
+  profileId: string;
 }
 
 export interface Day {

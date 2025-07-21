@@ -101,7 +101,10 @@ export default function tutoring() {
           })
           .then(async (data: Tutor[]) => {
             console.log("Tutors:", data);
-            setTutors(data);
+            const filtered = data.filter((tutor) => {
+              return !tutor.booked;
+            });
+            setTutors(filtered);
             const tutorProfile: Record<string, UserProfile | undefined> = {};
             await Promise.all(
               data.map(async (cls: any) => {
@@ -232,6 +235,7 @@ export default function tutoring() {
         startTime: selectedTutor.startTime,
         endTime: selectedTutor.endTime,
         rate: selectedTutor.rate,
+        profileId: selectedTutor.id,
       },
     });
   };

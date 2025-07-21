@@ -96,10 +96,13 @@ export default function Home() {
           })
           .then(async (data: Tutor[]) => {
             console.log("Tutors:", data);
-            setTutors(data);
+            const filtered = data.filter((tutor) => {
+              return !tutor.booked;
+            });
+            setTutors(filtered);
             const tutorProfile: Record<string, UserProfile> = {};
             await Promise.all(
-              data.map(async (cls: Tutor) => {
+              filtered.map(async (cls: Tutor) => {
                 try {
                   const res = await fetch(
                     `https://learnus.onrender.com/api/users/${cls.tutor}`,
@@ -191,6 +194,7 @@ export default function Home() {
           startTime: selectedTutor.startTime,
           endTime: selectedTutor.endTime,
           rate: selectedTutor.rate,
+          profileId: selectedTutor.id,
         },
       });
     }
