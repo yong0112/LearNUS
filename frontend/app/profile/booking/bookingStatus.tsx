@@ -15,7 +15,14 @@ import {
 
 export default function bookingStatus() {
   const router = useRouter();
-  const STATUS = ["Pending", "Accepted", "Paid", "Confirmed"];
+  const STATUS = [
+    "Pending",
+    "Accepted",
+    "Paid",
+    "Confirmed",
+    "Completed",
+    "Reviewed",
+  ];
   const [session, setSession] = useState<Class>();
   const [curr, setCurr] = useState<number>();
   const colorScheme = useColorScheme();
@@ -75,6 +82,15 @@ export default function bookingStatus() {
   const handleConfirmation = () => {
     router.push({
       pathname: "/profile/booking/confirmation",
+      params: {
+        id: id,
+      },
+    });
+  };
+
+  const handleFeedback = () => {
+    router.push({
+      pathname: "/profile/booking/review",
       params: {
         id: id,
       },
@@ -221,7 +237,7 @@ export default function bookingStatus() {
                 </Text>
               </View>
               <View style={styles.actionBar}>
-                {session?.role == "Student" ? (
+                {session?.role == "Student" && curr == 1 ? (
                   <TouchableOpacity
                     style={styles.actionButton}
                     onPress={handlePayment}
@@ -259,7 +275,7 @@ export default function bookingStatus() {
                 </Text>
               </View>
               <View style={styles.actionBar}>
-                {session?.role == "Tutor" ? (
+                {session?.role == "Tutor" && curr == 2 ? (
                   <TouchableOpacity
                     style={styles.actionButton}
                     onPress={handleConfirmation}
@@ -294,6 +310,63 @@ export default function bookingStatus() {
               <Text style={styles.statusBarTextUndone}>
                 Booking is not confirmed.
               </Text>
+            </View>
+          )
+        ) : (
+          <View />
+        )}
+        {curr != undefined && curr >= 0 ? (
+          curr > 3 ? (
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <AntDesign name="checkcircle" color={"green"} size={20} />
+                <Text style={styles.statusBarTextDone}>
+                  Session is completed.
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.statusBarUndone}>
+              <AntDesign name="checkcircle" color={"gray"} size={20} />
+              <Text style={styles.statusBarTextUndone}>
+                Session in progress.
+              </Text>
+            </View>
+          )
+        ) : (
+          <View />
+        )}
+        {curr != undefined && curr >= 0 ? (
+          curr > 4 ? (
+            <View style={styles.statusBarDone}>
+              <AntDesign name="checkcircle" color={"green"} size={20} />
+              <Text style={styles.statusBarTextDone}>Session is reviewed.</Text>
+            </View>
+          ) : (
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarUndone}>
+                <AntDesign name="checkcircle" color={"gray"} size={20} />
+                <Text style={styles.statusBarTextUndone}>
+                  Pending for student's feedback.
+                </Text>
+              </View>
+              <View style={styles.actionBar}>
+                {session?.role == "Student" && curr == 4 ? (
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={handleFeedback}
+                  >
+                    <Text style={styles.actionText}>Action required</Text>
+                    <MaterialIcons
+                      name="arrow-right"
+                      size={20}
+                      color={"#dd571c"}
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <View />
+                )}
+              </View>
             </View>
           )
         ) : (

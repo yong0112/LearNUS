@@ -275,7 +275,7 @@ export default function paymentPrompt() {
           name="arrow-back-circle"
           size={40}
           color="orange"
-          onPress={() => router.push("/profile/booking/bookingStatus")}
+          onPress={() => router.replace("/profile/booking/bookingStatus")}
         />
         <Text style={styles.headerText}>Payment</Text>
         <View style={{ width: 40 }} />
