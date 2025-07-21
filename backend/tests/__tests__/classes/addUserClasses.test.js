@@ -25,6 +25,8 @@ describe("addUserClasses Controller", () => {
       rate: 50,
       status: "Pending",
       role: "Student",
+      createdAt: new Date("2025-07-21T15:00:00.000Z").toISOString(),
+      endedAt: new Date("2025-08-12T12:00:00.000Z").toISOString(),
     };
     const studentClass = { id: "class1", ...input, user: uid, role: "Student" };
     const tutorClass = {
@@ -63,6 +65,8 @@ describe("addUserClasses Controller", () => {
       rate: input.rate,
       status: input.status,
       role: "Student",
+      createdAt: input.createdAt,
+      endedAt: input.endedAt,
     });
     expect(postUserClasses).toHaveBeenCalledWith({
       user: input.people,
@@ -74,6 +78,8 @@ describe("addUserClasses Controller", () => {
       rate: input.rate,
       status: input.status,
       role: "Tutor",
+      createdAt: input.createdAt,
+      endedAt: input.endedAt,
     });
   });
 
@@ -110,6 +116,8 @@ describe("addUserClasses Controller", () => {
       rate: 50,
       status: "Scheduled",
       role: "Student",
+      createdAt: new Date("2025-07-21T15:00:00.000Z").toISOString(),
+      endedAt: new Date("2025-08-12T12:00:00.000Z").toISOString(),
     };
     postUserClasses.mockRejectedValue(new Error("Database error"));
 

@@ -1,4 +1,4 @@
-const { getTutors, postTutor } = require("../models/tutorModel");
+const { getTutors, postTutor, updateStatus } = require("../models/tutorModel");
 const { FORMATS } = require("../config/constants");
 
 const fetchTutors = async (req, res) => {
@@ -56,4 +56,28 @@ const addTutor = async (req, res) => {
   }
 };
 
-module.exports = { fetchTutors, addTutor };
+const updateBooking = async (req, res) => {
+  const { uid, booked } = req.body;
+
+  if (!uid) return res.status(404).json({ error: "UID is required" });
+
+  try {
+    const updateData = {
+      ...(booked && { booked: booked }),
+      updatedAt: new Date(),
+    };
+
+    await updateStatus(uid, updateData);
+
+    res
+      .status(200)
+      .json({ message: "Tutor booking status updates successfully " });
+  } catch (err) {
+    res.status(500).json({
+      error: "Failed to update tutor booking status",
+      details: err.message,
+    });
+  }
+};
+
+module.exports = { fetchTutors, addTutor, updateBooking };
