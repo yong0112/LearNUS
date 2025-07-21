@@ -223,7 +223,7 @@ const removePost = async (postId, userId) => {
     console.error("Error removing post: ", error);
     throw new Error("Failed to remove post");
   }
-}
+};
 
 const removeComment = async (postId, commentId, userId) => {
   try {

@@ -22,6 +22,31 @@ import {
   UpvoteStatus,
 } from "../../constants/types";
 
+const tagColors = [
+  "#4CAF50", // Green
+  "#2196F3", // Blue
+  "#FF9800", // Orange
+  "#9C27B0", // Purple
+  "#FF5722", // Deep Orange
+  "#673AB7", // Deep Purple
+  "#009688", // Teal
+  "#E91E63", // Pink
+  "#3F51B5", // Indigo
+  "#FFC107", // Amber
+  "#607D8B", // Blue Gray
+  "#8BC34A", // Light Green
+  "#CDDC39", // Lime
+  "#F44336", // Red
+  "#0288D1", // Light Blue
+];
+
+const getTagColor = (courseTag: string) => {
+  const hash = courseTag
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return tagColors[hash % tagColors.length];
+};
+
 export default function ForumPostDetails() {
   const { postId } = useLocalSearchParams();
   const router = useRouter();
@@ -38,7 +63,9 @@ export default function ForumPostDetails() {
   >({});
   const [error, setError] = useState<string | null>(null);
   const [postMenuVisible, setPostMenuVisible] = useState(false);
-  const [commentMenuVisibleId, setCommentMenuVisibleId] = useState<string | null>(null);
+  const [commentMenuVisibleId, setCommentMenuVisibleId] = useState<
+    string | null
+  >(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -290,8 +317,8 @@ export default function ForumPostDetails() {
       borderRadius: 10,
     },
     profilePicture: {
-      width: 40,
-      height: 40,
+      width: 20,
+      height: 20,
       borderRadius: 20,
     },
     commentBar: {
@@ -330,6 +357,20 @@ export default function ForumPostDetails() {
       marginLeft: 8,
       fontSize: 16,
       color: text,
+    },
+    courseTagContainer: {
+      borderRadius: 12,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      alignSelf: "flex-start",
+      marginVertical: 8,
+      marginBottom: 4,
+      opacity: 0.8,
+    },
+    courseTagText: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: "#FFFFFF",
     },
   });
 
@@ -389,16 +430,21 @@ export default function ForumPostDetails() {
               </Text>
             </View>
 
-            {/* Title and Course Tag */}
-            <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>
+            {/* Title */}
+            <Text style={{ fontSize: 18, fontWeight: "800", color: text }}>
               {post.title}
             </Text>
+
+            {/* Course Tag */}
             {post.courseTag && (
-              <Text
-                style={{ fontSize: 16, color: "#888888", marginVertical: 8 }}
+              <View
+                style={[
+                  styles.courseTagContainer,
+                  { backgroundColor: getTagColor(post.courseTag) },
+                ]}
               >
-                {post.courseTag}
-              </Text>
+                <Text style={styles.courseTagText}>{post.courseTag}</Text>
+              </View>
             )}
 
             {/* Content */}
@@ -406,7 +452,7 @@ export default function ForumPostDetails() {
               style={{
                 fontSize: 18,
                 color: isDarkMode ? "#999999" : "#888888",
-                marginVertical: 8,
+                marginVertical: 2,
               }}
             >
               {post.content}
@@ -576,7 +622,9 @@ export default function ForumPostDetails() {
                       style={styles.menuButton}
                       onPress={() =>
                         setCommentMenuVisibleId(
-                          commentMenuVisibleId === comment.id ? null : comment.id,
+                          commentMenuVisibleId === comment.id
+                            ? null
+                            : comment.id,
                         )
                       }
                     >
@@ -607,7 +655,7 @@ export default function ForumPostDetails() {
             ))
           )}
         </ScrollView>
-            
+
         {/* Comment Input Bar */}
         <TouchableOpacity
           style={styles.commentBar}
