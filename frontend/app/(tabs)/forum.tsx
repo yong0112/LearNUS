@@ -49,6 +49,7 @@ export default function Forum() {
   const [modalVisible, setModalVisible] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [menuVisiblePostId, setMenuVisiblePostId] = useState<string | null>(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -202,6 +203,28 @@ export default function Forum() {
     }
   };
 
+  // Handle post deletion
+  const handleDeletePost = async (postId: string) => {
+    if (!auth.currentUser) {
+      alert("Please log in to delete a post");
+      return;
+    } 
+    try {
+      const res = await fetch(`${BASE_URL}/api/forum/${postId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: auth.currentUser.uid }),
+      });
+      if (!res.ok) throw new Error("Failed to delete post");
+      setPosts((prev) => prev.filter((post) => post.id !== postId));
+      setFilteredPosts((prev) => prev.filter((post) => post.id !== postId));
+      setMenuVisiblePostId(null); //Close menu after deletion
+      alert("Post deleted successfully");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Navigate to post details
   const handlePostDetails = (postId: string) => {
     router.push(`../forum/${postId}`);
@@ -251,6 +274,14 @@ export default function Forum() {
         post.courseTag.toLowerCase().includes(searchText.toLowerCase()))
     );
   });
+
+  const menuItems = [
+    {
+      label: "Delete",
+      value: "delete",
+      icon: <MaterialCommunityIcons name="trash-can-outline" size={20} color={text} />
+    },
+  ];
 
   const styles = StyleSheet.create({
     container: {
@@ -347,6 +378,31 @@ export default function Forum() {
       fontSize: 32,
       lineHeight: 36,
       fontWeight: "bold",
+    },
+    menuButton: {
+      padding: 8,
+    },
+    deleteMenu: {
+      position: "absolute",
+      right: 0,
+      top: 40,
+      width: 150,
+      backgroundColor: bg,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: text,
+      elevation: 5,
+      zIndex: 1000,
+    },
+    deleteMenuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 10,
+    },
+    deleteMenuText: {
+      marginLeft: 8,
+      fontSize: 16,
+      color: text,
     },
   });
 
@@ -547,7 +603,41 @@ export default function Forum() {
                       </Text>
                     </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
+                {/* Three-Dot Menu */}
+                {auth.currentUser?.uid === post.author && (
+                  <View style={{ position: "absolute", top: 8, right: 8 }}>
+                    <TouchableOpacity
+                      style={styles.menuButton}
+                      onPress={() =>
+                        setMenuVisiblePostId(
+                          menuVisiblePostId === post.id ? null : post.id,
+                        )
+                      }
+                    >
+                      <MaterialCommunityIcons
+                        name="dots-vertical"
+                        size={24}
+                        color={text}
+                      />
+                    </TouchableOpacity>
+                    {menuVisiblePostId === post.id && (
+                      <View style={styles.deleteMenu}>
+                        <TouchableOpacity
+                            style={styles.deleteMenuItem}
+                            onPress={() => handleDeletePost(post.id)}
+                          >
+                            <MaterialCommunityIcons
+                              name="trash-can-outline"
+                              size={20}
+                              color={text}
+                            />
+                            <Text style={styles.deleteMenuText}>Delete</Text>
+                          </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </TouchableOpacity>
               );
             })
           )}

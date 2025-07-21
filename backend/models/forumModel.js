@@ -259,4 +259,6 @@ module.exports = {
   getPostUpvoteStatus,
   toggleCommentUpvote,
   getCommentUpvoteStatus,
+  removePost,
+  removeComment,
 };
