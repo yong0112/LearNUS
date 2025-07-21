@@ -175,7 +175,7 @@ export default function review() {
       }
 
       const response3 = await fetch(
-        `https://learnus.onrender.com/api/users/${currUser?.uid}/classes/${id}`,
+        `https://learnus.onrender.com/api/users/${currUser?.uid}/classes/${id}/update-status`,
         {
           method: "POST",
           headers: {
