@@ -30,6 +30,7 @@ export default function BookingPage() {
   const [tutorProfile, setTutorProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<any>();
   const {
+    profileId,
     tutor,
     course,
     description,
@@ -84,14 +85,10 @@ export default function BookingPage() {
   }, []);
 
   const handleBooking = async () => {
-    if (startTime >= endTime) {
-      Alert.alert("End time could not be earlier than start time");
-      router.reload();
-    }
     try {
       const currUser = auth.currentUser;
       const response = await fetch(
-        `https://learnus.onrender.com/api/users/${currUser?.uid}/classes`,
+        `https:/learnus.onrender.com/api/users/${currUser?.uid}/classes`,
         {
           method: "POST",
           headers: {
@@ -106,12 +103,35 @@ export default function BookingPage() {
             endTime: endTime,
             rate: rate,
             status: "Pending",
+            createdAt: new Date().toISOString(),
+            endedAt: new Date(
+              computeEndTime(new Date(), dayOfWeek, endTime),
+            ).toISOString(),
+          }),
+        },
+      );
+
+      const response2 = await fetch(
+        `https://learnus.onrender.com/api/tutors/update-booking`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uid: profileId,
+            booked: true,
           }),
         },
       );
 
       if (!response.ok) {
         const text = await response.text();
+        return console.error(text);
+      }
+
+      if (!response2.ok) {
+        const text = await response2.text();
         return console.error(text);
       }
 
@@ -140,6 +160,34 @@ export default function BookingPage() {
       hour12: true,
     });
     return `${day?.label} (${formattedStart} - ${formattedEnd})`;
+  }
+
+  function computeEndTime(createdAt: Date, day: number, endTimeStr: string) {
+    const firstSessionDate = new Date(createdAt);
+    const bookingDay = createdAt.getDay();
+
+    // Step 1: Move to the next occurrence of the specified dayOfWeek
+    const diff = (day - bookingDay + 7) % 7;
+    firstSessionDate.setDate(firstSessionDate.getDate() + diff);
+
+    // Step 2: Move to the fourth session (3 weeks later)
+    const fourthSessionDate = new Date(firstSessionDate);
+    fourthSessionDate.setDate(fourthSessionDate.getDate() + 7 * 3);
+
+    // Step 3: Apply endTime to that date
+    const endTimeDate = new Date(endTimeStr);
+    const endHour = endTimeDate.getHours();
+    const endMinute = endTimeDate.getMinutes();
+    fourthSessionDate.setHours(endHour);
+    fourthSessionDate.setMinutes(endMinute);
+    fourthSessionDate.setSeconds(0);
+    fourthSessionDate.setMilliseconds(0);
+
+    // Step 4: Add 1 hour
+    fourthSessionDate.setHours(fourthSessionDate.getHours() + 1);
+
+    // Return timestamp
+    return fourthSessionDate.getTime();
   }
 
   const styles = StyleSheet.create({

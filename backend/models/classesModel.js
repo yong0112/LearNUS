@@ -29,6 +29,8 @@ const postUserClasses = async ({
   rate,
   status,
   role,
+  createdAt,
+  endedAt,
 }) => {
   try {
     const docRef = await db
@@ -44,6 +46,8 @@ const postUserClasses = async ({
         rate,
         status,
         role,
+        createdAt,
+        endedAt,
       });
     const savedDoc = await docRef.get();
     return { id: docRef.id, ...savedDoc.data() };

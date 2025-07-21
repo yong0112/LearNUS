@@ -43,4 +43,10 @@ const postTutor = async ({
   }
 };
 
-module.exports = { getTutors, postTutor };
+const updateStatus = async (uid, updateData) => {
+  const tutorRef = db.collection("tutors").doc(uid);
+  await tutorRef.update(updateData);
+  return true;
+};
+
+module.exports = { getTutors, postTutor, updateStatus };
