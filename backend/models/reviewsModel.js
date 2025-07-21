@@ -19,4 +19,23 @@ const getUserReviews = async (uid) => {
   return reviews;
 };
 
-module.exports = { getUserReviews };
+const postReview = async ({ tutor, student, rating, comment, createdAt }) => {
+  try {
+    const docRef = await db
+      .collection("users")
+      .doc(tutor)
+      .collection("reviews")
+      .add({
+        student,
+        rating,
+        comment,
+        createdAt,
+      });
+    const savedData = await docRef.get();
+    return { id: docRef.id, ...savedData.data() };
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+module.exports = { getUserReviews, postReview };
