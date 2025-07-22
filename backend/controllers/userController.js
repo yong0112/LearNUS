@@ -1,4 +1,5 @@
 const { getUserProfile, updateUserProfile } = require("../models/userModel");
+const { db } = require("../config/firebase");
 
 const fetchUserProfile = async (req, res) => {
   const uid = req.params.uid;
@@ -79,9 +80,47 @@ const updateRating = async (req, res) => {
   }
 };
 
+const updateFavourites = async (req, res) => {
+  const { uid, sessionId } = req.body;
+
+  if (!uid) return res.status(404).json({ error: "UID is required" });
+  if (!sessionId)
+    return res.status(400).json({ error: "Session ID is required" });
+
+  try {
+    const docRef = db.collection("users").doc(uid);
+    const doc = await docRef.get();
+
+    let favs = doc.exists && doc.data().favourites ? doc.data().favourites : [];
+
+    if (favs.includes(sessionId)) {
+      favs = favs.filter((fav) => fav != sessionId);
+    } else {
+      favs.push(sessionId);
+    }
+
+    const updateData = {
+      ...(favs && { favourites: favs }),
+      updatedAt: new Date(),
+    };
+
+    await updateUserProfile(uid, updateData);
+    res.status(200).json({
+      message: "User favourites updates successfully ",
+      favourites: favs,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: "Failed to update user favourites",
+      details: err.message,
+    });
+  }
+};
+
 module.exports = {
   fetchUserProfile,
   updateUserProfilePic,
   updateUserQR,
   updateRating,
+  updateFavourites,
 };

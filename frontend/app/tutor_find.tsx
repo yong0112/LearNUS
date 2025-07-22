@@ -14,6 +14,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  ImageBackground,
   Modal,
   ScrollView,
   StyleSheet,
@@ -30,7 +31,13 @@ import {
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { Tutor, UserProfile, Day } from "../constants/types";
+import {
+  Tutor,
+  UserProfile,
+  Day,
+  Favourite,
+  Session,
+} from "../constants/types";
 import SearchBar from "../components/SearchBar";
 
 const screenHeight = Dimensions.get("window").height;
@@ -47,6 +54,7 @@ export default function tutoring() {
   const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
   const [dayOptions, setDayOptions] = useState<Day[]>([]);
+  const [shortlisted, setShortlisted] = useState<string[]>();
   const [modalVisible, setModalVisible] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
   const colorScheme = useColorScheme();
@@ -91,6 +99,47 @@ export default function tutoring() {
   };
 
   useEffect(() => {
+    const fetchFavourite = async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        try {
+          await fetch(
+            `https://learnus.onrender.com/api/users/${currentUser.uid}`,
+          )
+            .then((res) => {
+              if (!res.ok) throw new Error("Failed to fetch user favourites");
+              return res.json();
+            })
+            .then((data) => {
+              console.log("User favourites", data.favourites);
+              setShortlisted(data.favourites || []);
+            });
+        } catch (err) {
+          console.error(err);
+          setShortlisted([]);
+        }
+      }
+    };
+
+    const fetchConstants = async () => {
+      fetch("https://learnus.onrender.com/api/constants")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch constants");
+          return res.json();
+        })
+        .then((data) => {
+          setDayOptions(data.DAYS);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    fetchConstants();
+    fetchFavourite();
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setTutors([]);
@@ -133,21 +182,6 @@ export default function tutoring() {
       }
     });
 
-    const fetchConstants = async () => {
-      fetch("https://learnus.onrender.com/api/constants")
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch constants");
-          return res.json();
-        })
-        .then((data) => {
-          setDayOptions(data.DAYS);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    };
-
-    fetchConstants();
     return () => unsubscribe();
   }, []);
 
@@ -212,6 +246,38 @@ export default function tutoring() {
     }
     setSelectedTutor(tutor);
     setModalVisible(true);
+  };
+
+  const toggleFavourite = async (sessionId: string) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const response = await fetch(
+          `http://192.168.0.107:5000/api/update-favourite`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              uid: currentUser.uid,
+              sessionId: sessionId,
+            }),
+          },
+        );
+
+        if (!response.ok) {
+          const text = await response.json();
+          console.error(text);
+        }
+
+        const data = await response.json();
+        console.log("Favourites updated", data.favourites);
+        setShortlisted(data.favourites);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const closeModal = () => {
@@ -327,9 +393,9 @@ export default function tutoring() {
     },
     image: {
       flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-end",
-      paddingBottom: 10,
+      justifyContent: "flex-end",
+      alignItems: "flex-start",
+      paddingTop: 5,
       paddingHorizontal: 5,
       borderBottomWidth: 2,
       borderBottomColor: "#444444",
@@ -458,14 +524,22 @@ export default function tutoring() {
                   style={styles.tutorCard}
                   onPress={() => handleTutorProfile(tutor)}
                 >
-                  <Image
+                  <ImageBackground
                     style={styles.image}
                     source={
                       profile.profilePicture
                         ? { uri: profile.profilePicture }
                         : require("../assets/images/person.jpg")
                     }
-                  />
+                  >
+                    <TouchableOpacity onPress={() => toggleFavourite(tutor.id)}>
+                      <AntDesign
+                        name="heart"
+                        size={25}
+                        color={shortlisted?.includes(tutor.id) ? "red" : "gray"}
+                      />
+                    </TouchableOpacity>
+                  </ImageBackground>
                   <View
                     style={{
                       flexDirection: "row",
@@ -554,11 +628,17 @@ export default function tutoring() {
                           </TouchableOpacity>
                         </View>
                         <View>
-                          <TouchableOpacity onPress={handleProfileSharing}>
-                            <FontAwesome
-                              name="share"
+                          <TouchableOpacity
+                            onPress={() => toggleFavourite(selectedTutor.id)}
+                          >
+                            <AntDesign
+                              name="heart"
                               size={30}
-                              color={"orange"}
+                              color={
+                                shortlisted?.includes(selectedTutor.id)
+                                  ? "red"
+                                  : "gray"
+                              }
                             />
                           </TouchableOpacity>
                         </View>
