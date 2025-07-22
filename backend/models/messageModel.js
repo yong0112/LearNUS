@@ -1,4 +1,4 @@
-const { db, admin } = require('../firebase');
+const { db, admin } = require('../config/firebase');
 
 class Message {
   constructor(data) {
@@ -6,8 +6,7 @@ class Message {
     this.chatId = data.chatId;
     this.senderId = data.senderId;
     this.message = data.message;
-    this.type = data.type || 'text'; // 'text', 'image', 'file'
-    this.attachments = data.attachments || [];
+    this.type = data.type || 'text'; 
     this.timestamp = data.timestamp;
     this.readBy = data.readBy || [];
     this.edited = data.edited || false;
@@ -22,8 +21,7 @@ class Message {
         chatId: messageData.chatId,
         senderId: messageData.senderId,
         message: messageData.message,
-        type: messageData.type || 'text',
-        attachments: messageData.attachments || [],
+        type:'text',
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
         readBy: [messageData.senderId],
         edited: false,
