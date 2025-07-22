@@ -7,6 +7,8 @@ const {
   getPostUpvoteStatus: getPostUpvoteStatusModel,
   toggleCommentUpvote: toggleCommentUpvoteModel,
   getCommentUpvoteStatus: getCommentUpvoteStatusModel,
+  removePost,
+  removeComment,
 } = require("../models/forumModel");
 
 const fetchForumPosts = async (req, res) => {
@@ -131,6 +133,40 @@ const getCommentUpvoteStatus = async (req, res) => {
   }
 };
 
+const deletePost = async (req, res) => {
+  const { postId } = req.params;
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+
+  try {
+    const result = await removePost(postId, userId);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Server error" });
+  }
+};
+
+const deleteComment = async (req, res) => {
+  const { postId, commentId } = req.params;
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+
+  try {
+    const result = await removeComment(postId, commentId, userId);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Server error" });
+  }
+};
+
 module.exports = {
   fetchForumPosts,
   addForumPost,
@@ -140,4 +176,6 @@ module.exports = {
   getPostUpvoteStatus,
   toggleCommentUpvote,
   getCommentUpvoteStatus,
+  deletePost,
+  deleteComment,
 };

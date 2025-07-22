@@ -58,6 +58,28 @@ const updateUserQR = async (req, res) => {
   }
 };
 
+const updateRating = async (req, res) => {
+  const { uid, ratings } = req.body;
+
+  if (!uid) return res.status(404).json({ error: "UID is required" });
+
+  try {
+    const updateData = {
+      ...(ratings && { ratings: ratings }),
+      updatedAt: new Date(),
+    };
+
+    await updateUserProfile(uid, updateData);
+
+    res.status(200).json({ message: "User ratings updates successfully " });
+  } catch (err) {
+    res.status(500).json({
+      error: "Failed to update user ratings",
+      details: err.message,
+    });
+  }
+};
+
 const updateFavourites = async (req, res) => {
   const { uid, sessionId } = req.body;
 
@@ -99,5 +121,6 @@ module.exports = {
   fetchUserProfile,
   updateUserProfilePic,
   updateUserQR,
+  updateRating,
   updateFavourites,
 };
