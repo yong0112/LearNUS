@@ -42,6 +42,7 @@ export default function Home() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [todayClass, setTodayClass] = useState<Class[]>([]);
   const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [shortlisted, setShortlisted] = useState<string[]>();
   const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [tutorProfiles, setTutorProfiles] = useState<
     Record<string, UserProfile>
@@ -71,6 +72,7 @@ export default function Home() {
             setTodayClass(
               classes.filter((cls) => cls.date == new Date().getDay()),
             );
+            console.log("Today classes", todayClass);
           })
           .catch((err) => {
             console.error(err);
@@ -126,6 +128,28 @@ export default function Home() {
       }
     });
 
+    const fetchFavourite = async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        try {
+          await fetch(
+            `https://learnus.onrender.com/api/users/${currentUser.uid}`,
+          )
+            .then((res) => {
+              if (!res.ok) throw new Error("Failed to fetch user favourites");
+              return res.json();
+            })
+            .then((data) => {
+              console.log("User favourites", data.favourites);
+              setShortlisted(data.favourites || []);
+            });
+        } catch (err) {
+          console.error(err);
+          setShortlisted([]);
+        }
+      }
+    };
+
     const fetchConstants = async () => {
       fetch("https://learnus.onrender.com/api/constants")
         .then((res) => {
@@ -140,6 +164,7 @@ export default function Home() {
         });
     };
 
+    fetchFavourite();
     fetchConstants();
     return () => unsubscribe();
   }, []);
@@ -170,6 +195,38 @@ export default function Home() {
 
   const handleNUSMods = () => {
     Linking.openURL("https://nusmods.com");
+  };
+
+  const toggleFavourite = async (sessionId: string) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const response = await fetch(
+          `http://192.168.0.107:5000/api/update-favourite`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              uid: currentUser.uid,
+              sessionId: sessionId,
+            }),
+          },
+        );
+
+        if (!response.ok) {
+          const text = await response.json();
+          console.error(text);
+        }
+
+        const data = await response.json();
+        console.log("Favourites updated", data.favourites);
+        setShortlisted(data.favourites);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const closeModal = () => {
@@ -240,7 +297,6 @@ export default function Home() {
       flexDirection: "column",
       paddingHorizontal: 20,
       paddingVertical: 40,
-      justifyContent: "flex-start",
     },
     headerLear: {
       fontSize: 25,
@@ -267,24 +323,20 @@ export default function Home() {
     },
     buttonText: { marginLeft: 6, fontSize: 14, fontWeight: "semibold" },
     reminder: {
-      width: "auto",
       height: 150,
       borderRadius: 10,
       backgroundColor: "#aaaaaa",
-      justifyContent: "center",
       marginBottom: 30,
     },
     classBox: {
-      marginBottom: 20,
       paddingHorizontal: 20,
       paddingVertical: 10,
       borderRadius: 20,
       borderTopWidth: 1,
       borderBottomWidth: 1,
       borderColor: "gray",
-      flexDirection: "column",
       justifyContent: "space-around",
-      alignItems: "baseline",
+      alignItems: "flex-start",
     },
     reminderText: { fontSize: 20, fontWeight: "bold", color: "black" },
     explore: { fontSize: 24, fontWeight: "bold", marginRight: 10, color: text },
@@ -413,26 +465,34 @@ export default function Home() {
           </TouchableOpacity>
         </ScrollView>
 
-        <View style={styles.reminder}>
+        <ScrollView
+          style={styles.reminder}
+          contentContainerStyle={{
+            justifyContent: "center",
+            alignItems: "stretch",
+          }}
+        >
           {todayClass.length > 0 ? (
             todayClass.map((cls, index) => (
               <View key={index} style={styles.classBox}>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    flexDirection: "row",
+                  }}
+                >
                   {cls.course}
                 </Text>
-                <Text style={{ fontSize: 16 }}>
+                <Text style={{ fontSize: 16, flexDirection: "row" }}>
                   {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
                 </Text>
               </View>
             ))
           ) : (
-            <View style={{ justifyContent: "flex-start", alignSelf: "center" }}>
-              <Text style={styles.reminderText}>
-                Currently no classes now...
-              </Text>
-            </View>
+            <Text style={styles.reminderText}>Currently no classes now...</Text>
           )}
-        </View>
+        </ScrollView>
 
         <Text style={styles.explore}>Explore</Text>
         <ScrollView
@@ -515,9 +575,29 @@ export default function Home() {
                     style={{ width: 80, height: 100, alignSelf: "center" }}
                   />
                 )}
-                <Text style={{ fontSize: 16, fontWeight: "bold", color: text }}>
-                  {cls.course}
-                </Text>
+                <View style={{ flexDirection: "row" }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      color: text,
+                      marginRight: 5,
+                    }}
+                  >
+                    {cls.course}
+                  </Text>
+                  <TouchableOpacity
+                    style={{ alignSelf: "center" }}
+                    onPress={() => toggleFavourite(cls.id)}
+                  >
+                    <AntDesign
+                      name="heart"
+                      size={10}
+                      color={shortlisted?.includes(cls.id) ? "red" : "gray"}
+                    />
+                  </TouchableOpacity>
+                </View>
+
                 <Text
                   style={{
                     fontSize: 16,
@@ -562,8 +642,18 @@ export default function Home() {
                       </TouchableOpacity>
                     </View>
                     <View>
-                      <TouchableOpacity onPress={handleProfileSharing}>
-                        <FontAwesome name="share" size={30} color={"orange"} />
+                      <TouchableOpacity
+                        onPress={() => toggleFavourite(selectedTutor.id)}
+                      >
+                        <AntDesign
+                          name="heart"
+                          size={30}
+                          color={
+                            shortlisted?.includes(selectedTutor.id)
+                              ? "red"
+                              : "gray"
+                          }
+                        />
                       </TouchableOpacity>
                     </View>
                   </View>

@@ -86,3 +86,7 @@ export interface Comment {
   createdAt: { _seconds: number; _nanoseconds: number };
   upvoteCount: number;
 }
+
+export interface Favourite {
+  session: string;
+}
