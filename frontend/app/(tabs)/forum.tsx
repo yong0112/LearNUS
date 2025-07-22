@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  Alert,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { doc, getDoc } from "firebase/firestore";
@@ -25,6 +26,7 @@ import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
 import SearchBar from "../../components/SearchBar";
+import { getTagColor } from "@/constants/tagColors";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -46,9 +48,11 @@ export default function Forum() {
   const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>([]);
   const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
-  const [modalVisible, setModalVisible] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [menuVisiblePostId, setMenuVisiblePostId] = useState<string | null>(
+    null,
+  );
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -184,7 +188,7 @@ export default function Forum() {
   // Handle upvote toggle
   const handleUpvote = async (postId: string) => {
     if (!auth.currentUser) {
-      alert("Please log in to upvote");
+      Alert.alert("Please log in to upvote");
       return;
     }
     try {
@@ -198,7 +202,30 @@ export default function Forum() {
       setUpvoteStatus((prev) => ({ ...prev, [postId]: result }));
     } catch (err) {
       console.error(err);
-      alert("Failed to upvote");
+      Alert.alert("Failed to upvote");
+    }
+  };
+
+  // Handle post deletion
+  const handleDeletePost = async (postId: string) => {
+    if (!auth.currentUser) {
+      alert("Please log in to delete a post");
+      return;
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/api/forum/${postId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: auth.currentUser.uid }),
+      });
+      if (!res.ok) throw new Error("Failed to delete post");
+      setPosts((prev) => prev.filter((post) => post.id !== postId));
+      setFilteredPosts((prev) => prev.filter((post) => post.id !== postId));
+      setMenuVisiblePostId(null); //Close menu after deletion
+      Alert.alert("Post deleted successfully");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Failed to delete post");
     }
   };
 
@@ -206,18 +233,6 @@ export default function Forum() {
   const handlePostDetails = (postId: string) => {
     router.push(`../forum/${postId}`);
   };
-
-  // Handle clicking a post to show details in modal
-  // const handlePostDetails = (post: any) => {
-  //   setSelectedPost(post);
-  //   setModalVisible(true);
-  // };
-
-  // // Close the modal
-  // const closeModal = () => {
-  //   setSelectedPost(null);
-  //   setModalVisible(false);
-  // };
 
   // Navigate to forum_post.tsx
   const handleNewPost = () => {
@@ -251,6 +266,20 @@ export default function Forum() {
         post.courseTag.toLowerCase().includes(searchText.toLowerCase()))
     );
   });
+
+  const menuItems = [
+    {
+      label: "Delete",
+      value: "delete",
+      icon: (
+        <MaterialCommunityIcons
+          name="trash-can-outline"
+          size={20}
+          color={text}
+        />
+      ),
+    },
+  ];
 
   const styles = StyleSheet.create({
     container: {
@@ -326,9 +355,9 @@ export default function Forum() {
       paddingBottom: 10,
     },
     profilePicture: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
     },
     fab: {
       position: "absolute",
@@ -347,6 +376,44 @@ export default function Forum() {
       fontSize: 32,
       lineHeight: 36,
       fontWeight: "bold",
+    },
+    menuButton: {
+      padding: 8,
+    },
+    deleteMenu: {
+      position: "absolute",
+      right: 0,
+      top: 40,
+      width: 150,
+      backgroundColor: bg,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: text,
+      elevation: 5,
+      zIndex: 1000,
+    },
+    deleteMenuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 10,
+    },
+    deleteMenuText: {
+      marginLeft: 8,
+      fontSize: 16,
+      color: text,
+    },
+    courseTagContainer: {
+      borderRadius: 12,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      alignSelf: "flex-start",
+      marginVertical: 8,
+      opacity: 0.8,
+    },
+    courseTagText: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: "#FFFFFF",
     },
   });
 
@@ -467,7 +534,7 @@ export default function Forum() {
                     />
                     <Text
                       style={{
-                        fontSize: 16,
+                        fontSize: 12,
                         fontWeight: "600",
                         marginLeft: 8,
                         color: text,
@@ -477,33 +544,33 @@ export default function Forum() {
                     </Text>
                   </View>
 
-                  {/* Title and Course Tag */}
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
+                  {/* Title */}
+                  <Text
+                    style={{ fontSize: 18, fontWeight: "800", color: text }}
                   >
-                    <Text
-                      style={{ fontSize: 24, fontWeight: "800", color: text }}
+                    {post.title}
+                  </Text>
+
+                  {/* Course Tag */}
+                  {post.courseTag && (
+                    <View
+                      style={[
+                        styles.courseTagContainer,
+                        { backgroundColor: getTagColor(post.courseTag) },
+                      ]}
                     >
-                      {post.title}
-                    </Text>
-                    {post.courseTag && (
-                      <Text style={{ fontSize: 16, color: "#888888" }}>
-                        {post.courseTag}
-                      </Text>
-                    )}
-                  </View>
+                      <Text style={styles.courseTagText}>{post.courseTag}</Text>
+                    </View>
+                  )}
 
                   {/* Content */}
                   <Text
                     style={{
-                      fontSize: 18,
+                      fontSize: 14,
                       fontWeight: "600",
                       color: "#888888",
-                      marginVertical: 8,
+                      marginVertical: 2,
+                      marginBottom: 8,
                     }}
                     numberOfLines={2}
                   >
@@ -547,6 +614,41 @@ export default function Forum() {
                       </Text>
                     </TouchableOpacity>
                   </View>
+
+                  {/* Three-Dot Menu */}
+                  {auth.currentUser?.uid === post.author && (
+                    <View style={{ position: "absolute", top: 8, right: 8 }}>
+                      <TouchableOpacity
+                        style={styles.menuButton}
+                        onPress={() =>
+                          setMenuVisiblePostId(
+                            menuVisiblePostId === post.id ? null : post.id,
+                          )
+                        }
+                      >
+                        <MaterialCommunityIcons
+                          name="dots-vertical"
+                          size={24}
+                          color={text}
+                        />
+                      </TouchableOpacity>
+                      {menuVisiblePostId === post.id && (
+                        <View style={styles.deleteMenu}>
+                          <TouchableOpacity
+                            style={styles.deleteMenuItem}
+                            onPress={() => handleDeletePost(post.id)}
+                          >
+                            <MaterialCommunityIcons
+                              name="trash-can-outline"
+                              size={20}
+                              color={text}
+                            />
+                            <Text style={styles.deleteMenuText}>Delete</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })
