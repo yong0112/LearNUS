@@ -195,6 +195,61 @@ const getCommentUpvoteStatus = async (postId, commentId, userId) => {
   }
 };
 
+const removePost = async (postId, userId) => {
+  try {
+    const postRef = db.collection("forums").doc(postId);
+    const postDoc = await postRef.get();
+
+    if (!postDoc.exists) {
+      throw new Error("Post not found");
+    }
+
+    if (postDoc.data().author !== userId) {
+      throw new Error("Unauthorized: Only the author can delete this post");
+    }
+
+    const batch = db.batch();
+    batch.delete(postRef);
+
+    const commentsRef = postRef.collection("comments");
+    const commentsSnapshot = await commentsRef.get();
+    commentsSnapshot.forEach((commentDoc) => {
+      batch.delete(commentDoc.ref);
+    });
+
+    await batch.commit();
+    return { message: "Post and associated comments deleted successfully" };
+  } catch (error) {
+    console.error("Error removing post: ", error);
+    throw new Error("Failed to remove post");
+  }
+};
+
+const removeComment = async (postId, commentId, userId) => {
+  try {
+    const commentRef = db
+      .collection("forums")
+      .doc(postId)
+      .collection("comments")
+      .doc(commentId);
+    const commentDoc = await commentRef.get();
+
+    if (!commentDoc.exists) {
+      throw new Error("Comment not found");
+    }
+
+    if (commentDoc.data().author !== userId) {
+      throw new Error("Unauthorized: Only the author can delete this comment");
+    }
+
+    await commentRef.delete();
+    return { message: "Comment deleted successfully" };
+  } catch (error) {
+    console.error("Error removing comment: ", error);
+    throw new Error("Failed to remove comment");
+  }
+};
+
 module.exports = {
   getForumPosts,
   postForum,
@@ -204,4 +259,6 @@ module.exports = {
   getPostUpvoteStatus,
   toggleCommentUpvote,
   getCommentUpvoteStatus,
+  removePost,
+  removeComment,
 };

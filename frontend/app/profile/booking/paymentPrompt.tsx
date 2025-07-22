@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   useColorScheme,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -13,12 +14,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { auth } from "@/lib/firebase";
 import { Day, Class, UserProfile } from "@/constants/types";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import {
+  Asset,
+  launchImageLibrary,
+  MediaType,
+  PhotoQuality,
+} from "react-native-image-picker";
 
 export default function paymentPrompt() {
   const router = useRouter();
   const [session, setSession] = useState<Class>();
   const [profile, setProfile] = useState<UserProfile>();
   const [dayConstants, setDayConstants] = useState<Day[]>([]);
+  const [selectedImage, setSelectedImage] = useState<Asset>();
+  const [uploading, setUploading] = useState<boolean>(false);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -85,7 +94,98 @@ export default function paymentPrompt() {
   }, [session]);
 
   const handleUpload = () => {
-    console.log("Uploading");
+    const options: {
+      mediaType: MediaType;
+      quality: PhotoQuality;
+      maxWidth: number;
+      maxHeight: number;
+    } = {
+      mediaType: "photo",
+      quality: 0.8,
+      maxWidth: 1000,
+      maxHeight: 1000,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel || response.errorMessage) return;
+
+      if (response.assets && response.assets[0]) {
+        const imageFile = response.assets[0];
+        setSelectedImage(imageFile);
+        uploadToCloud(imageFile);
+      }
+    });
+  };
+
+  const uploadToCloud = async (imageFile: Asset) => {
+    setUploading(true);
+
+    try {
+      const currUser = auth.currentUser;
+      const formData = new FormData();
+
+      if (imageFile && imageFile.uri && imageFile.type && imageFile.fileName) {
+        formData.append("file", {
+          uri: imageFile.uri,
+          type: imageFile.type,
+          name: imageFile.fileName || `image_${Date.now()}.jpg`,
+        } as any);
+      }
+      formData.append("upload_preset", "payment_proof");
+      formData.append("public_id", `classes_${session?.id}_qr`);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/difdq7lmt/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const result = await response.json();
+      console.log("Cloudinary response:", result);
+
+      if (response.ok) {
+        const url = result.secure_url;
+        console.log("Image URL", url);
+
+        try {
+          const response = await fetch(
+            `https://learnus.onrender.com/api/users/${currUser?.uid}/classes/${id}/update-payment`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                uid: currUser?.uid,
+                cid: id,
+                paymentProof: url,
+              }),
+            },
+          );
+
+          if (!response.ok) {
+            const text = await response.text();
+            console.log("Error");
+            return console.error("Error", text);
+          }
+          Alert.alert("Payment proof uploaded successfully");
+        } catch (err) {
+          console.error("Upload error", err);
+          Alert.alert("Error: Failed to upload database");
+        }
+
+        router.replace("/profile/booking/bookingStatus");
+      } else {
+        throw new Error(result.error.message || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Upload error", err);
+      Alert.alert("Error: Failed to upload payment");
+    } finally {
+      setUploading(false);
+    }
   };
 
   function formatAvailability(dayOfWeek: number, start: string, end: string) {
@@ -175,7 +275,7 @@ export default function paymentPrompt() {
           name="arrow-back-circle"
           size={40}
           color="orange"
-          onPress={() => router.push("/profile/booking/bookingStatus")}
+          onPress={() => router.replace("/profile/booking/bookingStatus")}
         />
         <Text style={styles.headerText}>Payment</Text>
         <View style={{ width: 40 }} />

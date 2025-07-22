@@ -9,6 +9,8 @@ const {
   getPostUpvoteStatus,
   toggleCommentUpvote,
   getCommentUpvoteStatus,
+  deletePost,
+  deleteComment,
 } = require("../controllers/forumController");
 
 router.get("/", fetchForumPosts);
@@ -22,5 +24,7 @@ router.get(
   "/:postId/comments/:commentId/upvote-status/:userId",
   getCommentUpvoteStatus,
 );
+router.delete("/:postId", deletePost);
+router.delete("/:postId/comments/:commentId", deleteComment);
 
 module.exports = router;

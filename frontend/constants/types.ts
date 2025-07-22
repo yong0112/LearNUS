@@ -87,6 +87,14 @@ export interface Comment {
   upvoteCount: number;
 }
 
+export interface Review {
+  id: string;
+  student: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
 export interface Favourite {
   session: string;
 }

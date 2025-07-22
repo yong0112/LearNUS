@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  Alert,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -20,6 +21,7 @@ import {
   UserProfile,
   UpvoteStatus,
 } from "../../constants/types";
+import { getTagColor } from "@/constants/tagColors";
 
 export default function ForumPostDetails() {
   const { postId } = useLocalSearchParams();
@@ -36,6 +38,10 @@ export default function ForumPostDetails() {
     Record<string, UpvoteStatus>
   >({});
   const [error, setError] = useState<string | null>(null);
+  const [postMenuVisible, setPostMenuVisible] = useState(false);
+  const [commentMenuVisibleId, setCommentMenuVisibleId] = useState<
+    string | null
+  >(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -121,7 +127,7 @@ export default function ForumPostDetails() {
   // Handle upvote for post
   const handlePostUpvote = async () => {
     if (!auth.currentUser) {
-      alert("Please log in to upvote");
+      Alert.alert("Please log in to upvote");
       return;
     }
     if (!postId || typeof postId !== "string") return;
@@ -137,14 +143,14 @@ export default function ForumPostDetails() {
       setPostUpvoteStatus(result);
     } catch (err) {
       console.error(err);
-      alert("Failed to upvote");
+      Alert.alert("Failed to upvote");
     }
   };
 
   // Handle upvote for comment
   const handleCommentUpvote = async (commentId: string) => {
     if (!auth.currentUser) {
-      alert("Please log in to upvote");
+      Alert.alert("Please log in to upvote");
       return;
     }
     if (!postId || typeof postId !== "string") return;
@@ -177,7 +183,62 @@ export default function ForumPostDetails() {
       );
     } catch (err) {
       console.error(err);
-      alert("Failed to upvote");
+      Alert.alert("Failed to upvote");
+    }
+  };
+
+  // Handle delete post
+  const handleDeletePost = async () => {
+    if (!auth.currentUser) {
+      Alert.alert("Please log in to delete the post");
+      return;
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/api/forum/${postId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: auth.currentUser.uid }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error("Failed to delete post: " + errorData);
+      }
+      setPostMenuVisible(false);
+      Alert.alert("Post deleted successfully");
+      router.push("/(tabs)/forum");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Failed to delete post");
+    }
+  };
+
+  // Handle delete comment
+  const handleDeleteComment = async (commentId: string) => {
+    if (!auth.currentUser) {
+      Alert.alert("Please log in to delete a comment");
+      return;
+    }
+    if (!postId || typeof postId !== "string") return;
+
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/forum/${postId}/comments/${commentId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: auth.currentUser.uid }),
+        },
+      );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete comment");
+      }
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+      setCommentMenuVisibleId(null);
+      Alert.alert("Comment deleted successfully");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Failed to delete comment");
     }
   };
 
@@ -232,8 +293,8 @@ export default function ForumPostDetails() {
       borderRadius: 10,
     },
     profilePicture: {
-      width: 40,
-      height: 40,
+      width: 20,
+      height: 20,
       borderRadius: 20,
     },
     commentBar: {
@@ -247,6 +308,45 @@ export default function ForumPostDetails() {
       borderTopColor: "#ccc",
       alignItems: "center",
       borderRadius: 10,
+    },
+    menuButton: {
+      padding: 8,
+    },
+    deleteMenu: {
+      position: "absolute",
+      right: 0,
+      top: 40,
+      width: 150,
+      backgroundColor: bg,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: text,
+      elevation: 5,
+      zIndex: 1000,
+    },
+    deleteMenuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 10,
+    },
+    deleteMenuText: {
+      marginLeft: 8,
+      fontSize: 16,
+      color: text,
+    },
+    courseTagContainer: {
+      borderRadius: 12,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      alignSelf: "flex-start",
+      marginVertical: 8,
+      marginBottom: 4,
+      opacity: 0.8,
+    },
+    courseTagText: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: "#FFFFFF",
     },
   });
 
@@ -306,16 +406,21 @@ export default function ForumPostDetails() {
               </Text>
             </View>
 
-            {/* Title and Course Tag */}
-            <Text style={{ fontSize: 24, fontWeight: "800", color: text }}>
+            {/* Title */}
+            <Text style={{ fontSize: 18, fontWeight: "800", color: text }}>
               {post.title}
             </Text>
+
+            {/* Course Tag */}
             {post.courseTag && (
-              <Text
-                style={{ fontSize: 16, color: "#888888", marginVertical: 8 }}
+              <View
+                style={[
+                  styles.courseTagContainer,
+                  { backgroundColor: getTagColor(post.courseTag) },
+                ]}
               >
-                {post.courseTag}
-              </Text>
+                <Text style={styles.courseTagText}>{post.courseTag}</Text>
+              </View>
             )}
 
             {/* Content */}
@@ -323,7 +428,7 @@ export default function ForumPostDetails() {
               style={{
                 fontSize: 18,
                 color: isDarkMode ? "#999999" : "#888888",
-                marginVertical: 8,
+                marginVertical: 2,
               }}
             >
               {post.content}
@@ -375,6 +480,37 @@ export default function ForumPostDetails() {
                 </Text>
               </View>
             </View>
+
+            {/* Post Three-Dot Menu */}
+            {auth.currentUser?.uid === post.author && (
+              <View style={{ position: "absolute", top: 8, right: 8 }}>
+                <TouchableOpacity
+                  style={styles.menuButton}
+                  onPress={() => setPostMenuVisible(!postMenuVisible)}
+                >
+                  <MaterialCommunityIcons
+                    name="dots-vertical"
+                    size={24}
+                    color={text}
+                  />
+                </TouchableOpacity>
+                {postMenuVisible && (
+                  <View style={styles.deleteMenu}>
+                    <TouchableOpacity
+                      style={styles.deleteMenuItem}
+                      onPress={handleDeletePost}
+                    >
+                      <MaterialCommunityIcons
+                        name="trash-can-outline"
+                        size={20}
+                        color={text}
+                      />
+                      <Text style={styles.deleteMenuText}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
 
           {/* Comments */}
@@ -454,6 +590,43 @@ export default function ForumPostDetails() {
                       comment.upvoteCount}
                   </Text>
                 </TouchableOpacity>
+
+                {/* Comment Three-Dot Menu */}
+                {auth.currentUser?.uid === comment.author && (
+                  <View style={{ position: "absolute", top: 8, right: 8 }}>
+                    <TouchableOpacity
+                      style={styles.menuButton}
+                      onPress={() =>
+                        setCommentMenuVisibleId(
+                          commentMenuVisibleId === comment.id
+                            ? null
+                            : comment.id,
+                        )
+                      }
+                    >
+                      <MaterialCommunityIcons
+                        name="dots-vertical"
+                        size={24}
+                        color={text}
+                      />
+                    </TouchableOpacity>
+                    {commentMenuVisibleId === comment.id && (
+                      <View style={styles.deleteMenu}>
+                        <TouchableOpacity
+                          style={styles.deleteMenuItem}
+                          onPress={() => handleDeleteComment(comment.id)}
+                        >
+                          <MaterialCommunityIcons
+                            name="trash-can-outline"
+                            size={20}
+                            color={text}
+                          />
+                          <Text style={styles.deleteMenuText}>Delete</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                )}
               </View>
             ))
           )}

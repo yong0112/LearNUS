@@ -41,4 +41,24 @@ const updateSessionStatus = async (req, res) => {
   }
 };
 
-module.exports = { fetchUserSession, updateSessionStatus };
+const updatePaymentProof = async (req, res) => {
+  const { uid, cid, paymentProof } = req.body;
+
+  if (!uid || !cid || !paymentProof) {
+    return res
+      .status(400)
+      .json({ error: "Missing uid or cid in the request parameters." });
+  }
+
+  try {
+    const updatedData = {
+      ...(paymentProof && { paymentProof: paymentProof }),
+    };
+    await updateUserSessionField(uid, cid, updatedData);
+    res.json({ message: "Payment proof posted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { fetchUserSession, updateSessionStatus, updatePaymentProof };
