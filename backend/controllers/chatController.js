@@ -1,5 +1,5 @@
 const Chat = require("../models/chatModel");
-const { admin } = require("../config/firebase");
+const { db, admin } = require("../config/firebase");
 
 const chatController = {
   // Get all chats for a user
