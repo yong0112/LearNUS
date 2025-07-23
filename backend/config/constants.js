@@ -13,4 +13,12 @@ module.exports = {
     { label: "Saturday", value: 6 },
     { label: "Sunday", value: 0 },
   ],
+  FAQ: [
+    { title: "Test", ans: "Testing" },
+    { title: "Test2", ans: "HAHA, stupid" },
+    {
+      title: "Test3",
+      ans: "wejcbwecbewicewicewucebwuicewucewuicewuicewuicewbuicwebcuiwecuiewbcuebceucbuicbui",
+    },
+  ],
 };

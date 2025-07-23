@@ -266,7 +266,7 @@ export default function Home() {
   const handleBooking = () => {
     if (selectedTutor) {
       router.push({
-        pathname: "/booking",
+        pathname: "/tutor_find/booking",
         params: {
           tutor: selectedTutor.tutor,
           course: selectedTutor.course,
@@ -284,10 +284,6 @@ export default function Home() {
 
   const handleContact = () => {
     Alert.alert("Sorry, feature under development");
-  };
-
-  const handleEditProfile = () => {
-    console.log("Editing");
   };
 
   function formatTime(date: string) {
@@ -797,40 +793,7 @@ export default function Home() {
                     </Text>
                   </View>
                   {selectedTutor.tutor == auth.currentUser?.uid ? (
-                    <View
-                      style={{
-                        marginTop: 40,
-                        borderRadius: 10,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: "orange",
-                        alignSelf: "stretch",
-                      }}
-                    >
-                      <TouchableOpacity
-                        style={{
-                          borderRadius: 10,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "orange",
-                          flexDirection: "row",
-                          paddingVertical: 8,
-                        }}
-                        onPress={handleEditProfile}
-                      >
-                        <Text
-                          style={{
-                            marginHorizontal: 4,
-                            fontSize: 28,
-                            fontWeight: "600",
-                            marginBottom: 2,
-                            color: "white",
-                          }}
-                        >
-                          Edit tutor profile
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                    <View />
                   ) : (
                     <View
                       style={{
@@ -848,7 +811,7 @@ export default function Home() {
                           justifyContent: "center",
                           backgroundColor: "orange",
                           flexDirection: "row",
-                          paddingVertical: 8,
+                          paddingVertical: 5,
                           alignSelf: "stretch",
                         }}
                         onPress={handleBooking}
@@ -856,7 +819,7 @@ export default function Home() {
                         <Text
                           style={{
                             marginHorizontal: 4,
-                            fontSize: 28,
+                            fontSize: 20,
                             fontWeight: "600",
                             marginBottom: 2,
                             color: "white",
@@ -873,7 +836,7 @@ export default function Home() {
                           backgroundColor: "white",
                           flexDirection: "row",
                           marginTop: 10,
-                          paddingVertical: 8,
+                          paddingVertical: 5,
                           alignSelf: "stretch",
                           borderWidth: 1,
                         }}
@@ -883,7 +846,7 @@ export default function Home() {
                         <Text
                           style={{
                             marginHorizontal: 4,
-                            fontSize: 28,
+                            fontSize: 20,
                             fontWeight: "600",
                             marginBottom: 2,
                             color: "black",

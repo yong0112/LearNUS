@@ -195,7 +195,7 @@ export default function review() {
       }
 
       Alert.alert("Review posted successfully.");
-      router.replace("/profile/booking/bookingStatus");
+      router.replace("/booking/bookingStatus");
     } catch (err: any) {
       console.error("Error", err);
       Alert.alert("Review failed to post" + err.message);
@@ -217,12 +217,15 @@ export default function review() {
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
+      alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     ratingContainer: {
@@ -272,13 +275,10 @@ export default function review() {
     <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="orange"
-          onPress={() => router.push("/profile/booking/bookingStatus")}
-        />
-        <Text style={styles.headerText}>Rating & Review</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Feedback</Text>
         <View style={{ width: 40 }} />
       </View>
 

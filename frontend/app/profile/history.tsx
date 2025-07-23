@@ -152,7 +152,7 @@ export default function history() {
   const handleTutorProfile = (id: string) => {
     console.log(id);
     router.push({
-      pathname: "./booking/bookingStatus",
+      pathname: "/booking/bookingStatus",
       params: {
         id: id,
       },
@@ -184,6 +184,9 @@ export default function history() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
       fontSize: 24,
@@ -272,7 +275,7 @@ export default function history() {
                     size={25}
                     color={"red"}
                   />
-                  <Text style={styles.title}>Pending acitons</Text>
+                  <Text style={styles.title}>Pending actions</Text>
                 </View>
                 <View>
                   {pendingClasses.length != 0 ? (
