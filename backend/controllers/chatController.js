@@ -1,5 +1,5 @@
-const Chat = require('../models/chatModel');
-const { admin } = require('../config/firebase');
+const Chat = require("../models/chatModel");
+const { admin } = require("../config/firebase");
 
 const chatController = {
   // Get all chats for a user
@@ -7,13 +7,13 @@ const chatController = {
     try {
       const userId = req.user.uid; // From auth middleware
       const chats = await Chat.getUserChats(userId);
-      
+
       // Get participant details for each chat
       const chatsWithDetails = await Promise.all(
         chats.map(async (chat) => {
           const participantDetails = await Promise.all(
             chat.participants
-              .filter(id => id !== userId) // Exclude current user
+              .filter((id) => id !== userId) // Exclude current user
               .map(async (participantId) => {
                 try {
                   const userRecord = await admin.auth().getUser(participantId);
@@ -21,29 +21,29 @@ const chatController = {
                     uid: userRecord.uid,
                     email: userRecord.email,
                     displayName: userRecord.displayName,
-                    photoURL: userRecord.photoURL
+                    photoURL: userRecord.photoURL,
                   };
                 } catch (error) {
-                  return { uid: participantId, displayName: 'Unknown User' };
+                  return { uid: participantId, displayName: "Unknown User" };
                 }
-              })
+              }),
           );
 
           return {
             ...chat,
-            participantDetails
+            participantDetails,
           };
-        })
+        }),
       );
 
       res.status(200).json({
         success: true,
-        data: chatsWithDetails
+        data: chatsWithDetails,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   },
@@ -57,7 +57,7 @@ const chatController = {
       if (!participantId) {
         return res.status(400).json({
           success: false,
-          message: 'Participant ID is required'
+          message: "Participant ID is required",
         });
       }
 
@@ -68,21 +68,21 @@ const chatController = {
         // Create new chat
         const chatData = {
           participants: [userId, participantId],
-          type: 'direct',
-          metadata: tutorPostId ? { tutorPostId } : {}
+          type: "direct",
+          metadata: tutorPostId ? { tutorPostId } : {},
         };
-        
+
         chat = await Chat.create(chatData);
       }
 
       res.status(200).json({
         success: true,
-        data: chat
+        data: chat,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   },
@@ -98,7 +98,7 @@ const chatController = {
       if (!chat) {
         return res.status(404).json({
           success: false,
-          message: 'Chat not found'
+          message: "Chat not found",
         });
       }
 
@@ -106,21 +106,21 @@ const chatController = {
       if (!chat.isParticipant(userId)) {
         return res.status(403).json({
           success: false,
-          message: 'Access denied'
+          message: "Access denied",
         });
       }
 
       res.status(200).json({
         success: true,
-        data: chat
+        data: chat,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
-  }
+  },
 };
 
 module.exports = chatController;

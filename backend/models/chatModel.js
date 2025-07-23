@@ -1,10 +1,10 @@
-const { db, admin } = require('../config/firebase'); 
+const { db, admin } = require("../config/firebase");
 
 class Chat {
   constructor(data) {
     this.id = data.id;
     this.participants = data.participants || [];
-    this.type = data.type || 'direct'; // 'direct' or 'group'
+    this.type = data.type || "direct";
     this.lastMessage = data.lastMessage || null;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
@@ -16,16 +16,16 @@ class Chat {
     try {
       const newChat = {
         participants: chatData.participants,
-        type: chatData.type || 'direct',
+        type: chatData.type || "direct",
         lastMessage: null,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        metadata: chatData.metadata || {}
+        metadata: chatData.metadata || {},
       };
 
-      const chatRef = await db.collection('chats').add(newChat);
+      const chatRef = await db.collection("chats").add(newChat);
       const chatDoc = await chatRef.get();
-      
+
       return new Chat({ id: chatDoc.id, ...chatDoc.data() });
     } catch (error) {
       throw new Error(`Error creating chat: ${error.message}`);
@@ -35,14 +35,14 @@ class Chat {
   // Find existing chat between users
   static async findBetweenUsers(userId1, userId2) {
     try {
-      const chatsRef = db.collection('chats');
+      const chatsRef = db.collection("chats");
       const snapshot = await chatsRef
-        .where('participants', 'array-contains', userId1)
-        .where('type', '==', 'direct')
+        .where("participants", "array-contains", userId1)
+        .where("type", "==", "direct")
         .get();
 
       let existingChat = null;
-      snapshot.forEach(doc => {
+      snapshot.forEach((doc) => {
         const chatData = doc.data();
         if (chatData.participants.includes(userId2)) {
           existingChat = new Chat({ id: doc.id, ...chatData });
@@ -58,14 +58,14 @@ class Chat {
   // Get user's chats
   static async getUserChats(userId) {
     try {
-      const chatsRef = db.collection('chats');
+      const chatsRef = db.collection("chats");
       const snapshot = await chatsRef
-        .where('participants', 'array-contains', userId)
-        .orderBy('updatedAt', 'desc')
+        .where("participants", "array-contains", userId)
+        .orderBy("updatedAt", "desc")
         .get();
 
       const chats = [];
-      snapshot.forEach(doc => {
+      snapshot.forEach((doc) => {
         chats.push(new Chat({ id: doc.id, ...doc.data() }));
       });
 
@@ -78,8 +78,8 @@ class Chat {
   // Get chat by ID
   static async getById(chatId) {
     try {
-      const chatDoc = await db.collection('chats').doc(chatId).get();
-      
+      const chatDoc = await db.collection("chats").doc(chatId).get();
+
       if (!chatDoc.exists) {
         return null;
       }
@@ -93,15 +93,18 @@ class Chat {
   // Update last message
   async updateLastMessage(messageData) {
     try {
-      await db.collection('chats').doc(this.id).update({
-        lastMessage: {
-          text: messageData.message,
-          senderId: messageData.senderId,
-          timestamp: messageData.timestamp,
-          type: messageData.type
-        },
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+      await db
+        .collection("chats")
+        .doc(this.id)
+        .update({
+          lastMessage: {
+            text: messageData.message,
+            senderId: messageData.senderId,
+            timestamp: messageData.timestamp,
+            type: messageData.type,
+          },
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
     } catch (error) {
       throw new Error(`Error updating last message: ${error.message}`);
     }
