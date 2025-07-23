@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -33,10 +34,11 @@ import {
   MediaType,
   PhotoQuality,
 } from "react-native-image-picker";
+import { UserProfile } from "@/constants/types";
 
 export default function Details() {
   const router = useRouter();
-  const [userProfile, setUserProfile] = useState<any | undefined>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile>();
   const [selectedImage, setSelectedImage] = useState<Asset>();
   const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState(null);
@@ -48,7 +50,6 @@ export default function Details() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        setUserProfile(null);
         fetch(`https://learnus.onrender.com/api/users/${currentUser.uid}`)
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch user profile");
@@ -63,7 +64,7 @@ export default function Details() {
             setError(err.message);
           });
       } else {
-        setUserProfile(null);
+        setUserProfile(undefined);
       }
     });
 
@@ -201,26 +202,20 @@ export default function Details() {
 
   const styles = StyleSheet.create({
     container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-    background: {
-      position: "absolute",
-      top: -550,
-      left: -150,
-      width: 10000,
-      height: 650,
-      borderRadius: 0,
-      backgroundColor: "#ffc04d",
-      zIndex: -1,
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     avatar: {
-      width: 100,
-      height: 100,
+      width: 150,
+      height: 150,
       borderRadius: 50,
       alignSelf: "center",
       marginTop: 20,
@@ -238,7 +233,7 @@ export default function Details() {
       alignItems: "flex-end",
       width: 60,
       alignSelf: "center",
-      marginLeft: 50,
+      marginLeft: 100,
     },
     option: {
       flexDirection: "row",
@@ -251,21 +246,11 @@ export default function Details() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/*Header*/}
-        <View style={styles.background} />
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color={isDarkMode ? "white" : "orange"}
-            onPress={() => router.push("/(tabs)/profile")}
-          />
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} />
+          </TouchableOpacity>
           <Text style={styles.headerText}>Personal Details</Text>
           <View style={{ width: 40 }} />
         </View>
@@ -281,8 +266,8 @@ export default function Details() {
               <MenuTrigger>
                 <MaterialCommunityIcons
                   name="progress-pencil"
-                  size={30}
-                  color={text}
+                  size={40}
+                  color={"#ffc74fff"}
                 />
               </MenuTrigger>
               <MenuOptions
@@ -312,7 +297,7 @@ export default function Details() {
         </View>
 
         {/*Info List*/}
-        <View style={styles.info}>
+        <ScrollView style={styles.info}>
           <View style={{ paddingBottom: 35 }}>
             <Text style={styles.label}>First Name</Text>
             <Text style={styles.field}>{userProfile?.firstName}</Text>
@@ -322,8 +307,12 @@ export default function Details() {
             <Text style={styles.field}>{userProfile?.lastName}</Text>
           </View>
           <View style={{ paddingBottom: 35 }}>
-            <Text style={styles.label}>Gender</Text>
-            <Text style={styles.field}>Unknown</Text>
+            <Text style={styles.label}>Major</Text>
+            <Text style={styles.field}>{userProfile?.major}</Text>
+          </View>
+          <View style={{ paddingBottom: 35 }}>
+            <Text style={styles.label}>Preferred Teaching mode</Text>
+            <Text style={styles.field}>{userProfile?.teachingMode}</Text>
           </View>
           <View style={{ paddingBottom: 35 }}>
             <Text style={styles.label}>Email</Text>
@@ -342,7 +331,7 @@ export default function Details() {
               </Text>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </View>
     </ThemedView>
   );

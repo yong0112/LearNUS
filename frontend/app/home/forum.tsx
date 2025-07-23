@@ -288,6 +288,18 @@ export default function Forum() {
       paddingHorizontal: 10,
       justifyContent: "flex-start",
     },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 10,
+    },
+    headerText: {
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
+      color: text,
+    },
     filterWrapper: {
       marginLeft: 8,
     },
@@ -420,6 +432,15 @@ export default function Forum() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Discussion Forum</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
         {/* Search Bar */}
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <SearchBar

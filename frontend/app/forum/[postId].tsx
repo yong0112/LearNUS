@@ -205,7 +205,7 @@ export default function ForumPostDetails() {
       }
       setPostMenuVisible(false);
       Alert.alert("Post deleted successfully");
-      router.push("/(tabs)/forum");
+      router.back();
     } catch (err) {
       console.error(err);
       Alert.alert("Failed to delete post");
@@ -368,7 +368,7 @@ export default function ForumPostDetails() {
             name="arrow-back-circle"
             size={40}
             color={text}
-            onPress={() => router.push("/(tabs)/forum")}
+            onPress={() => router.back()}
           />
           <Text style={styles.headerText}>Post Details</Text>
           <View style={{ width: 40 }} />

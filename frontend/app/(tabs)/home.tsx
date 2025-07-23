@@ -34,8 +34,10 @@ import { auth } from "../../lib/firebase";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Class, Tutor, UserProfile, Day } from "../../constants/types";
+import { useFonts } from "expo-font";
 
 const screenHeight = Dimensions.get("window").height;
+const screenWidth = Dimensions.get("window").width;
 
 export default function Home() {
   const router = useRouter();
@@ -54,11 +56,14 @@ export default function Home() {
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
+  const [fontLoaded] = useFonts({
+    "Itim-Regular": require("../../assets/fonts/Itim-Regular.ttf"),
+  });
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        setTutors([]);
+        setClasses([]);
         fetch(
           `https://learnus.onrender.com/api/users/${currentUser.uid}/classes`,
         )
@@ -69,10 +74,6 @@ export default function Home() {
           .then(async (data: Class[]) => {
             console.log("Classes:", data);
             setClasses(data);
-            setTodayClass(
-              classes.filter((cls) => cls.date == new Date().getDay()),
-            );
-            console.log("Today classes", todayClass);
           })
           .catch((err) => {
             console.error(err);
@@ -80,12 +81,40 @@ export default function Home() {
           });
       } else {
         setClasses([]);
-        setTodayClass([]);
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        try {
+          await fetch(
+            `https://learnus.onrender.com/api/users/${currentUser.uid}/classes`,
+          )
+            .then((res) => {
+              if (!res.ok) throw new Error("Failed to fetch user favourites");
+              return res.json();
+            })
+            .then((data) => {
+              const today = data.filter(
+                (cls: Class) => cls.date == new Date().getDay(),
+              );
+              console.log(today);
+              setTodayClass(today);
+            });
+        } catch (err) {
+          console.error(err);
+          setShortlisted([]);
+        }
+      }
+    };
+
+    fetchClasses();
+  }, [classes]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -202,7 +231,7 @@ export default function Home() {
       const currentUser = auth.currentUser;
       if (currentUser) {
         const response = await fetch(
-          `http://192.168.0.107:5000/api/update-favourite`,
+          `https://learnus.onrender.com/api/update-favourite`,
           {
             method: "POST",
             headers: {
@@ -232,10 +261,6 @@ export default function Home() {
   const closeModal = () => {
     setSelectedTutor(null);
     setModalVisible(false);
-  };
-
-  const handleProfileSharing = () => {
-    Alert.alert("Sorry, feature under development");
   };
 
   const handleBooking = () => {
@@ -297,57 +322,60 @@ export default function Home() {
       flexDirection: "column",
       paddingHorizontal: 20,
       paddingVertical: 40,
+      opacity: modalVisible ? 0.1 : 1,
+    },
+    notificationBadge: {
+      position: "absolute",
+      top: 4,
+      right: 4,
+      width: 8,
+      height: 8,
+      borderRadius: 20,
+      backgroundColor: "red",
     },
     headerLear: {
-      fontSize: 25,
+      fontSize: 22,
       fontWeight: "bold",
-      marginLeft: 10,
       color: text,
+      fontFamily: "Itim-Regular",
     },
-    headerNUS: { fontSize: 25, fontWeight: "bold", color: "orange" },
-    tabBar: {
-      paddingHorizontal: 0,
-      paddingTop: 10,
-      paddingBottom: 20,
+    headerNUS: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: "orange",
+      fontFamily: "Itim-Regular",
     },
-    tabButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: isDarkMode ? "gray" : "#f2f2f2",
-      borderRadius: 20,
-      paddingVertical: 8,
-      paddingHorizontal: 6,
-      marginHorizontal: 6,
-      borderWidth: 1,
-      alignSelf: "center",
-    },
-    buttonText: { marginLeft: 6, fontSize: 14, fontWeight: "semibold" },
     reminder: {
       height: 150,
-      borderRadius: 10,
-      backgroundColor: "#aaaaaa",
-      marginBottom: 30,
+      borderRadius: 20,
+      backgroundColor: "#c7c7c7ff",
+      marginVertical: 30,
     },
     classBox: {
       paddingHorizontal: 20,
       paddingVertical: 10,
-      borderRadius: 20,
-      borderTopWidth: 1,
+      borderRadius: 50,
       borderBottomWidth: 1,
       borderColor: "gray",
       justifyContent: "space-around",
       alignItems: "flex-start",
     },
     reminderText: { fontSize: 20, fontWeight: "bold", color: "black" },
-    explore: { fontSize: 24, fontWeight: "bold", marginRight: 10, color: text },
+    title: { fontSize: 24, fontWeight: "bold", color: text, marginBottom: 5 },
+    exploreBar: {
+      paddingHorizontal: 0,
+      paddingTop: 5,
+      paddingBottom: 20,
+      flexDirection: "row",
+      marginBottom: 25,
+    },
     exploreButton: {
-      width: 90,
+      width: (screenWidth - 40) / 4,
       height: 75,
       flexDirection: "column",
-      justifyContent: "flex-end",
+      justifyContent: "flex-start",
       alignItems: "center",
       borderColor: "#ddd",
-      marginRight: 20,
     },
     exploreButtonText: {
       marginTop: 10,
@@ -356,29 +384,36 @@ export default function Home() {
       textAlign: "center",
       color: text,
     },
-    tutorProfile: {
-      width: 100,
-      height: "auto",
-      flexDirection: "column",
-      marginRight: 10,
+    tabBar: {
+      paddingHorizontal: 0,
+      paddingTop: 10,
+      paddingBottom: 20,
     },
-    image: { width: 50, height: 50, borderRadius: 10 },
+    tutorProfile: {
+      width: 150,
+      height: 250,
+      flexDirection: "column",
+    },
+    tutorName: {
+      fontSize: 14,
+      color: "gray",
+    },
     modalOverlay: {
       padding: 20,
       alignItems: "center",
       flex: 1,
     },
     modalContent: {
-      width: "97%",
-      height: screenHeight * 0.95,
+      width: "90%",
+      height: screenHeight * 0.9,
       backgroundColor: isDarkMode ? "#999999" : "white",
       borderRadius: 20,
       padding: 15,
       alignItems: "flex-start",
       overflow: "hidden",
       elevation: 10,
-      shadowColor: "#000",
-      shadowOpacity: 0.8,
+      shadowColor: "#444444",
+      shadowOpacity: 1,
       shadowOffset: { width: 0, height: 4 },
       shadowRadius: 8,
       alignSelf: "center",
@@ -394,20 +429,47 @@ export default function Home() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Image
-            source={require("../../assets/images/logo.jpg")}
-            style={styles.image}
-          />
-          <Text style={styles.headerLear}>Lear</Text>
-          <Text style={styles.headerNUS}>NUS</Text>
+        {/**Header */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View>
+            <TouchableOpacity
+              onPress={() => router.push("/home/notifications")}
+            >
+              <MaterialIcons name="notifications-none" size={30} />
+            </TouchableOpacity>
+            <View style={styles.notificationBadge} />
+            <View />
+          </View>
           <View
             style={{
-              flex: 1,
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginLeft: 25,
+            }}
+          >
+            <Text style={styles.headerLear}>Lear</Text>
+            <Text style={styles.headerNUS}>NUS</Text>
+          </View>
+          <View
+            style={{
               flexDirection: "row",
               justifyContent: "flex-end",
             }}
           >
+            <TouchableOpacity onPress={() => router.push("/home/favourites")}>
+              <AntDesign
+                name="hearto"
+                size={28}
+                style={{ marginRight: 10, alignSelf: "center" }}
+              />
+            </TouchableOpacity>
             <Menu onSelect={handleSettings}>
               <MenuTrigger>
                 <Ionicons name="settings-outline" size={30} color={text} />
@@ -430,46 +492,13 @@ export default function Home() {
           </View>
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabBar}
-        >
-          <TouchableOpacity
-            style={styles.tabButton}
-            onPress={() => Alert.alert("Sorry, feature under development")}
-          >
-            <Ionicons name="heart-outline" size={15} color="black" />
-            <Text style={styles.buttonText}>Favourites</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.tabButton}
-            onPress={() => router.push("/profile/history")}
-          >
-            <Ionicons name="list" size={15} color="black" />
-            <Text style={styles.buttonText}>Classes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.tabButton}
-            onPress={() => router.push("/profile/ratings")}
-          >
-            <MaterialIcons name="stars" size={15} color="black" />
-            <Text style={styles.buttonText}>Ratings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.tabButton}
-            onPress={() => router.push("/profile/security")}
-          >
-            <MaterialIcons name="security" size={15} color="black" />
-            <Text style={styles.buttonText}>Security</Text>
-          </TouchableOpacity>
-        </ScrollView>
-
+        {/**Reminder */}
         <ScrollView
           style={styles.reminder}
           contentContainerStyle={{
             justifyContent: "center",
             alignItems: "stretch",
+            flexDirection: "column",
           }}
         >
           {todayClass.length > 0 ? (
@@ -490,22 +519,23 @@ export default function Home() {
               </View>
             ))
           ) : (
-            <Text style={styles.reminderText}>Currently no classes now...</Text>
+            <View style={{ alignSelf: "center", marginTop: 30 }}>
+              <Text style={styles.reminderText}>
+                Currently no classes now...
+              </Text>
+            </View>
           )}
         </ScrollView>
 
-        <Text style={styles.explore}>Explore</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabBar}
-        >
+        {/**Explore */}
+        <Text style={styles.title}>Explore</Text>
+        <View style={styles.exploreBar}>
           <TouchableOpacity
             style={styles.exploreButton}
-            onPress={() => router.push("/tutor_post")}
+            onPress={() => router.push("/home/tutor_post")}
           >
             <FontAwesome5 name="chalkboard-teacher" size={40} color={text} />
-            <Text style={styles.exploreButtonText}>Tutoring</Text>
+            <Text style={styles.exploreButtonText}>Be a tutor!</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.exploreButton}
@@ -519,28 +549,22 @@ export default function Home() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.exploreButton}
-            onPress={() => router.push("../wallet")}
+            onPress={() => router.push("/home/calendar")}
           >
-            <MaterialIcons name="wallet" size={45} color={text} />
-            <Text style={styles.exploreButtonText}>Wallet</Text>
+            <AntDesign name="calendar" size={45} color={text} />
+            <Text style={styles.exploreButtonText}>Calendar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.exploreButton}
-            onPress={() => router.push("/profile/achievements")}
+            onPress={() => router.push("/home/forum")}
           >
-            <SimpleLineIcons name="badge" size={40} color={text} />
-            <Text style={styles.exploreButtonText}>Badges</Text>
+            <MaterialIcons name="groups" size={45} color={text} />
+            <Text style={styles.exploreButtonText}>Discussion Forum</Text>
           </TouchableOpacity>
-        </ScrollView>
+        </View>
 
-        <TouchableOpacity
-          style={{ flexDirection: "row", height: 40, alignItems: "center" }}
-          onPress={() => router.push("/tutor_find")}
-        >
-          <Text style={styles.explore}>Looking for tutor?</Text>
-          <AntDesign name={"rightcircle"} size={20} color={text} />
-        </TouchableOpacity>
-
+        {/**Suggested tutors */}
+        <Text style={styles.title}>Suggested tutors</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -564,50 +588,59 @@ export default function Home() {
                 style={styles.tutorProfile}
                 onPress={() => handleTutorProfile(cls)}
               >
-                {tutorProfiles[cls.tutor]?.profilePicture ? (
-                  <Image
-                    source={{ uri: tutorProfiles[cls.tutor].profilePicture }}
-                    style={{ width: 80, height: 100, alignSelf: "center" }}
-                  />
-                ) : (
-                  <Image
-                    source={require("../../assets/images/person.jpg")}
-                    style={{ width: 80, height: 100, alignSelf: "center" }}
-                  />
-                )}
-                <View style={{ flexDirection: "row" }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "bold",
-                      color: text,
-                      marginRight: 5,
-                    }}
-                  >
-                    {cls.course}
-                  </Text>
-                  <TouchableOpacity
-                    style={{ alignSelf: "center" }}
-                    onPress={() => toggleFavourite(cls.id)}
-                  >
-                    <AntDesign
-                      name="heart"
-                      size={10}
-                      color={shortlisted?.includes(cls.id) ? "red" : "gray"}
+                {tutorProfiles[cls.tutor] ? (
+                  <View>
+                    <Image
+                      source={{ uri: tutorProfiles[cls.tutor].profilePicture }}
+                      style={{ width: 120, height: 150 }}
                     />
-                  </TouchableOpacity>
-                </View>
+                    <Text style={styles.tutorName}>
+                      {tutorProfiles[cls.tutor].firstName}{" "}
+                      {tutorProfiles[cls.tutor].lastName}
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        width: 120,
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 17,
+                          fontWeight: "bold",
+                          color: text,
+                          marginRight: 5,
+                        }}
+                      >
+                        {cls.course}
+                      </Text>
+                      <TouchableOpacity
+                        style={{ alignSelf: "center" }}
+                        onPress={() => toggleFavourite(cls.id)}
+                      >
+                        <AntDesign
+                          name="heart"
+                          size={18}
+                          color={shortlisted?.includes(cls.id) ? "red" : "gray"}
+                        />
+                      </TouchableOpacity>
+                    </View>
 
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "500",
-                    fontStyle: "italic",
-                    color: text,
-                  }}
-                >
-                  S${cls.rate} hourly
-                </Text>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "500",
+                        fontStyle: "italic",
+                        color: text,
+                      }}
+                    >
+                      S${cls.rate} hourly
+                    </Text>
+                  </View>
+                ) : (
+                  <View />
+                )}
               </TouchableOpacity>
             ))
           )}

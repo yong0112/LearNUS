@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -76,13 +76,33 @@ export default function Profile() {
   };
 
   const menuItems = [
-    { label: "Personal Details", route: "../profile/details" },
-    { label: "Tutoring History", route: "../profile/history" },
-    { label: "Ratings & Reviews", route: "../profile/ratings" },
-    { label: "Achievements & Badges", route: "../profile/achievements" },
-    { label: "Payment Methods", route: "../profile/payments" },
-    { label: "Security & Privacy", route: "../profile/security" },
-    { label: "Contact Us", route: "../profile/contact" },
+    {
+      label: "Personal Details",
+      route: "../profile/details",
+      icon: "account-details",
+    },
+    { label: "Classes", route: "../profile/history", icon: "bookshelf" },
+    {
+      label: "Ratings & Reviews",
+      route: "../profile/ratings",
+      icon: "message-star-outline",
+    },
+    { label: "Finance", route: "../profile/payments", icon: "cash-fast" },
+    {
+      label: "Security & Privacy",
+      route: "../profile/security",
+      icon: "security",
+    },
+    {
+      label: "App Settings",
+      route: "../profile/settings",
+      icon: "database-settings",
+    },
+    {
+      label: "Help & Support",
+      route: "../profile/contact",
+      icon: "help-circle",
+    },
   ];
 
   const styles = StyleSheet.create({
@@ -96,7 +116,7 @@ export default function Profile() {
       width: 700,
       height: 650,
       borderRadius: 300,
-      backgroundColor: "#FF8C00", // dark orange
+      backgroundColor: "#faa53dff",
       zIndex: -1,
     },
     header: {
@@ -108,7 +128,7 @@ export default function Profile() {
       paddingTop: 10,
     },
     headerText: {
-      fontSize: 28,
+      fontSize: 24,
       fontWeight: "bold",
       alignItems: "center",
       justifyContent: "center",
@@ -137,13 +157,15 @@ export default function Profile() {
       padding: 10,
       borderRadius: 10,
       flexDirection: "row",
-      justifyContent: "space-between",
+      justifyContent: "flex-start",
       alignItems: "center",
+      marginHorizontal: 5,
     },
     menuText: {
       fontSize: 20,
       fontWeight: "500",
       color: text,
+      marginLeft: 10,
     },
     arrow: {
       fontSize: 18,
@@ -160,8 +182,10 @@ export default function Profile() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
+        {/**Background */}
         <View style={styles.circleBackground} />
 
+        {/**Header */}
         <View style={styles.header}>
           <View style={{ width: 60 }} />
           <View>
@@ -190,6 +214,7 @@ export default function Profile() {
           </View>
         </View>
 
+        {/**Avatar */}
         <View style={{ flexDirection: "column" }}>
           <Image
             source={{ uri: userProfile?.profilePicture }}
@@ -198,6 +223,7 @@ export default function Profile() {
           <Text style={styles.name}>{userProfile?.firstName}</Text>
         </View>
 
+        {/**Menu */}
         <View style={styles.menu}>
           {menuItems.map((item, index) => (
             <View key={index}>
@@ -205,6 +231,7 @@ export default function Profile() {
                 style={styles.menuItem}
                 onPress={() => router.push(item.route as any)}
               >
+                <MaterialCommunityIcons name={item.icon as any} size={30} />
                 <Text style={styles.menuText}>{item.label}</Text>
               </TouchableOpacity>
 
