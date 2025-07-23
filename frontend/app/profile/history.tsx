@@ -2,7 +2,11 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -24,7 +28,10 @@ type DayOptions = {
 
 export default function history() {
   const router = useRouter();
-  const [classes, setClasses] = useState<any>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [pendingClasses, setPendingClasses] = useState<Class[]>([]);
+  const [confirmedClasses, setConfirmedClasses] = useState<Class[]>([]);
+  const [completedClasses, setCompletedClasses] = useState<Class[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [name, setNames] = useState<Record<string, string>>({});
   const [dayConstants, setDayConstants] = useState<DayOptions[]>([]);
@@ -33,6 +40,15 @@ export default function history() {
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
+  const STATUS = [
+    "Pending",
+    "Accepted",
+    "Rejected",
+    "Paid",
+    "Completed",
+    "Confirmed",
+    "Reviewed",
+  ];
 
   function formatDate(day: number, time: string) {
     const Time = new Date(time);
@@ -109,6 +125,30 @@ export default function history() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const pending: Class[] = [];
+    const confirmed: Class[] = [];
+    const completed: Class[] = [];
+
+    classes.forEach((cls: Class) => {
+      const ind = STATUS.indexOf(cls.status);
+      if (ind < 5) {
+        pending.push(cls);
+      } else if (ind == 5) {
+        confirmed.push(cls);
+      } else if (ind == 6) {
+        completed.push(cls);
+      }
+    });
+
+    console.log(pending);
+    console.log(confirmed);
+    console.log(completed);
+    setPendingClasses(pending);
+    setConfirmedClasses(confirmed);
+    setCompletedClasses(completed);
+  }, [classes]);
+
   const handleTutorProfile = (id: string) => {
     console.log(id);
     router.push({
@@ -140,70 +180,77 @@ export default function history() {
 
   const styles = StyleSheet.create({
     container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-    background: {
-      position: "absolute",
-      top: -550,
-      left: -350,
-      width: 100000,
-      height: 650,
-      borderRadius: 0,
-      backgroundColor: "#ffc04d",
-      zIndex: -1,
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
+    },
+    titleBar: {
+      flexDirection: "row",
+      marginBottom: 10,
+      alignItems: "center",
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginLeft: 10,
     },
     classCard: {
       marginBottom: 20,
-      padding: 20,
+      padding: 8,
       borderRadius: 20,
-      borderWidth: 2,
       flexDirection: "row",
       justifyContent: "space-between",
+      shadowColor: "#777575ff",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 24,
+      elevation: 12,
+      backgroundColor: "white",
     },
     subject: {
-      fontSize: 22,
+      fontSize: 18,
       fontWeight: "bold",
       color: text,
     },
     avatar: {
-      width: 80,
-      height: 80,
+      width: 60,
+      height: 60,
       borderRadius: 50,
       alignSelf: "center",
       marginTop: 20,
+    },
+    noClassContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 20,
+    },
+    noClassText: {
+      fontSize: 20,
+      fontWeight: "700",
     },
   });
 
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/*Header*/}
-        <View style={styles.background} />
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}
-        >
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color={isDarkMode ? "white" : "orange"}
-            onPress={() => router.push("/(tabs)/profile")}
-          />
-          <Text style={styles.headerText}>Tutoring History</Text>
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Classes</Text>
           <View style={{ width: 40 }} />
         </View>
 
         {/*List*/}
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <ScrollView>
           {classes.length === 0 ? (
             <Text
               style={{
@@ -216,43 +263,161 @@ export default function history() {
               No classes yet.
             </Text>
           ) : (
-            classes.map(
-              (cls: {
-                id: React.Key;
-                course: string;
-                date: number;
-                role: string;
-                startTime: string;
-                endTime: string;
-                people: string;
-                rate: string;
-                status: string;
-              }) => (
-                <TouchableOpacity
-                  key={cls.id}
-                  style={styles.classCard}
-                  onPress={() => handleTutorProfile(cls.id.toString())}
-                >
-                  <View
-                    style={{
-                      flexDirection: "column",
-                      justifyContent: "space-evenly",
-                    }}
-                  >
-                    <Text style={styles.subject}>
-                      {cls.course} ({cls.role})
-                    </Text>
-                    <Text style={{ fontSize: 18, color: text }}>
-                      {formatDate(cls.date, cls.startTime)}
-                    </Text>
-                  </View>
-                  <Image
-                    source={{ uri: profiles[cls.people] }}
-                    style={styles.avatar}
+            <View>
+              {/**Pending */}
+              <View style={{ marginBottom: 10 }}>
+                <View style={styles.titleBar}>
+                  <MaterialIcons
+                    name="pending-actions"
+                    size={25}
+                    color={"red"}
                   />
-                </TouchableOpacity>
-              ),
-            )
+                  <Text style={styles.title}>Pending acitons</Text>
+                </View>
+                <View>
+                  {pendingClasses.length != 0 ? (
+                    pendingClasses.map((cls) => {
+                      return (
+                        <TouchableOpacity
+                          key={cls.id}
+                          style={styles.classCard}
+                          onPress={() => handleTutorProfile(cls.id.toString())}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "column",
+                              justifyContent: "space-evenly",
+                            }}
+                          >
+                            <Text style={styles.subject}>
+                              {cls.course} ({cls.role})
+                            </Text>
+                            <Text style={{ fontSize: 16, color: text }}>
+                              {formatDate(cls.date, cls.startTime)}
+                            </Text>
+                            <Text style={{ fontSize: 16, color: text }}>
+                              Status: {cls.status}
+                            </Text>
+                          </View>
+                          <Image
+                            source={{ uri: profiles[cls.people] }}
+                            style={styles.avatar}
+                          />
+                        </TouchableOpacity>
+                      );
+                    })
+                  ) : (
+                    <View style={styles.noClassContainer}>
+                      <Text style={styles.noClassText}>No pending classes</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {/**Confirmed */}
+              <View>
+                <View style={styles.titleBar}>
+                  <MaterialCommunityIcons
+                    name="progress-check"
+                    size={20}
+                    color={"#e4a800ff"}
+                  />
+                  <Text style={styles.title}>Confirmed classes</Text>
+                </View>
+                <View>
+                  {confirmedClasses.length != 0 ? (
+                    confirmedClasses.map((cls) => {
+                      return (
+                        <TouchableOpacity
+                          key={cls.id}
+                          style={styles.classCard}
+                          onPress={() => handleTutorProfile(cls.id.toString())}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "column",
+                              justifyContent: "space-evenly",
+                            }}
+                          >
+                            <Text style={styles.subject}>
+                              {cls.course} ({cls.role})
+                            </Text>
+                            <Text style={{ fontSize: 18, color: text }}>
+                              {formatDate(cls.date, cls.startTime)}
+                            </Text>
+                            <Text style={{ fontSize: 18, color: text }}>
+                              Status: {cls.status}
+                            </Text>
+                          </View>
+                          <Image
+                            source={{ uri: profiles[cls.people] }}
+                            style={styles.avatar}
+                          />
+                        </TouchableOpacity>
+                      );
+                    })
+                  ) : (
+                    <View style={styles.noClassContainer}>
+                      <Text style={styles.noClassText}>
+                        No confirmed classes
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {/**Completed */}
+              <View>
+                <View style={styles.titleBar}>
+                  <Ionicons
+                    name="checkmark-done-circle-sharp"
+                    size={20}
+                    color={"green"}
+                  />
+                  <Text style={styles.title}>Completed classes</Text>
+                </View>
+                <View>
+                  {completedClasses.length != 0 ? (
+                    completedClasses.map((cls) => {
+                      return (
+                        <TouchableOpacity
+                          key={cls.id}
+                          style={styles.classCard}
+                          onPress={() => handleTutorProfile(cls.id.toString())}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "column",
+                              justifyContent: "space-evenly",
+                            }}
+                          >
+                            <Text style={styles.subject}>
+                              {cls.course} ({cls.role})
+                            </Text>
+                            <Text style={{ fontSize: 18, color: text }}>
+                              {formatDate(cls.date, cls.startTime)}
+                            </Text>
+                            <Text style={{ fontSize: 18, color: text }}>
+                              Status: {cls.status}
+                            </Text>
+                          </View>
+                          <Image
+                            source={{ uri: profiles[cls.people] }}
+                            style={styles.avatar}
+                          />
+                        </TouchableOpacity>
+                      );
+                    })
+                  ) : (
+                    <View style={styles.noClassContainer}>
+                      <Text style={styles.noClassText}>
+                        No completed classes
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
           )}
         </ScrollView>
       </View>

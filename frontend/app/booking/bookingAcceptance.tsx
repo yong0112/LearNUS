@@ -107,7 +107,7 @@ export default function bookingAcceptance() {
       }
 
       Alert.alert("Booking accepted");
-      router.replace("/profile/booking/bookingStatus");
+      router.replace("/booking/bookingStatus");
     } catch (err) {
       console.error(err);
     }
@@ -140,7 +140,7 @@ export default function bookingAcceptance() {
       }
 
       Alert.alert("Booking rejected");
-      router.replace("/profile/booking/bookingStatus");
+      router.replace("/booking/bookingStatus");
     } catch (err) {
       console.error(err);
     }
@@ -222,7 +222,7 @@ export default function bookingAcceptance() {
           name="arrow-back-circle"
           size={40}
           color="orange"
-          onPress={() => router.push("/profile/booking/bookingStatus")}
+          onPress={() => router.back()}
         />
       </View>
 

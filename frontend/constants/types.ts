@@ -19,11 +19,16 @@ export interface ForumPost {
 }
 
 export interface UserProfile {
+  favourites: string[];
   firstName: string;
   lastName: string;
   profilePicture?: string;
   ratings?: number;
   QR: string;
+  email: string;
+  major: string;
+  teachingMode: string;
+  budgetCap: number;
 }
 
 export interface UpvoteStatus {

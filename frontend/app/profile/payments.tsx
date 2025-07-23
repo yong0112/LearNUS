@@ -214,14 +214,12 @@ export default function payments() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 20,
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "black",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
+      color: text,
     },
     title: {
       fontSize: 20,
@@ -238,28 +236,43 @@ export default function payments() {
       borderTopWidth: 1,
       borderTopColor: "gray",
       justifyContent: "space-between",
+      alignItems: "center",
+    },
+    paymentDetailContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     paymentDetail: {
-      fontSize: 18,
+      fontSize: 15,
+      marginLeft: 5,
+    },
+    avatar: {
+      width: 50,
+      height: 50,
+      borderRadius: 50,
+      alignSelf: "center",
     },
     amountPaid: {
       fontSize: 18,
       fontStyle: "italic",
       fontWeight: "300",
       color: "red",
+      alignSelf: "center",
     },
     amountReceived: {
       fontSize: 18,
       fontStyle: "italic",
       fontWeight: "bold",
       color: "green",
+      alignSelf: "center",
     },
     paymentMethod: {
       flexDirection: "row",
       justifyContent: "space-between",
     },
     paymentMethodText: {
-      fontSize: 18,
+      fontSize: 15,
     },
     subtitle: {
       fontSize: 16,
@@ -300,14 +313,11 @@ export default function payments() {
 
   return (
     <View style={styles.container}>
-      {/*Header*/}
+      {/**Header */}
       <View style={styles.header}>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="orange"
-          onPress={() => router.push("/(tabs)/profile")}
-        />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Finance</Text>
         <View style={{ width: 40 }} />
       </View>
@@ -321,21 +331,37 @@ export default function payments() {
               if (cls.role == "Student") {
                 return (
                   <View key={cls.id} style={styles.detailBox}>
-                    <Text style={styles.paymentDetail}>
-                      Payment made to {otherProfiles[cls.people].firstName}{" "}
-                      {otherProfiles[cls.people].lastName}
-                    </Text>
+                    <View style={styles.paymentDetailContainer}>
+                      <Image
+                        style={styles.avatar}
+                        source={{
+                          uri: otherProfiles[cls.people].profilePicture,
+                        }}
+                      />
+                      <Text style={styles.paymentDetail}>
+                        Payment made to {otherProfiles[cls.people].firstName}{" "}
+                        {otherProfiles[cls.people].lastName}
+                      </Text>
+                    </View>
                     <Text style={styles.amountPaid}>-S${cls.rate}</Text>
                   </View>
                 );
               } else {
                 return (
                   <View key={cls.id} style={styles.detailBox}>
-                    <Text style={styles.paymentDetail}>
-                      Payment received from{" "}
-                      {otherProfiles[cls.people].firstName}{" "}
-                      {otherProfiles[cls.people].lastName}
-                    </Text>
+                    <View style={styles.paymentDetailContainer}>
+                      <Image
+                        style={styles.avatar}
+                        source={{
+                          uri: otherProfiles[cls.people].profilePicture,
+                        }}
+                      />
+                      <Text style={styles.paymentDetail}>
+                        Payment received from{" "}
+                        {otherProfiles[cls.people].firstName}{" "}
+                        {otherProfiles[cls.people].lastName}
+                      </Text>
+                    </View>
                     <Text style={styles.amountReceived}>+S${cls.rate}</Text>
                   </View>
                 );

@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -21,7 +22,7 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { CourseOption, LocationOption, Day } from "../constants/types";
+import { CourseOption, LocationOption, Day } from "../../constants/types";
 
 function convertTimeLocally(current: Date) {
   const newDate = new Date();
@@ -45,7 +46,7 @@ export default function TutorPost() {
   );
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
-  const [rate, setRate] = useState<Number>();
+  const [rate, setRate] = useState<string>("");
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -125,6 +126,17 @@ export default function TutorPost() {
   }, []);
 
   const handlePosting = async () => {
+    if (!selectedCourse || !selectedLocation || !description || !day || !rate) {
+      Alert.alert("Please fill in every input field.");
+      router.replace("/home/tutor_post");
+      return;
+    }
+
+    if (typeof rate != "number" || rate < 0) {
+      Alert.alert("Please provide valid hourly rate");
+      return;
+    }
+
     try {
       const currUser = auth.currentUser;
       const response = await fetch("https://learnus.onrender.com/api/tutors", {
@@ -160,30 +172,30 @@ export default function TutorPost() {
 
   const styles = StyleSheet.create({
     container: {
+      flex: 1,
       paddingVertical: 40,
       paddingHorizontal: 20,
-      justifyContent: "flex-start",
     },
-    background: {
-      position: "absolute",
-      top: -450,
-      left: -150,
-      width: 700,
-      height: 650,
-      borderRadius: 0,
-      backgroundColor: "#ffc04d",
-      zIndex: -1,
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
+    },
+    content: {
+      justifyContent: "flex-start",
+      flexDirection: "column",
+      paddingTop: 10,
+      paddingHorizontal: 10,
     },
     title: {
       fontSize: 20,
-      fontWeight: "bold",
+      fontWeight: "500",
       marginBottom: 5,
       color: text,
     },
@@ -209,16 +221,34 @@ export default function TutorPost() {
       marginLeft: 10,
       color: "#222222",
     },
+    info: {
+      fontSize: 14,
+      color: "gray",
+      marginBottom: 5,
+    },
+    timeButton: {
+      borderRadius: 10,
+      backgroundColor: "#efb261",
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    timeText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "white",
+    },
     postButton: {
       marginTop: 20,
-      borderRadius: 10,
+      borderRadius: 20,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: "orange",
+      marginHorizontal: 30,
+      paddingVertical: 10,
     },
     buttonText: {
       marginHorizontal: 4,
-      fontSize: 28,
+      fontSize: 24,
       fontWeight: "600",
       marginBottom: 2,
       color: "white",
@@ -226,34 +256,19 @@ export default function TutorPost() {
   });
 
   return (
-    <ThemedView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <View style={styles.background} />
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color={isDarkMode ? "white" : "orange"}
-            onPress={() => router.push("/(tabs)/home")}
-          />
-          <Text style={styles.headerText}>Tutor Posting</Text>
-          <View style={{ width: 40 }} />
-        </View>
+    <ThemedView style={styles.container}>
+      {/**Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Tutor Posting</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
-        <View
-          style={{
-            justifyContent: "flex-start",
-            flexDirection: "column",
-            paddingTop: 20,
-            paddingHorizontal: 10,
-          }}
-        >
+      <ScrollView>
+        {/**Content */}
+        <View style={styles.content}>
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
             <Text style={styles.title}>Course Code</Text>
             <View style={styles.searchBar}>
@@ -271,7 +286,7 @@ export default function TutorPost() {
                   setSelectedCourse(item.value);
                 }}
                 renderLeftIcon={() => (
-                  <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+                  <Ionicons color={"gray"} name="search-sharp" size={20} />
                 )}
                 search
                 searchPlaceholder="Search course"
@@ -295,7 +310,7 @@ export default function TutorPost() {
                   setSelectedLocation(item.value);
                 }}
                 renderLeftIcon={() => (
-                  <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+                  <Ionicons color={"gray"} name="search-sharp" size={20} />
                 )}
               />
             </View>
@@ -303,7 +318,7 @@ export default function TutorPost() {
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
             <Text style={styles.title}>About the lesson</Text>
             <View style={styles.searchBar}>
-              <MaterialIcons name="keyboard" size={25} color="orange" />
+              <MaterialIcons name="keyboard" size={20} color="gray" />
               <TextInput
                 style={{
                   color: "#222222",
@@ -319,6 +334,10 @@ export default function TutorPost() {
           </View>
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
             <Text style={styles.title}>Availability (weekly)</Text>
+            <Text style={styles.info}>
+              *Please note that each tutoring session includes 4 classes per
+              month
+            </Text>
             <View>
               <View style={styles.searchBar}>
                 <Dropdown
@@ -335,7 +354,7 @@ export default function TutorPost() {
                     setDay(item.value);
                   }}
                   renderLeftIcon={() => (
-                    <Fontisto color={"#ffc04d"} name="date" size={20} />
+                    <Fontisto color={"gray"} name="date" size={20} />
                   )}
                   search
                   searchPlaceholder="Select a day"
@@ -350,11 +369,18 @@ export default function TutorPost() {
                   alignItems: "center",
                 }}
               >
-                <Button
-                  title={`Start: ${startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                <TouchableOpacity
+                  style={styles.timeButton}
                   onPress={() => setShowStart(true)}
-                  color={"#ffb347"}
-                />
+                >
+                  <Text style={styles.timeText}>
+                    Start:{" "}
+                    {startTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
                 {showStart && (
                   <DateTimePicker
                     mode="time"
@@ -368,11 +394,18 @@ export default function TutorPost() {
                 <Text style={{ fontWeight: "800", marginHorizontal: 20 }}>
                   -
                 </Text>
-                <Button
-                  title={`End: ${endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                <TouchableOpacity
+                  style={styles.timeButton}
                   onPress={() => setShowEnd(true)}
-                  color={"#ffb347"}
-                />
+                >
+                  <Text style={styles.timeText}>
+                    End:{" "}
+                    {endTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
                 {showEnd && (
                   <DateTimePicker
                     mode="time"
@@ -389,24 +422,23 @@ export default function TutorPost() {
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>
             <Text style={styles.title}>Hourly Rate</Text>
             <View style={styles.searchBar}>
-              <FontAwesome name="dollar" size={25} color="orange" />
+              <FontAwesome name="dollar" size={20} color="gray" />
               <TextInput
                 style={{ color: "#222222", fontSize: 17, marginLeft: 10 }}
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
                 placeholder="Singapore dollar"
                 placeholderTextColor="#888888"
-                onChangeText={(text) => {
-                  const num = parseFloat(text);
-                  setRate(isNaN(num) ? undefined : num);
-                }}
+                onChangeText={setRate}
               />
             </View>
           </View>
+
+          {/**Posting */}
           <TouchableOpacity style={styles.postButton} onPress={handlePosting}>
             <Text style={styles.buttonText}>Post!</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </ThemedView>
   );
 }

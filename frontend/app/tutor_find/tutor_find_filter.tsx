@@ -12,7 +12,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { LocationOption } from "../constants/types";
+import { LocationOption } from "../../constants/types";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -70,21 +70,15 @@ export default function TutorFilter() {
       paddingHorizontal: 20,
       justifyContent: "flex-start",
     },
-    background: {
-      position: "absolute",
-      top: -550,
-      left: -150,
-      width: 700,
-      height: 650,
-      borderRadius: 0,
-      backgroundColor: "#ffc04d",
-      zIndex: -1,
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     title: {
@@ -150,21 +144,11 @@ export default function TutorFilter() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/*Header*/}
-        <View style={styles.background} />
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color={isDarkMode ? "white" : "orange"}
-            onPress={() => router.push("/tutor_find")}
-          />
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} />
+          </TouchableOpacity>
           <Text style={styles.headerText}>Filter</Text>
           <View style={{ width: 40 }} />
         </View>
