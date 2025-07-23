@@ -121,6 +121,67 @@ const chatController = {
       });
     }
   },
+
+  // Create chat with tutor based on post
+  createChatWithTutor: async (req, res) => {
+    try {
+      const userId = req.user.uid;
+      const { tutorId, postId } = req.body;
+
+      // Validate input
+      if (!tutorId || !postId) {
+        return res.status(400).json({
+          success: false,
+          message: "Tutor ID and post ID are required",
+        });
+      }
+
+      // Verify the tutor post exists
+      const tutorDoc = await db.collection("tutors").doc(postId).get();
+      if (!tutorDoc.exists) {
+        return res.status(404).json({
+          success: false,
+          message: "Tutor post not found",
+        });
+      }
+
+      const tutorData = tutorDoc.data();
+      if (tutorData.tutor !== tutorId) {
+        return res.status(400).json({
+          success: false,
+          message: "Tutor ID does not match post creator",
+        });
+      }
+
+      // Check if chat already exists
+      let chat = await Chat.findBetweenUsers(userId, tutorId);
+      if (!chat) {
+        const chatData = {
+          participants: [userId, tutorId],
+          type: "direct",
+          metadata: {
+            tutorPostId: postId,
+            course: tutorData.course || "Unknown Course",
+            description: tutorData.description || "",
+          },
+        };
+        chat = await Chat.create(chatData);
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          chatId: chat.id,
+          message: "Chat created successfully",
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  },
 };
 
 module.exports = chatController;
