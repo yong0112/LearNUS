@@ -1,4 +1,4 @@
-const { db, admin } = require('../config/firebase');
+const { db, admin } = require("../config/firebase");
 
 class Message {
   constructor(data) {
@@ -6,7 +6,7 @@ class Message {
     this.chatId = data.chatId;
     this.senderId = data.senderId;
     this.message = data.message;
-    this.type = data.type || 'text'; 
+    this.type = data.type || "text";
     this.timestamp = data.timestamp;
     this.readBy = data.readBy || [];
     this.edited = data.edited || false;
@@ -21,16 +21,16 @@ class Message {
         chatId: messageData.chatId,
         senderId: messageData.senderId,
         message: messageData.message,
-        type:'text',
+        type: "text",
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
         readBy: [messageData.senderId],
         edited: false,
-        reactions: {}
+        reactions: {},
       };
 
-      const messageRef = await db.collection('messages').add(newMessage);
+      const messageRef = await db.collection("messages").add(newMessage);
       const messageDoc = await messageRef.get();
-      
+
       return new Message({ id: messageDoc.id, ...messageDoc.data() });
     } catch (error) {
       throw new Error(`Error creating message: ${error.message}`);
@@ -40,20 +40,24 @@ class Message {
   // Get messages for a chat
   static async getChatMessages(chatId, limit = 50, lastMessageId = null) {
     try {
-      let query = db.collection('messages')
-        .where('chatId', '==', chatId)
-        .orderBy('timestamp', 'desc')
+      let query = db
+        .collection("messages")
+        .where("chatId", "==", chatId)
+        .orderBy("timestamp", "desc")
         .limit(limit);
 
       if (lastMessageId) {
-        const lastMessageDoc = await db.collection('messages').doc(lastMessageId).get();
+        const lastMessageDoc = await db
+          .collection("messages")
+          .doc(lastMessageId)
+          .get();
         query = query.startAfter(lastMessageDoc);
       }
 
       const snapshot = await query.get();
       const messages = [];
-      
-      snapshot.forEach(doc => {
+
+      snapshot.forEach((doc) => {
         messages.push(new Message({ id: doc.id, ...doc.data() }));
       });
 
@@ -66,9 +70,12 @@ class Message {
   // Mark message as read
   static async markAsRead(messageId, userId) {
     try {
-      await db.collection('messages').doc(messageId).update({
-        readBy: admin.firestore.FieldValue.arrayUnion(userId)
-      });
+      await db
+        .collection("messages")
+        .doc(messageId)
+        .update({
+          readBy: admin.firestore.FieldValue.arrayUnion(userId),
+        });
     } catch (error) {
       throw new Error(`Error marking message as read: ${error.message}`);
     }
@@ -77,12 +84,12 @@ class Message {
   // Edit message
   async edit(newMessage) {
     try {
-      await db.collection('messages').doc(this.id).update({
+      await db.collection("messages").doc(this.id).update({
         message: newMessage,
         edited: true,
-        editedAt: admin.firestore.FieldValue.serverTimestamp()
+        editedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-      
+
       this.message = newMessage;
       this.edited = true;
     } catch (error) {
@@ -93,20 +100,20 @@ class Message {
   // Add/remove reaction
   static async toggleReaction(messageId, userId, emoji) {
     try {
-      const messageRef = db.collection('messages').doc(messageId);
+      const messageRef = db.collection("messages").doc(messageId);
       const messageDoc = await messageRef.get();
-      
+
       if (!messageDoc.exists) {
-        throw new Error('Message not found');
+        throw new Error("Message not found");
       }
 
       const messageData = messageDoc.data();
       const reactions = messageData.reactions || {};
-      
+
       if (!reactions[emoji]) {
         reactions[emoji] = [];
       }
-      
+
       const userIndex = reactions[emoji].indexOf(userId);
       if (userIndex > -1) {
         reactions[emoji].splice(userIndex, 1);
@@ -116,7 +123,7 @@ class Message {
       } else {
         reactions[emoji].push(userId);
       }
-      
+
       await messageRef.update({ reactions });
       return reactions;
     } catch (error) {
@@ -127,7 +134,7 @@ class Message {
   // Delete message
   async delete() {
     try {
-      await db.collection('messages').doc(this.id).delete();
+      await db.collection("messages").doc(this.id).delete();
     } catch (error) {
       throw new Error(`Error deleting message: ${error.message}`);
     }
