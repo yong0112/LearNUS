@@ -37,8 +37,8 @@ import {
   Day,
   Favourite,
   Session,
-} from "../constants/types";
-import SearchBar from "../components/SearchBar";
+} from "../../constants/types";
+import SearchBar from "../../components/SearchBar";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -52,6 +52,8 @@ export default function tutoring() {
   >({});
   const [error, setError] = useState(null);
   const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
+  const [isSorted, setIsSorted] = useState<boolean>(false);
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
   const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [shortlisted, setShortlisted] = useState<string[]>();
@@ -78,7 +80,13 @@ export default function tutoring() {
   };
 
   const handleFilter = () => {
-    router.push("/tutor_find_filter");
+    if (isFiltered) {
+      setFilteredTutors(tutors);
+      setIsFiltered(false);
+      return;
+    }
+
+    router.push("/tutor_find/tutor_find_filter");
   };
 
   const handleSort = (option: string) => {
@@ -212,6 +220,17 @@ export default function tutoring() {
       );
     });
     setFilteredTutors(filtered);
+
+    if (
+      !location &&
+      (!ratings || ratings == "0") &&
+      (!minRate || minRate == "0") &&
+      (!maxRate || maxRate == "100")
+    ) {
+      setIsFiltered(false);
+    } else {
+      setIsFiltered(true);
+    }
   }, [location, ratings, minRate, maxRate, tutors, tutorProfile]);
 
   const sortTutors = (criteria: "rating" | "rate", order: "asc" | "desc") => {
@@ -238,6 +257,7 @@ export default function tutoring() {
     });
 
     setTutors(sorted);
+    setIsSorted(true);
   };
 
   const handleTutorProfile = (tutor: Tutor) => {
@@ -253,7 +273,7 @@ export default function tutoring() {
       const currentUser = auth.currentUser;
       if (currentUser) {
         const response = await fetch(
-          `http://192.168.0.107:5000/api/update-favourite`,
+          `https:/learnus.onrender.com/api/update-favourite`,
           {
             method: "POST",
             headers: {
@@ -283,10 +303,6 @@ export default function tutoring() {
   const closeModal = () => {
     setSelectedTutor(null);
     setModalVisible(false);
-  };
-
-  const handleProfileSharing = () => {
-    Alert.alert("Sorry, feature under development");
   };
 
   const handleBooking = () => {
@@ -340,6 +356,7 @@ export default function tutoring() {
       paddingVertical: 40,
       paddingHorizontal: 10,
       justifyContent: "flex-start",
+      opacity: modalVisible ? 0.1 : 1,
     },
     searchBar: {
       flex: 1,
@@ -355,28 +372,46 @@ export default function tutoring() {
       borderRadius: 10,
       paddingHorizontal: 10,
       paddingVertical: 5,
-      borderWidth: 1,
+      borderWidth: 2,
+      borderColor: isFiltered ? "#b35d02ff" : "gray",
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
       marginHorizontal: 6,
     },
-    filterSelectedButton: {
+    sortButton: {
       borderRadius: 10,
       paddingHorizontal: 10,
       paddingVertical: 5,
+      borderWidth: 2,
+      borderColor: isSorted ? "#b35d02ff" : "gray",
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
       marginHorizontal: 6,
-      backgroundColor: "orange",
     },
-    buttonText: {
+    buttonBadge: {
+      position: "absolute",
+      top: 4,
+      left: 23,
+      width: 10,
+      height: 10,
+      borderRadius: 20,
+      backgroundColor: "#b35d02ff",
+    },
+    filterText: {
       marginHorizontal: 4,
       fontSize: 14,
       fontWeight: "400",
       marginBottom: 2,
-      color: text,
+      color: isFiltered ? "#b35d02ff" : "gray",
+    },
+    sortText: {
+      marginHorizontal: 4,
+      fontSize: 14,
+      fontWeight: "400",
+      marginBottom: 2,
+      color: isSorted ? "#b35d02ff" : "gray",
     },
     buttonSelectedText: {
       marginHorizontal: 4,
@@ -399,7 +434,7 @@ export default function tutoring() {
       paddingHorizontal: 5,
       borderBottomWidth: 2,
       borderBottomColor: "#444444",
-      height: 150,
+      height: 225,
     },
     modalOverlay: {
       padding: 20,
@@ -407,16 +442,16 @@ export default function tutoring() {
       flex: 1,
     },
     modalContent: {
-      width: "97%",
-      height: screenHeight * 0.95,
+      width: "90%",
+      height: screenHeight * 0.9,
       backgroundColor: isDarkMode ? "#999999" : "white",
       borderRadius: 20,
       padding: 15,
       alignItems: "flex-start",
       overflow: "hidden",
       elevation: 10,
-      shadowColor: "#000",
-      shadowOpacity: 0.8,
+      shadowColor: "#999999",
+      shadowOpacity: 1,
       shadowOffset: { width: 0, height: 4 },
       shadowRadius: 8,
       alignSelf: "center",
@@ -440,12 +475,6 @@ export default function tutoring() {
             justifyContent: "flex-start",
           }}
         >
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color="#ffc04d"
-            onPress={() => router.push("/(tabs)/home")}
-          />
           <SearchBar
             placeholder="Search by tutors name or course code"
             onSearch={handleSearch}
@@ -466,16 +495,26 @@ export default function tutoring() {
             <MaterialCommunityIcons
               name="filter-outline"
               size={20}
-              color={text}
+              color={isFiltered ? "#b35d02ff" : "gray"}
             />
-            <Text style={styles.buttonText}>Filter</Text>
+            {isFiltered && <View style={styles.buttonBadge} />}
+            <Text style={styles.filterText}>Filter</Text>
           </TouchableOpacity>
 
           <Menu onSelect={handleSort}>
-            <MenuTrigger style={styles.filterButton}>
-              <MaterialCommunityIcons name="sort" size={20} color={text} />
-              <Text style={styles.buttonText}>Sort</Text>
-              <FontAwesome name="angle-down" size={20} color="#9ca3af" />
+            <MenuTrigger style={styles.sortButton}>
+              <MaterialCommunityIcons
+                name="sort"
+                size={20}
+                color={isSorted ? "#b35d02ff" : "gray"}
+              />
+              <Text style={styles.sortText}>Sort</Text>
+              {isSorted && <View style={styles.buttonBadge} />}
+              <FontAwesome
+                name="angle-down"
+                size={20}
+                color={isSorted ? "#b35d02ff" : "gray"}
+              />
             </MenuTrigger>
             <MenuOptions
               customStyles={{
@@ -529,7 +568,7 @@ export default function tutoring() {
                     source={
                       profile.profilePicture
                         ? { uri: profile.profilePicture }
-                        : require("../assets/images/person.jpg")
+                        : require("../../assets/images/person.jpg")
                     }
                   >
                     <TouchableOpacity onPress={() => toggleFavourite(tutor.id)}>
@@ -647,7 +686,7 @@ export default function tutoring() {
                         source={
                           profile.profilePicture
                             ? { uri: profile.profilePicture }
-                            : require("../assets/images/person.jpg")
+                            : require("../../assets/images/person.jpg")
                         }
                         style={styles.modalImage}
                       />

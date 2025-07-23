@@ -63,7 +63,7 @@ export default function bookingStatus() {
 
   const handleAcceptance = () => {
     router.push({
-      pathname: "/profile/booking/bookingAcceptance",
+      pathname: "/booking/bookingAcceptance",
       params: {
         id: id,
       },
@@ -72,7 +72,7 @@ export default function bookingStatus() {
 
   const handlePayment = () => {
     router.push({
-      pathname: "/profile/booking/paymentPrompt",
+      pathname: "/booking/paymentPrompt",
       params: {
         id: id,
       },
@@ -81,7 +81,7 @@ export default function bookingStatus() {
 
   const handleConfirmation = () => {
     router.push({
-      pathname: "/profile/booking/confirmation",
+      pathname: "/booking/confirmation",
       params: {
         id: id,
       },
@@ -90,7 +90,7 @@ export default function bookingStatus() {
 
   const handleFeedback = () => {
     router.push({
-      pathname: "/profile/booking/review",
+      pathname: "/booking/review",
       params: {
         id: id,
       },
@@ -105,13 +105,12 @@ export default function bookingStatus() {
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
-      paddingHorizontal: 20,
+      alignItems: "center",
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     body: {
@@ -170,12 +169,9 @@ export default function bookingStatus() {
     <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="orange"
-          onPress={() => router.push("/profile/history")}
-        />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Booking status</Text>
         <View style={{ width: 40 }} />
       </View>

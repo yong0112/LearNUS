@@ -2,7 +2,15 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, useColorScheme, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
 import { Rating } from "react-native-ratings";
 import { auth } from "../../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -78,21 +86,15 @@ export default function ratings() {
 
   const styles = StyleSheet.create({
     container: { paddingVertical: 40, paddingHorizontal: 20 },
-    background: {
-      position: "absolute",
-      top: -550,
-      left: -150,
-      width: 10000,
-      height: 650,
-      borderRadius: 0,
-      backgroundColor: "#ffc04d",
-      zIndex: -1,
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     review: {
@@ -113,22 +115,11 @@ export default function ratings() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/*Header*/}
-        <View style={styles.background} />
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}
-        >
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color={isDarkMode ? "white" : "orange"}
-            onPress={() => router.push("/(tabs)/profile")}
-          />
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} />
+          </TouchableOpacity>
           <Text style={styles.headerText}>Ratings & Reviews</Text>
           <View style={{ width: 40 }} />
         </View>
@@ -172,7 +163,7 @@ export default function ratings() {
           </Text>
         </View>
 
-        <View>
+        <ScrollView>
           {!reviews ? (
             <Text
               style={{
@@ -260,7 +251,7 @@ export default function ratings() {
               </View>
             ))
           )}
-        </View>
+        </ScrollView>
       </View>
     </ThemedView>
   );

@@ -172,7 +172,7 @@ export default function Comment() {
             name="arrow-back"
             size={30}
             color="orange"
-            onPress={() => router.push(`../../forum/${postId}`)}
+            onPress={() => router.back()}
           />
           <Text style={styles.headerText}>Add comment</Text>
           <TouchableOpacity onPress={handlePostComment}>

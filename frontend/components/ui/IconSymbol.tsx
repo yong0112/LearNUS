@@ -3,7 +3,12 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { SymbolWeight, SymbolViewProps } from "expo-symbols";
 import { ComponentProps } from "react";
-import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
+import {
+  OpaqueColorValue,
+  View,
+  type StyleProp,
+  type TextStyle,
+} from "react-native";
 
 type IconMapping = Record<
   SymbolViewProps["name"],
@@ -25,6 +30,7 @@ const MAPPING = {
   "message.fill": "sms",
   calendar: "calendar-month",
   "person.3.fill": "groups",
+  magnifyingglass: "search",
 } as IconMapping;
 
 /**
