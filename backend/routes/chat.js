@@ -8,5 +8,6 @@ router.use(authMiddleware);
 router.get("/", chatController.getUserChats);
 router.post("/", chatController.createOrGetChat);
 router.get("/:chatId", chatController.getChat);
+router.post("/tutor", chatController.createChatWithTutor);
 
 module.exports = router;

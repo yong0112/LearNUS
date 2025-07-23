@@ -78,7 +78,7 @@ export default function ForumPost() {
         return;
       }
       Alert.alert("Forum post created!");
-      router.replace("/(tabs)/forum");
+      router.replace("./(tabs)/forum");
     } catch (error: any) {
       console.error("Error:", error);
       Alert.alert("Failed to post: ");
@@ -194,7 +194,7 @@ export default function ForumPost() {
             name="arrow-back-circle"
             size={40}
             color={text}
-            onPress={() => router.push("/(tabs)/forum")}
+            onPress={() => router.push("./(tabs)/forum")}
           />
           <Text style={styles.headerText}>Create A Post</Text>
           <View style={{ width: 40 }} />
