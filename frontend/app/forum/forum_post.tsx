@@ -20,7 +20,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { CourseOption } from "../constants/types";
+import { CourseOption } from "../../constants/types";
 
 export default function ForumPost() {
   const router = useRouter();
@@ -78,7 +78,7 @@ export default function ForumPost() {
         return;
       }
       Alert.alert("Forum post created!");
-      router.replace("/(tabs)/forum");
+      router.back();
     } catch (error: any) {
       console.error("Error:", error);
       Alert.alert("Failed to post: ");
@@ -91,23 +91,18 @@ export default function ForumPost() {
       paddingVertical: 40,
       paddingHorizontal: 20,
     },
-    background: {
-      position: "absolute",
-      top: -550,
-      left: -150,
-      width: 700,
-      height: 650,
-      backgroundColor: "#ffc04d",
-      zIndex: -1,
-    },
     header: {
       flexDirection: "row",
-      alignItems: "center",
       justifyContent: "space-between",
+      alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     inputGroup: {
@@ -150,7 +145,7 @@ export default function ForumPost() {
       color: "#222",
     },
     clearFilterContainer: {
-      marginTop: 20,
+      marginTop: 10,
       borderRadius: 10,
       paddingHorizontal: 10,
       paddingVertical: 5,
@@ -175,11 +170,11 @@ export default function ForumPost() {
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: "orange",
-      paddingVertical: 12,
-      height: 60,
+      paddingVertical: 8,
+      marginHorizontal: 20,
     },
     buttonText: {
-      fontSize: 28,
+      fontSize: 20,
       fontWeight: "600",
       color: "white",
     },
@@ -188,15 +183,12 @@ export default function ForumPost() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <View style={styles.background} />
+        {/**Header */}
         <View style={styles.header}>
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color={text}
-            onPress={() => router.push("/(tabs)/forum")}
-          />
-          <Text style={styles.headerText}>Create A Post</Text>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Create a post</Text>
           <View style={{ width: 40 }} />
         </View>
 

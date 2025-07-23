@@ -103,3 +103,8 @@ export interface Review {
 export interface Favourite {
   session: string;
 }
+
+export interface FAQ {
+  title: string;
+  ans: string;
+}

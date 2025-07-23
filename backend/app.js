@@ -26,6 +26,8 @@ const forumRoutes = require("./routes/forum");
 app.use("/api/forum", forumRoutes);
 const eventRoutes = require("./routes/events");
 app.use("/api/users", eventRoutes);
+const reportRoutes = require("./routes/reports");
+app.use("/api/reports", reportRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is working~~");

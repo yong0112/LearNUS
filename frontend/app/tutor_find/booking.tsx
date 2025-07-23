@@ -22,7 +22,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
-import { Session, Day, UserProfile } from "../constants/types";
+import { Session, Day, UserProfile } from "../../constants/types";
 
 export default function BookingPage() {
   const router = useRouter();
@@ -290,7 +290,7 @@ export default function BookingPage() {
             name="arrow-back-circle"
             size={40}
             color={text}
-            onPress={() => router.push("/tutor_find")}
+            onPress={() => router.back()}
           />
           <Text style={styles.headerText}>Session Booking</Text>
           <View style={{ width: 40 }} />

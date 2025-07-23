@@ -1,7 +1,7 @@
 import { auth, db } from "@/lib/firebase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -11,6 +11,7 @@ import {
   useColorScheme,
   View,
   Alert,
+  Dimensions,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -22,6 +23,9 @@ import {
   UpvoteStatus,
 } from "../../constants/types";
 import { getTagColor } from "@/constants/tagColors";
+
+const screenHeight = Dimensions.get("window").height;
+const screenWidth = Dimensions.get("window").width;
 
 export default function ForumPostDetails() {
   const { postId } = useLocalSearchParams();
@@ -50,79 +54,81 @@ export default function ForumPostDetails() {
   const BASE_URL = "https://learnus.onrender.com";
 
   // Fetch post, comments, profiles, and upvote statuses
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!postId || typeof postId !== "string") return;
 
-    const fetchData = async () => {
-      try {
-        // Fetch post
-        const postRes = await fetch(`${BASE_URL}/api/forum`);
-        if (!postRes.ok) throw new Error("Failed to fetch post");
-        const posts: ForumPost[] = await postRes.json();
-        const foundPost = posts.find((p) => p.id === postId);
-        if (!foundPost) throw new Error("Post not found");
-        setPost(foundPost);
+    try {
+      // Fetch post
+      const postRes = await fetch(`${BASE_URL}/api/forum`);
+      if (!postRes.ok) throw new Error("Failed to fetch post");
+      const posts: ForumPost[] = await postRes.json();
+      const foundPost = posts.find((p) => p.id === postId);
+      if (!foundPost) throw new Error("Post not found");
+      setPost(foundPost);
 
-        // Fetch comments
-        const commentsRes = await fetch(
-          `${BASE_URL}/api/forum/${postId}/comments`,
+      // Fetch comments
+      const commentsRes = await fetch(
+        `${BASE_URL}/api/forum/${postId}/comments`,
+      );
+      if (!commentsRes.ok) throw new Error("Failed to fetch comments");
+      const commentsData: Comment[] = await commentsRes.json();
+      // Sort by upvoteCount (highest first)
+      setComments(commentsData.sort((a, b) => b.upvoteCount - a.upvoteCount));
+
+      // Fetch profiles
+      const profiles: Record<string, UserProfile | undefined> = {};
+      const authorIds = new Set([
+        foundPost.author,
+        ...commentsData.map((c) => c.author),
+      ]);
+      await Promise.all(
+        Array.from(authorIds).map(async (authorId) => {
+          try {
+            const userRes = await fetch(`${BASE_URL}/api/users/${authorId}`);
+            if (!userRes.ok) return;
+            const userData: UserProfile = await userRes.json();
+            profiles[authorId] = userData;
+          } catch (err) {
+            console.error(err);
+          }
+        }),
+      );
+      setUserProfiles(profiles);
+
+      // Fetch upvote statuses
+      if (auth.currentUser) {
+        const userId = auth.currentUser.uid;
+        const postUpvoteRes = await fetch(
+          `${BASE_URL}/api/forum/${postId}/upvote-status/${userId}`,
         );
-        if (!commentsRes.ok) throw new Error("Failed to fetch comments");
-        const commentsData: Comment[] = await commentsRes.json();
-        // Sort by upvoteCount (highest first)
-        setComments(commentsData.sort((a, b) => b.upvoteCount - a.upvoteCount));
+        if (postUpvoteRes.ok) {
+          setPostUpvoteStatus(await postUpvoteRes.json());
+        }
 
-        // Fetch profiles
-        const profiles: Record<string, UserProfile | undefined> = {};
-        const authorIds = new Set([
-          foundPost.author,
-          ...commentsData.map((c) => c.author),
-        ]);
+        const commentStatuses: Record<string, UpvoteStatus> = {};
         await Promise.all(
-          Array.from(authorIds).map(async (authorId) => {
-            try {
-              const userRes = await fetch(`${BASE_URL}/api/users/${authorId}`);
-              if (!userRes.ok) return;
-              const userData: UserProfile = await userRes.json();
-              profiles[authorId] = userData;
-            } catch (err) {
-              console.error(err);
+          commentsData.map(async (comment) => {
+            const commentUpvoteRes = await fetch(
+              `${BASE_URL}/api/forum/${postId}/comments/${comment.id}/upvote-status/${userId}`,
+            );
+            if (commentUpvoteRes.ok) {
+              commentStatuses[comment.id] = await commentUpvoteRes.json();
             }
           }),
         );
-        setUserProfiles(profiles);
-
-        // Fetch upvote statuses
-        if (auth.currentUser) {
-          const userId = auth.currentUser.uid;
-          const postUpvoteRes = await fetch(
-            `${BASE_URL}/api/forum/${postId}/upvote-status/${userId}`,
-          );
-          if (postUpvoteRes.ok) {
-            setPostUpvoteStatus(await postUpvoteRes.json());
-          }
-
-          const commentStatuses: Record<string, UpvoteStatus> = {};
-          await Promise.all(
-            commentsData.map(async (comment) => {
-              const commentUpvoteRes = await fetch(
-                `${BASE_URL}/api/forum/${postId}/comments/${comment.id}/upvote-status/${userId}`,
-              );
-              if (commentUpvoteRes.ok) {
-                commentStatuses[comment.id] = await commentUpvoteRes.json();
-              }
-            }),
-          );
-          setCommentUpvoteStatus(commentStatuses);
-        }
-      } catch (err) {
-        console.error(err);
-        setError(err instanceof Error ? err.message : "An error occurred");
+        setCommentUpvoteStatus(commentStatuses);
       }
-    };
-
-    fetchData();
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : "An error occurred");
+    }
   }, [postId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData]),
+  );
 
   // Handle upvote for post
   const handlePostUpvote = async () => {
@@ -247,10 +253,27 @@ export default function ForumPostDetails() {
     _seconds: number;
     _nanoseconds: number;
   }) => {
-    return new Date(
-      createdAt._seconds * 1000 + createdAt._nanoseconds / 1000000,
-    ).toLocaleString();
+    return formatToCustomFormat(
+      new Date(createdAt._seconds * 1000 + createdAt._nanoseconds / 1000000),
+    );
   };
+
+  function formatToCustomFormat(date: Date): string {
+    const year = date.getFullYear();
+    const month = date.getMonth().toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    // Convert to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    const hoursStr = hours.toString().padStart(2, "0");
+
+    return `${year}/${month}/${day}  ${hoursStr}:${minutes} ${ampm}`;
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -260,26 +283,22 @@ export default function ForumPostDetails() {
     },
     background: {
       position: "absolute",
-      top: -550,
-      left: -150,
-      width: 700,
-      height: 650,
+      width: screenWidth,
+      top: 0,
+      left: -10,
+      right: 0,
+      height: screenHeight * 0.06,
       backgroundColor: "#ffc04d",
-      zIndex: -1,
     },
     header: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
+      justifyContent: "flex-start",
       paddingHorizontal: 10,
-    },
-    headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      color: text,
+      paddingTop: 20,
+      marginBottom: 10,
     },
     postCard: {
-      marginTop: 20,
       marginBottom: 20,
       flexDirection: "column",
       borderBottomWidth: 2,
@@ -310,7 +329,7 @@ export default function ForumPostDetails() {
       borderRadius: 10,
     },
     menuButton: {
-      padding: 8,
+      padding: 3,
     },
     deleteMenu: {
       position: "absolute",
@@ -362,16 +381,14 @@ export default function ForumPostDetails() {
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.background} />
         <View style={styles.header}>
+          <View style={styles.background} />
           <Ionicons
-            name="arrow-back-circle"
-            size={40}
+            name="arrow-back-outline"
+            size={20}
             color={text}
             onPress={() => router.back()}
           />
-          <Text style={styles.headerText}>Post Details</Text>
-          <View style={{ width: 40 }} />
         </View>
 
         {/* Post and Comments */}
@@ -473,17 +490,20 @@ export default function ForumPostDetails() {
                   {postUpvoteStatus?.upvoteCount || post.upvoteCount}
                 </Text>
               </TouchableOpacity>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <TouchableOpacity
+                style={{ flexDirection: "row", alignItems: "center" }}
+                onPress={() => router.push(`/forum/${postId}/comment`)}
+              >
                 <Ionicons name="chatbubble-outline" size={20} color="#ffc04d" />
                 <Text style={{ marginLeft: 4, color: text }}>
                   {comments.length}
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
 
             {/* Post Three-Dot Menu */}
             {auth.currentUser?.uid === post.author && (
-              <View style={{ position: "absolute", top: 8, right: 8 }}>
+              <View style={{ position: "absolute", top: 1, right: 2 }}>
                 <TouchableOpacity
                   style={styles.menuButton}
                   onPress={() => setPostMenuVisible(!postMenuVisible)}

@@ -106,6 +106,10 @@ export default function bookingStatus() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
+      paddingHorizontal: 20,
     },
     headerText: {
       fontSize: 24,
@@ -114,7 +118,6 @@ export default function bookingStatus() {
       color: text,
     },
     body: {
-      marginTop: 20,
       flexDirection: "column",
       backgroundColor: "#aaa7ad",
     },
