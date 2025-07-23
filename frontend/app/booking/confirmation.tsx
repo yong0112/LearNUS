@@ -96,7 +96,7 @@ export default function confirmation() {
       }
 
       Alert.alert("Booking confirmed");
-      router.replace("/profile/booking/bookingStatus");
+      router.replace("/booking/bookingStatus");
     } catch (err) {
       console.error(err);
     }
@@ -111,10 +111,12 @@ export default function confirmation() {
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
+      alignItems: "center",
     },
     headerText: {
       fontSize: 24,
-      fontWeight: "bold",
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     body: {
@@ -176,7 +178,7 @@ export default function confirmation() {
           name="arrow-back-circle"
           size={40}
           color="orange"
-          onPress={() => router.push("/profile/booking/bookingStatus")}
+          onPress={() => router.back()}
         />
         <Text style={styles.headerText}>Payment Confirmation</Text>
         <View style={{ width: 40 }} />

@@ -176,7 +176,7 @@ export default function paymentPrompt() {
           Alert.alert("Error: Failed to upload database");
         }
 
-        router.replace("/profile/booking/bookingStatus");
+        router.replace("/booking/bookingStatus");
       } else {
         throw new Error(result.error.message || "Upload failed");
       }
@@ -216,12 +216,12 @@ export default function paymentPrompt() {
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
+      alignItems: "center",
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
-      alignItems: "center",
-      justifyContent: "center",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
       color: text,
     },
     classDetails: {
@@ -271,12 +271,9 @@ export default function paymentPrompt() {
     <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="orange"
-          onPress={() => router.replace("/profile/booking/bookingStatus")}
-        />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Payment</Text>
         <View style={{ width: 40 }} />
       </View>
@@ -328,7 +325,7 @@ export default function paymentPrompt() {
                 source={
                   profile?.QR
                     ? { uri: profile.QR }
-                    : require("../../../assets/images/fakeQR.jpg")
+                    : require("../../assets/images/fakeQR.jpg")
                 }
               />
             </View>

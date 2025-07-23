@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, Text, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -17,7 +17,6 @@ export default function TabLayout() {
         tabBarActiveTintColor: "#FF6200",
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
         tabBarLabelPosition: "below-icon",
         tabBarStyle: Platform.select({
           ios: {
@@ -29,29 +28,28 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="forum"
-        options={{
-          title: "Forum",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.3.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          title: "Calendar",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="calendar" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="home"
         options={{
           title: "Home",
+          tabBarActiveBackgroundColor: "#f3be3aff",
+          tabBarInactiveBackgroundColor: "transparent",
+          tabBarActiveTintColor: "white",
+          tabBarInactiveTintColor: "gray",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={30} name="house.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tutor_find"
+        options={{
+          title: "Search tutors",
+          tabBarActiveBackgroundColor: "#f3be3aff",
+          tabBarInactiveBackgroundColor: "transparent",
+          tabBarActiveTintColor: "white",
+          tabBarInactiveTintColor: "gray",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={30} name="magnifyingglass" color={color} />
           ),
         }}
       />
@@ -59,8 +57,12 @@ export default function TabLayout() {
         name="chat"
         options={{
           title: "Chat",
+          tabBarActiveBackgroundColor: "#f3be3aff",
+          tabBarInactiveBackgroundColor: "transparent",
+          tabBarActiveTintColor: "white",
+          tabBarInactiveTintColor: "gray",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="message.fill" color={color} />
+            <IconSymbol size={30} name="message.fill" color={color} />
           ),
         }}
       />
@@ -68,8 +70,12 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
+          tabBarActiveBackgroundColor: "#f3be3aff",
+          tabBarInactiveBackgroundColor: "transparent",
+          tabBarActiveTintColor: "white",
+          tabBarInactiveTintColor: "gray",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.fill" color={color} />
+            <IconSymbol size={30} name="person.fill" color={color} />
           ),
         }}
       />

@@ -1,11 +1,13 @@
 import { auth } from "@/lib/firebase";
-import { AntDesign, Entypo } from "@expo/vector-icons";
+import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Button,
   Dimensions,
+  FlatList,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -23,8 +25,9 @@ import { ThemedView } from "@/components/ThemedView";
 const screenHeight = Dimensions.get("window").height;
 
 export default function CalendarPage() {
+  const router = useRouter();
   const currTime = new Date();
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState<string>(currTime.toDateString());
   const [classes, setClasses] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -179,7 +182,6 @@ export default function CalendarPage() {
         new Date(event.date).getMonth() + 1,
         new Date(event.date).getFullYear(),
       );
-      console.log(date);
       dict[date] = {
         marked: true,
         dotColor: "orange",
@@ -252,7 +254,12 @@ export default function CalendarPage() {
       paddingHorizontal: 20,
     },
     header: {
-      fontSize: 30,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    headerText: {
+      fontSize: 24,
       fontWeight: "600",
       marginBottom: 10,
       color: text,
@@ -261,10 +268,17 @@ export default function CalendarPage() {
       borderWidth: 1,
       borderColor: "gray",
       height: 350,
+      marginTop: 10,
+      marginBottom: 20,
     },
     plus: {
       flexDirection: "row",
       justifyContent: "flex-end",
+      position: "absolute",
+      bottom: 20,
+      right: 20,
+      width: 56,
+      height: (screenHeight / 100) * 10,
     },
     classList: {
       paddingBottom: 20,
@@ -326,85 +340,89 @@ export default function CalendarPage() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Text style={styles.header}>Calendar</Text>
-        <View style={{ flex: 1, justifyContent: "space-between" }}>
-          <Calendar
-            markingType="custom"
-            onDayPress={(day) => {
-              setSelected(day.dateString);
-            }}
-            markedDates={markedDates}
-            style={styles.calendar}
-            theme={{
-              backgroundColor: "#000000",
-              calendarBackground: "#ffffff",
-              textSectionTitleColor: "#b6c1cd",
-              selectedDayBackgroundColor: "orange",
-              selectedDayTextColor: "#ffffff",
-              todayTextColor: "orange",
-              dayTextColor: "black",
-              textDisabledColor: "lightgray",
-              arrowColor: "orange",
-              textDayFontWeight: "300",
-              textMonthFontWeight: "bold",
-              textDayHeaderFontWeight: "600",
-              textDayFontSize: 18,
-              textMonthFontSize: 20,
-              textDayHeaderFontSize: 14,
-              arrowWidth: 40,
-              dotColor: "orange",
-              selectedDotColor: "white",
-            }}
-          />
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Calendar</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-          <View style={styles.classList}>
-            {classesForSelectedDate.length > 0 ? (
-              classesForSelectedDate.map((cls, index) => (
-                <View key={index} style={styles.classBox}>
-                  <Text
-                    style={{ fontSize: 18, fontWeight: "bold", color: text }}
-                  >
-                    {cls.course}
-                  </Text>
-                  <Text style={{ fontSize: 16, color: text }}>
-                    {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
-                  </Text>
-                </View>
-              ))
-            ) : selected ? (
-              <View style={{ alignSelf: "center", alignItems: "center" }}>
-                <Text
-                  style={{ fontSize: 20, fontWeight: "semibold", color: text }}
-                >
-                  No classes for today
+        {/**Calendar */}
+        <Calendar
+          markingType="custom"
+          onDayPress={(day) => {
+            setSelected(day.dateString);
+          }}
+          markedDates={markedDates}
+          style={styles.calendar}
+          theme={{
+            backgroundColor: "#000000",
+            calendarBackground: "#ffffff",
+            textSectionTitleColor: "#b6c1cd",
+            selectedDayBackgroundColor: "orange",
+            selectedDayTextColor: "#ffffff",
+            todayTextColor: "orange",
+            dayTextColor: "black",
+            textDisabledColor: "lightgray",
+            arrowColor: "orange",
+            textDayFontWeight: "300",
+            textMonthFontWeight: "bold",
+            textDayHeaderFontWeight: "600",
+            textDayFontSize: 18,
+            textMonthFontSize: 20,
+            textDayHeaderFontSize: 14,
+            arrowWidth: 40,
+            dotColor: "orange",
+            selectedDotColor: "white",
+          }}
+        />
+
+        {/**Classes & Events */}
+        <ScrollView style={styles.classList}>
+          {classesForSelectedDate.length > 0 ? (
+            classesForSelectedDate.map((cls, index) => (
+              <View key={index} style={styles.classBox}>
+                <Text style={{ fontSize: 18, fontWeight: "bold", color: text }}>
+                  {cls.course}
+                </Text>
+                <Text style={{ fontSize: 16, color: text }}>
+                  {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
                 </Text>
               </View>
-            ) : (
-              <View />
-            )}
+            ))
+          ) : selected ? (
+            <View style={{ alignSelf: "center", alignItems: "center" }}>
+              <Text
+                style={{ fontSize: 20, fontWeight: "semibold", color: text }}
+              >
+                No classes for today
+              </Text>
+            </View>
+          ) : (
+            <View />
+          )}
 
-            {eventsForSelectedDate.length > 0 ? (
-              eventsForSelectedDate.map((event, index) => (
-                <View key={index} style={styles.classBox}>
-                  <Text
-                    style={{ fontSize: 18, fontWeight: "bold", color: text }}
-                  >
-                    {event.title}
-                  </Text>
-                  <Text style={{ fontSize: 16, color: text }}>
-                    {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <View />
-            )}
-          </View>
+          {eventsForSelectedDate.length > 0 ? (
+            eventsForSelectedDate.map((event, index) => (
+              <View key={index} style={styles.classBox}>
+                <Text style={{ fontSize: 18, fontWeight: "bold", color: text }}>
+                  {event.title}
+                </Text>
+                <Text style={{ fontSize: 16, color: text }}>
+                  {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <View />
+          )}
+        </ScrollView>
 
-          <TouchableOpacity style={styles.plus} onPress={handleAddButton}>
-            <AntDesign name="pluscircle" size={50} color={"orange"} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.plus} onPress={handleAddButton}>
+          <AntDesign name="pluscircle" size={50} color={"orange"} />
+        </TouchableOpacity>
 
         <Modal
           animationType="slide"
