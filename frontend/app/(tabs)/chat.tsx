@@ -37,7 +37,7 @@ export default function ChatMessage() {
           return;
         }
         const token = await currentUser.getIdToken();
-        const response = await fetch("http://192.168.1.5:5000/api/chat", {
+        const response = await fetch("https://learnus.onrender.com/api/chat", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -57,7 +57,7 @@ export default function ChatMessage() {
               if (!profiles[participant.uid]) {
                 try {
                   const res = await fetch(
-                    `http://192.168.1.5:5000/api/users/${participant.uid}`,
+                    `https://learnus.onrender.com/api/users/${participant.uid}`,
                     {
                       headers: { Authorization: `Bearer ${token}` },
                     },
@@ -112,10 +112,7 @@ export default function ChatMessage() {
           })
         }
       >
-        <Image
-          source={{ uri: profilePicture || "https://via.placeholder.com/50" }}
-          style={styles.chatImage}
-        />
+        <Image source={{ uri: profilePicture }} style={styles.chatImage} />
         <View style={styles.chatInfo}>
           <Text style={[styles.chatName, { color: text }]}>{name}</Text>
           <Text

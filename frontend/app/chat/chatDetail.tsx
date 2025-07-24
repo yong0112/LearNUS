@@ -47,7 +47,7 @@ export default function ChatDetail() {
         const token = await currentUser.getIdToken();
         const userId = currentUser.uid;
 
-        const socket = io("http://192.168.1.5:5000", {
+        const socket = io("https://learnus.onrender.com", {
           transports: ["websocket"],
         });
 
@@ -113,7 +113,7 @@ export default function ChatDetail() {
 
         // Fetch chat details
         const chatResponse = await fetch(
-          `http://192.168.1.5:5000/api/chat/${chatId}`,
+          `https://learnus.onrender.com/api/chat/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -158,7 +158,7 @@ export default function ChatDetail() {
 
         // Fetch messages
         const messagesResponse = await fetch(
-          `http://192.168.1.5:5000/api/message/${chatId}`,
+          `https://learnus.onrender.com/api/message/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -300,12 +300,6 @@ export default function ChatDetail() {
       </View>
     );
   };
-
-  //   const otherParticipantName = chat?.participantDetails
-  //     ? tutorProfiles[
-  //         chat.participantDetails.find((p) => p.uid !== auth.currentUser?.uid)?.uid || ""
-  //       ]?.firstName || "Chat"
-  //     : "Chat";
 
   const otherParticipantName =
     tutorProfiles[
