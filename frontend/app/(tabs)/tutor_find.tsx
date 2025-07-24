@@ -309,7 +309,7 @@ export default function tutoring() {
   const handleBooking = () => {
     if (!selectedTutor) return;
     router.push({
-      pathname: "/tutor_find/booking",
+      pathname: "./tutor_find/booking",
       params: {
         tutor: selectedTutor.tutor,
         course: selectedTutor.course,
@@ -335,17 +335,20 @@ export default function tutoring() {
         return;
       }
       const token = await currentUser.getIdToken();
-      const response = await fetch("http://192.168.1.5:5000/api/chat/tutor", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        "https://learnus.onrender.com/api/chat/tutor",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            tutorId: selectedTutor.tutor,
+            postId: selectedTutor.id,
+          }),
         },
-        body: JSON.stringify({
-          tutorId: selectedTutor.tutor,
-          postId: selectedTutor.id,
-        }),
-      });
+      );
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || "Failed to create chat");

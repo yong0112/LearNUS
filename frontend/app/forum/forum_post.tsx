@@ -78,11 +78,7 @@ export default function ForumPost() {
         return;
       }
       Alert.alert("Forum post created!");
-<<<<<<< HEAD:frontend/app/forum_post.tsx
-      router.replace("./(tabs)/forum");
-=======
       router.back();
->>>>>>> main:frontend/app/forum/forum_post.tsx
     } catch (error: any) {
       console.error("Error:", error);
       Alert.alert("Failed to post: ");
@@ -189,20 +185,10 @@ export default function ForumPost() {
       <View style={styles.container}>
         {/**Header */}
         <View style={styles.header}>
-<<<<<<< HEAD:frontend/app/forum_post.tsx
-          <Ionicons
-            name="arrow-back-circle"
-            size={40}
-            color={text}
-            onPress={() => router.push("./(tabs)/forum")}
-          />
-          <Text style={styles.headerText}>Create A Post</Text>
-=======
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back-outline" size={20} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Create a post</Text>
->>>>>>> main:frontend/app/forum/forum_post.tsx
           <View style={{ width: 40 }} />
         </View>
 
