@@ -1,10 +1,23 @@
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Entypo, Fontisto, Ionicons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Entypo,
+  Fontisto,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
 
-export default function contact() {
+export default function help() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -13,78 +26,86 @@ export default function contact() {
 
   const styles = StyleSheet.create({
     container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
-    background: {
-      position: "absolute",
-      top: -550,
-      left: -150,
-      width: 10000,
-      height: 650,
-      borderRadius: 0,
-      backgroundColor: "#ffc04d",
-      zIndex: -1,
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
-      fontSize: 28,
-      fontWeight: "bold",
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 10,
+      color: text,
+    },
+    helpContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingVertical: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 1,
       alignItems: "center",
-      justifyContent: "center",
-      color: "black",
+    },
+    icon: {
+      flexDirection: "row",
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: "600",
+      marginLeft: 15,
     },
   });
 
   return (
     <View style={styles.container}>
-      {/*Header*/}
-      <View style={styles.background} />
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="white"
-          onPress={() => router.push("/(tabs)/profile")}
-        />
-        <Text style={styles.headerText}>Contact Us</Text>
+      {/**Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Help & Support</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <View
-        style={{ flex: 1, flexDirection: "column", justifyContent: "center" }}
-      >
-        <View
-          style={{ flexDirection: "row", justifyContent: "center", margin: 20 }}
+      {/**Body */}
+      <View>
+        {/**FAQ */}
+        <TouchableOpacity
+          style={styles.helpContainer}
+          onPress={() => router.push("/help/faq")}
         >
-          <Fontisto name="email" size={30} color={"orange"} />
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "500",
-              marginLeft: 10,
-              textDecorationLine: "underline",
-              color: "blue",
-            }}
-          >
-            yonglzy1611@gmail.com
-          </Text>
-        </View>
-        <View style={{ flexDirection: "row", justifyContent: "center" }}>
-          <Entypo name="old-phone" size={30} color={"orange"} />
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "500",
-              marginLeft: 10,
-              color: text,
-            }}
-          >
-            +65 9019 1786
-          </Text>
-        </View>
+          <View style={styles.icon}>
+            <MaterialCommunityIcons name="comment-question-outline" size={25} />
+            <Text style={styles.title}>FAQs</Text>
+          </View>
+          <AntDesign name="arrowright" size={20} />
+        </TouchableOpacity>
+
+        {/**Report issue */}
+        <TouchableOpacity
+          style={styles.helpContainer}
+          onPress={() => router.push("/help/report")}
+        >
+          <View style={styles.icon}>
+            <MaterialIcons name="report" size={25} />
+            <Text style={styles.title}>Report an issue</Text>
+          </View>
+          <AntDesign name="arrowright" size={20} />
+        </TouchableOpacity>
+
+        {/**Contact Us */}
+        <TouchableOpacity
+          style={styles.helpContainer}
+          onPress={() => router.push("/help/contact")}
+        >
+          <View style={styles.icon}>
+            <Fontisto name="email" size={25} />
+            <Text style={styles.title}>Contact Us</Text>
+          </View>
+          <AntDesign name="arrowright" size={20} />
+        </TouchableOpacity>
       </View>
     </View>
   );
