@@ -1,5 +1,6 @@
 const { getUserProfile, updateUserProfile } = require("../models/userModel");
 const { db } = require("../config/firebase");
+const { getAuth } = require("firebase-admin/auth");
 
 const fetchUserProfile = async (req, res) => {
   const uid = req.params.uid;
@@ -144,6 +145,25 @@ const setOnboarding = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).send("Missing or invalid authorization header");
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  const { newPass } = req.body;
+
+  try {
+    const decoded = await getAuth().verifyIdToken(idToken);
+    await getAuth().updateUser(decoded.uid, { password: newPass });
+    res.status(200).send("Password updated");
+  } catch (err) {
+    console.error(err);
+    res.status(401).send("Unauthorized or error detected");
+  }
+};
+
 module.exports = {
   fetchUserProfile,
   updateUserProfilePic,
@@ -151,4 +171,5 @@ module.exports = {
   updateRating,
   updateFavourites,
   setOnboarding,
+  resetPassword,
 };
