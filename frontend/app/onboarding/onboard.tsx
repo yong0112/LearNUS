@@ -29,7 +29,7 @@ import {
   CourseOption,
   LocationOption,
   Day,
-  Majors,
+  Major,
 } from "../../constants/types";
 import SectionedMultiSelect from "react-native-sectioned-multi-select";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
@@ -58,7 +58,7 @@ function convertTimeLocally(current: Date) {
 export default function onboard() {
   const router = useRouter();
   const hasFetched = useRef(false);
-  const [majorOptions, setMajorOptions] = useState<Majors[]>([]);
+  const [majorOptions, setMajorOptions] = useState<Major[]>([]);
   const [selectedMajor, setSelectedMajor] = useState("");
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -82,7 +82,7 @@ export default function onboard() {
         if (!response.ok) throw new Error("Failed to fetch constants");
         const data = await response.json();
         setMajorOptions(data.MAJORS || []);
-        setLocationOptions(data.DAYS || []);
+        setLocationOptions(data.FORMATS || []);
         hasFetched.current = true;
       } catch (err) {
         console.error(err);
@@ -349,7 +349,7 @@ export default function onboard() {
                 placeholder={"Select your major"}
                 value={selectedMajor}
                 onChange={(item) => {
-                  setSelectedMajor(item.label);
+                  setSelectedMajor(item.value);
                 }}
                 renderLeftIcon={() => (
                   <Ionicons color={"gray"} name="search-sharp" size={20} />
