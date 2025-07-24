@@ -29,6 +29,7 @@ export interface UserProfile {
   major: string;
   teachingMode: string;
   budgetCap: number;
+  onboarded: boolean;
 }
 
 export interface UpvoteStatus {
@@ -107,4 +108,15 @@ export interface Favourite {
 export interface FAQ {
   title: string;
   ans: string;
+}
+
+export interface Majors {
+  name: string;
+  id: number;
+  children: Major[];
+}
+
+export interface Major {
+  name: string;
+  id: string;
 }

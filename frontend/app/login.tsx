@@ -25,6 +25,7 @@ import {
 import { db, auth } from "../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedText } from "@/components/ThemedText";
+import { UserProfile } from "@/constants/types";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -70,9 +71,15 @@ export default function Login() {
         emailVerified: true,
       });
 
+      const response = await fetch(
+        `https://learnus.onrender.com/api/users/${user.uid}`,
+      );
+      if (!response.ok) throw new Error("Failed to fetch user profile");
+      const data: UserProfile = response.json() as any;
+
       // Alert for successful login and redirect to home page
       Alert.alert("Success: Logged in successfully!");
-      router.replace("/(tabs)/home");
+      router.replace(data.onboarded ? "/(tabs)/home" : "/onboarding/welcome");
     } catch (error: any) {
       let errorMessage = "Unknown error occurred. Please try again.";
 

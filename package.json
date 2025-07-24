@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "react-native-sectioned-multi-select": "^0.10.0"
+  }
+}
