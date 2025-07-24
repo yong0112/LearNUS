@@ -24,7 +24,9 @@ export default function ChatMessage() {
   const text = useThemeColor({}, "text");
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tutorProfiles, setTutorProfiles] = useState<Record<string, UserProfile>>({});
+  const [tutorProfiles, setTutorProfiles] = useState<
+    Record<string, UserProfile>
+  >({});
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -41,6 +43,7 @@ export default function ChatMessage() {
           },
         });
         const data = await response.json();
+        console.log("Fetched chats:", data);
         if (!response.ok) {
           throw new Error(data.message || "Failed to fetch chats");
         }
@@ -57,7 +60,7 @@ export default function ChatMessage() {
                     `http://192.168.1.5:5000/api/users/${participant.uid}`,
                     {
                       headers: { Authorization: `Bearer ${token}` },
-                    }
+                    },
                   );
                   if (res.ok) {
                     profiles[participant.uid] = await res.json();
@@ -66,12 +69,16 @@ export default function ChatMessage() {
                   console.error(err);
                 }
               }
-            })
-          )
+            }),
+          ),
         );
         setTutorProfiles(profiles);
+        console.log("Fetched tutor profiles:", profiles);
       } catch (error) {
-        Alert.alert("Error", error instanceof Error ? error.message : "An unknown error occurred");
+        Alert.alert(
+          "Error",
+          error instanceof Error ? error.message : "An unknown error occurred",
+        );
       } finally {
         setLoading(false);
       }
@@ -83,15 +90,17 @@ export default function ChatMessage() {
   const renderChat = ({ item }: { item: Chat }) => {
     const currentUser = auth.currentUser?.uid;
     const otherParticipant = item.participantDetails.find(
-      (p) => p.uid !== currentUser
+      (p) => p.uid !== currentUser,
     );
     const name = otherParticipant
-      ? `${otherParticipant.displayName || "Unknown"}`
+      ? tutorProfiles[otherParticipant.uid]?.firstName || "Unknown"
       : "Unknown";
+    console.log("Rendering chat for:", otherParticipant?.displayName);
     const profilePicture =
       otherParticipant && otherParticipant.uid
         ? tutorProfiles[otherParticipant.uid]?.profilePicture || ""
         : "";
+    console.log("Profile picture URL:", profilePicture);
 
     return (
       <TouchableOpacity
@@ -109,7 +118,12 @@ export default function ChatMessage() {
         />
         <View style={styles.chatInfo}>
           <Text style={[styles.chatName, { color: text }]}>{name}</Text>
-          <Text style={[styles.lastMessage, { color: isDarkMode ? "#888" : "#666" }]}>
+          <Text
+            style={[
+              styles.lastMessage,
+              { color: isDarkMode ? "#888" : "#666" },
+            ]}
+          >
             {item.lastMessage?.text || "No messages yet"}
           </Text>
         </View>
@@ -162,7 +176,9 @@ export default function ChatMessage() {
       {loading ? (
         <ActivityIndicator size="large" color="orange" />
       ) : chats.length === 0 ? (
-        <Text style={[styles.lastMessage, { color: text, textAlign: "center" }]}>
+        <Text
+          style={[styles.lastMessage, { color: text, textAlign: "center" }]}
+        >
           No chats yet
         </Text>
       ) : (

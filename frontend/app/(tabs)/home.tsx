@@ -462,7 +462,7 @@ export default function Home() {
       borderRadius: 50,
       alignSelf: "center",
     },
-    contactButton: { 
+    contactButton: {
       borderRadius: 10,
       alignItems: "center",
       justifyContent: "center",
@@ -928,7 +928,9 @@ export default function Home() {
                         disabled={contactLoading}
                       >
                         <Entypo name="old-phone" size={25} color={"black"} />
-                        <Text style={styles.contactButtonText}>Contact me!</Text>
+                        <Text style={styles.contactButtonText}>
+                          Contact me!
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   )}

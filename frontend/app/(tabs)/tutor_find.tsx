@@ -58,6 +58,7 @@ export default function tutoring() {
   const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [shortlisted, setShortlisted] = useState<string[]>();
   const [modalVisible, setModalVisible] = useState(false);
+  const [contactLoading, setContactLoading] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -323,8 +324,45 @@ export default function tutoring() {
     });
   };
 
-  const handleContact = () => {
-    Alert.alert("Sorry, feature under development");
+  const handleContact = async () => {
+    if (!selectedTutor) return;
+    setContactLoading(true);
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        Alert.alert("Error", "You must be logged in to contact a tutor");
+        setContactLoading(false);
+        return;
+      }
+      const token = await currentUser.getIdToken();
+      const response = await fetch("http://192.168.1.5:5000/api/chat/tutor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tutorId: selectedTutor.tutor,
+          postId: selectedTutor.id,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create chat");
+      }
+      setContactLoading(false);
+      router.push({
+        pathname: "../chat/chatDetail",
+        params: { chatId: data.data.chatId },
+      });
+    } catch (error) {
+      setContactLoading(false);
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Error", "An unknown error occurred");
+      }
+    }
   };
 
   const handleEditProfile = () => {

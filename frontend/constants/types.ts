@@ -19,16 +19,17 @@ export interface ForumPost {
 }
 
 export interface UserProfile {
-  favourites: string[];
+  uid?: string;
+  favourites?: string[];
   firstName: string;
   lastName: string;
   profilePicture?: string;
   ratings?: number;
-  QR: string;
-  email: string;
-  major: string;
-  teachingMode: string;
-  budgetCap: number;
+  QR?: string;
+  email?: string;
+  major?: string;
+  teachingMode?: string;
+  budgetCap?: number;
 }
 
 export interface UpvoteStatus {
@@ -108,11 +109,21 @@ export interface Chat {
   id: string;
   participants: string[];
   type: string;
-  lastMessage: { text: string; senderId: string; timestamp: string; type: string } | null;
+  lastMessage: {
+    text: string;
+    senderId: string;
+    timestamp: string;
+    type: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
   metadata: { tutorPostId?: string; course?: string; description?: string };
-  participantDetails: { uid: string; email?: string; displayName?: string; photoURL?: string }[];
+  participantDetails: {
+    uid: string;
+    email?: string;
+    displayName?: string;
+    photoURL?: string;
+  }[];
 }
 
 export interface Message {
