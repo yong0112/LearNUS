@@ -23,11 +23,11 @@ import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
-import { Session, Day, UserProfile } from "../../constants/types";
+import { Session, Day, UserProfile, Major } from "../../constants/types";
 
 export default function BookingPage() {
   const router = useRouter();
-  const [dayOptions, setDayOptions] = useState<Day[]>([]);
+  const [majorOptions, setMajorOptions] = useState<Major[]>([]);
   const [tutorProfile, setTutorProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<any>();
   const { selectedMajor, selectedLocation, budget, selectedImageURL } =
@@ -36,6 +36,24 @@ export default function BookingPage() {
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
+
+  useEffect(() => {
+    const fetchConstants = async () => {
+      await fetch(`https://learnus.onrender.com/api/constants`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch constants");
+          return res.json();
+        })
+        .then((data) => {
+          setMajorOptions(data.MAJORS);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    fetchConstants();
+  }, []);
 
   const handleOnboard = async () => {
     try {
@@ -179,7 +197,9 @@ export default function BookingPage() {
             <Text style={styles.titleText}>Major</Text>
             <View style={styles.searchBar}>
               <MaterialIcons name="subject" size={25} color={"#ffc04d"} />
-              <Text style={styles.textStyle}>{selectedMajor}</Text>
+              <Text style={styles.textStyle}>
+                {majorOptions.find((mjr) => mjr.value == selectedMajor)?.label}
+              </Text>
             </View>
           </View>
 

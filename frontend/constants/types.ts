@@ -110,13 +110,13 @@ export interface FAQ {
   ans: string;
 }
 
-export interface Majors {
-  name: string;
-  id: number;
-  children: Major[];
+export interface Major {
+  label: string;
+  value: string;
+  isHeader: boolean;
+  disable: boolean;
 }
 
-export interface Major {
-  name: string;
-  id: string;
+export interface CourseMap {
+  [key: string]: string;
 }
