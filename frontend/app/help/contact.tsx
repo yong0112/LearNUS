@@ -25,7 +25,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
 const screenHeight = Dimensions.get("window").height;
 
-export default function settings() {
+export default function contact() {
   const router = useRouter();
   const [isDarkEnabled, setIsDarkEnabled] = useState<boolean>(false);
   const colorScheme = useColorScheme();
@@ -57,31 +57,24 @@ export default function settings() {
       marginBottom: 10,
       color: text,
     },
-    content: {
+    body: {
       flexDirection: "column",
-      paddingVertical: 10,
-    },
-    settingContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
+      flex: 1,
       alignItems: "center",
-      paddingHorizontal: 5,
-      paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: "gray",
+      justifyContent: "center",
+      marginBottom: 30,
     },
-    wording: {
-      flexDirection: "column",
-      justifyContent: "space-around",
+    word: {
+      fontSize: 20,
+      fontWeight: "700",
+      marginVertical: 20,
     },
-    title: {
-      fontSize: 17,
-      fontWeight: "600",
-    },
-    subtitle: {
-      fontSize: 16,
-      fontWeight: "semibold",
-      color: "gray",
+    email: {
+      fontSize: 20,
+      fontWeight: "700",
+      fontStyle: "italic",
+      textDecorationLine: "underline",
+      color: "#3363ffff",
     },
   });
 
@@ -98,23 +91,11 @@ export default function settings() {
         </View>
 
         {/**Body */}
-        <ScrollView style={styles.content}>
-          <View style={styles.settingContainer}>
-            <View style={styles.wording}>
-              <Text style={styles.title}>Dark mode appearance</Text>
-              <Text style={styles.subtitle}>
-                Switch your in-app appearance to dark mode.
-              </Text>
-            </View>
-            <Switch
-              trackColor={{ false: "#767577", true: "#fbcc5fff" }}
-              thumbColor={isDarkEnabled ? "#feb823ff" : "#f4f3f4"}
-              ios_backgroundColor={"#3e3e3e"}
-              onValueChange={toggleDarkSwitch}
-              value={isDarkEnabled}
-            />
-          </View>
-        </ScrollView>
+        <View style={styles.body}>
+          <Text style={styles.word}>For general enquiries, email us at</Text>
+          <Text style={styles.email}>learnus123@gmail.com</Text>
+          <Text style={styles.word}>We aim to respond within 72 hours.</Text>
+        </View>
       </View>
     </ThemedView>
   );
