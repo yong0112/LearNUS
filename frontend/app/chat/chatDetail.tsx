@@ -1,4 +1,3 @@
-// chatDetail.tsx
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useEffect, useState, useRef } from "react";
 import {
@@ -8,10 +7,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Image,
   Alert,
   ActivityIndicator,
   useColorScheme,
+  Image,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { auth } from "../../lib/firebase";
@@ -31,57 +30,76 @@ export default function ChatDetail() {
   const [newMessage, setNewMessage] = useState("");
   const [typing, setTyping] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [tutorProfiles, setTutorProfiles] = useState<Record<string, UserProfile>>({});
+  const [tutorProfiles, setTutorProfiles] = useState<
+    Record<string, UserProfile>
+  >({});
   const socketRef = useRef<any>(null);
   const typingTimeoutRef = useRef<number | null>(null);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     const initializeSocket = async () => {
       try {
         const currentUser = auth.currentUser;
         if (!currentUser) {
-          Alert.alert("Error", "You must be logged in to chat");
-          return;
+          throw new Error("You must be logged in to chat");
         }
         const token = await currentUser.getIdToken();
-        socketRef.current = io("ws://192.168.1.5:5000", {
-          auth: { userId: currentUser.uid, token },
+        const userId = currentUser.uid;
+
+        const socket = io("http://192.168.1.5:5000", {
+          transports: ["websocket"],
         });
 
-        socketRef.current.on("connect", () => {
-          socketRef.current.emit("join", { userId: currentUser.uid, token });
-          socketRef.current.emit("join_chat", chatId);
-        });
+        socketRef.current = socket;
 
-        socketRef.current.on("new_message", (message: Message) => {
-          setMessages((prev) => [...prev, message]);
-        });
+        return new Promise<void>((resolve, reject) => {
+          socket.on("connect", () => {
+            console.log("Socket connected:", socket.id);
+            socket.emit("join", { token, userId });
+          });
 
-        socketRef.current.on("user_typing", ({ userId }: { userId: string }) => {
-          if (userId !== currentUser.uid) {
-            setTyping(true);
-          }
-        });
+          socket.on("joined", (res) => {
+            console.log("Successfully joined socket:", res);
+            socket.emit("join_chat", { chatId });
+            resolve();
+          });
 
-        socketRef.current.on("user_stopped_typing", ({ userId }: { userId: string }) => {
-          if (userId !== currentUser.uid) {
-            setTyping(false);
-          }
-        });
+          socket.on("new_message", (newMessage: Message) => {
+            setMessages((prevMessages) => {
+              const filteredMessages = prevMessages.filter(
+                (msg) => !msg.id.startsWith("temp-"),
+              );
+              return [...filteredMessages, newMessage];
+            });
+            setTimeout(() => {
+              flatListRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+          });
 
-        socketRef.current.on("auth_error", (error: { message: string }) => {
-          Alert.alert("Socket Error", error.message);
-        });
+          socket.on("user_typing", ({ userId, isTyping }) => {
+            if (userId !== auth.currentUser?.uid) {
+              setTyping(isTyping);
+            }
+          });
 
-        socketRef.current.on("error", (error: { message: string }) => {
-          Alert.alert("Socket Error", error.message);
+          socket.on("auth_error", (err) => {
+            console.error("Socket auth error:", err);
+            reject(new Error("Socket authentication failed"));
+          });
+
+          socket.on("connect_error", (err) => {
+            console.error("Socket connection error:", err);
+            reject(new Error("Failed to connect to socket server"));
+          });
+
+          socket.on("error", (err) => {
+            console.error("Socket error:", err);
+            reject(new Error(err.message || "Socket error occurred"));
+          });
         });
       } catch (error) {
-        if (error instanceof Error) {
-          Alert.alert("Error", error.message);
-        } else {
-          Alert.alert("Error", "An unknown error occurred");
-        }
+        throw error;
       }
     };
 
@@ -89,8 +107,7 @@ export default function ChatDetail() {
       try {
         const currentUser = auth.currentUser;
         if (!currentUser) {
-          Alert.alert("Error", "You must be logged in to view chats");
-          return;
+          throw new Error("You must be logged in to view chats");
         }
         const token = await currentUser.getIdToken();
 
@@ -99,62 +116,84 @@ export default function ChatDetail() {
           `http://192.168.1.5:5000/api/chat/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         const chatData = await chatResponse.json();
-        if (!chatResponse.ok) {
+        console.log("Chat data:", chatData);
+        if (!chatResponse.ok || !chatData.success) {
+          if (chatResponse.status === 403) {
+            throw new Error("You do not have access to this chat");
+          } else if (chatResponse.status === 404) {
+            throw new Error("Chat not found");
+          }
           throw new Error(chatData.message || "Failed to fetch chat");
         }
+        if (!chatData.data) {
+          throw new Error("Chat data is missing");
+        }
         setChat(chatData.data);
+        console.log("Chat details:", chatData.data);
 
         // Fetch user profiles
         const profiles: Record<string, UserProfile> = {};
-        await Promise.all(
-          chatData.data.participantDetails.map(async (participant: any) => {
-            if (!profiles[participant.uid]) {
-              try {
-                const res = await fetch(
-                  `http://192.168.1.5:5000/api/users/${participant.uid}`,
-                  {
-                    headers: { Authorization: `Bearer ${token}` },
-                  }
-                );
-                if (res.ok) {
-                  profiles[participant.uid] = await res.json();
-                }
-              } catch (err) {
-                console.error(err);
-              }
-            }
-          })
-        );
+        const participantDetails = chatData.participantDetails || [];
+        console.log("Participant details:", participantDetails);
+        participantDetails.forEach((participant: any) => {
+          profiles[participant.uid] = {
+            uid: participant.uid,
+            email: participant.email || "",
+            firstName: participant.displayName || "Unknown",
+            lastName: "",
+            profilePicture: participant.photoURL || "",
+            ratings: 0,
+            favourites: [],
+            QR: "",
+            major: "",
+            teachingMode: "",
+            budgetCap: 0,
+          };
+        });
         setTutorProfiles(profiles);
+        console.log("Tutor profiles:", tutorProfiles);
 
         // Fetch messages
         const messagesResponse = await fetch(
           `http://192.168.1.5:5000/api/message/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         const messagesData = await messagesResponse.json();
+        console.log("Messages data:", messagesData);
         if (!messagesResponse.ok) {
           throw new Error(messagesData.message || "Failed to fetch messages");
         }
         setMessages(messagesData.data || []);
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      } catch (error) {
+        throw error;
+      }
+    };
+
+    const setupChat = async () => {
+      setLoading(true);
+      try {
+        await initializeSocket();
+        await fetchChatAndMessages();
       } catch (error) {
         if (error instanceof Error) {
           Alert.alert("Error", error.message);
         } else {
           Alert.alert("Error", "An unknown error occurred");
-        }   
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    initializeSocket();
-    fetchChatAndMessages();
+    setupChat();
 
     return () => {
       if (socketRef.current) {
@@ -167,64 +206,120 @@ export default function ChatDetail() {
   }, [chatId]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !socketRef.current) return;
+    if (!newMessage.trim() || !socketRef.current || !auth.currentUser) return;
+
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      chatId: chatId as string,
+      senderId: auth.currentUser.uid,
+      message: newMessage,
+      type: "text",
+      timestamp: new Date().toISOString(),
+      readBy: [auth.currentUser.uid],
+      edited: false,
+      editedAt: null,
+      reactions: {},
+    };
+
+    setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
     socketRef.current.emit("send_message", {
       chatId,
       message: newMessage,
       type: "text",
     });
     setNewMessage("");
-    socketRef.current.emit("user_stopped_typing", { chatId });
+    socketRef.current.emit("typing_stop", { chatId });
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
   };
 
   const handleTyping = (text: string) => {
     setNewMessage(text);
-    if (!socketRef.current) return;
+    if (!socketRef.current || !text.trim()) return;
     socketRef.current.emit("typing_start", { chatId });
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     typingTimeoutRef.current = setTimeout(() => {
-      socketRef.current.emit("user_stopped_typing", { chatId });
+      socketRef.current.emit("typing_stop", { chatId });
     }, 2000);
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
     const isCurrentUser = item.senderId === auth.currentUser?.uid;
-    const senderProfile = tutorProfiles[item.senderId] || { firstName: "Unknown", lastName: "" };
+    const senderProfile = tutorProfiles[item.senderId] || {
+      firstName: "Unknown",
+      lastName: "",
+    };
+    let timestamp: Date | null = null;
+    if (typeof item.timestamp === "string" && item.timestamp) {
+      timestamp = new Date(item.timestamp);
+    } else if (
+      typeof item.timestamp === "object" &&
+      item.timestamp !== null &&
+      typeof (item.timestamp as any)._seconds === "number" &&
+      typeof (item.timestamp as any)._nanoseconds === "number"
+    ) {
+      // Convert Firestore Timestamp to Date
+      const ts = item.timestamp as { _seconds: number; _nanoseconds: number };
+      timestamp = new Date(ts._seconds * 1000 + ts._nanoseconds / 1000000);
+      console.log("timestamp:", ts._seconds * 1000 + ts._nanoseconds / 1000000);
+    }
 
     return (
       <View
         style={[
           styles.messageContainer,
-          isCurrentUser
-            ? styles.currentUserMessage
-            : styles.otherUserMessage,
+          isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage,
         ]}
       >
-        <Text style={[styles.messageText, { color: isCurrentUser ? "white" : text }]}>
-          {item.message}
-        </Text>
-        <Text
-          style={[
-            styles.timestamp,
-            { color: isCurrentUser ? "#ddd" : isDarkMode ? "#888" : "#666" },
-          ]}
-        >
-          {new Date(item.timestamp).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </Text>
+        <View style={styles.messageRow}>
+          <Text
+            style={[
+              styles.messageText,
+              { color: isCurrentUser ? "white" : text },
+            ]}
+          >
+            {item.message}
+          </Text>
+          <Text
+            style={[
+              styles.timestamp,
+              { color: isCurrentUser ? "#ddd" : isDarkMode ? "#888" : "#666" },
+            ]}
+          >
+            {timestamp
+              ? timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : ""}
+          </Text>
+        </View>
       </View>
     );
   };
 
-  const otherParticipantName = chat?.participantDetails
-    ? tutorProfiles[
-        chat.participantDetails.find((p) => p.uid !== auth.currentUser?.uid)?.uid || ""
-      ]?.firstName || "Chat"
-    : "Chat";
+  //   const otherParticipantName = chat?.participantDetails
+  //     ? tutorProfiles[
+  //         chat.participantDetails.find((p) => p.uid !== auth.currentUser?.uid)?.uid || ""
+  //       ]?.firstName || "Chat"
+  //     : "Chat";
+
+  const otherParticipantName =
+    tutorProfiles[
+      chat?.participants.find((p) => p !== auth.currentUser?.uid) || ""
+    ]?.firstName;
+  console.log(
+    "Other participant name:",
+    chat?.participants.find((p) => p !== auth.currentUser?.uid),
+  );
+  const profilePicture =
+    tutorProfiles[
+      chat?.participants.find((p) => p !== auth.currentUser?.uid) || ""
+    ]?.profilePicture;
+  console.log("Profile picture URL:", profilePicture);
 
   const styles = StyleSheet.create({
     container: {
@@ -233,14 +328,26 @@ export default function ChatDetail() {
       paddingHorizontal: 20,
       backgroundColor: bg,
     },
-    header: {
+    headerContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+      marginTop: 15,
+    },
+    headerImage: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      marginRight: 10,
+      backgroundColor: isDarkMode ? "#444" : "#ddd",
+    },
+    headerText: {
       fontSize: 24,
       fontWeight: "600",
       color: text,
-      marginBottom: 10,
     },
     backButton: {
-      marginBottom: 10,
+      marginRight: 10,
     },
     messageContainer: {
       maxWidth: "70%",
@@ -258,6 +365,13 @@ export default function ChatDetail() {
     },
     messageText: {
       fontSize: 16,
+      flexShrink: 1,
+      marginRight: 8,
+    },
+    messageRow: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      justifyContent: "space-between",
     },
     timestamp: {
       fontSize: 12,
@@ -293,25 +407,30 @@ export default function ChatDetail() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.push("/chat")}
-      >
-        <Entypo name="chevron-left" size={30} color="orange" />
-      </TouchableOpacity>
-      <Text style={styles.header}>{otherParticipantName}</Text>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.push("/chat")}
+        >
+          <Entypo name="chevron-left" size={30} color="orange" />
+        </TouchableOpacity>
+        <Image style={styles.headerImage} source={{ uri: profilePicture }} />
+        <Text style={styles.headerText}>{otherParticipantName}</Text>
+      </View>
       {loading ? (
         <ActivityIndicator size="large" color="orange" />
       ) : (
         <>
           <FlatList
+            ref={flatListRef}
             data={messages}
             renderItem={renderMessage}
             keyExtractor={(item) => item.id}
-            inverted
           />
           {typing && (
-            <Text style={styles.typingIndicator}>typing...</Text>
+            <Text style={styles.typingIndicator}>
+              {otherParticipantName} is typing...
+            </Text>
           )}
           <View style={styles.inputContainer}>
             <TextInput
@@ -324,8 +443,13 @@ export default function ChatDetail() {
             <TouchableOpacity
               style={styles.sendButton}
               onPress={handleSendMessage}
+              disabled={!newMessage.trim()}
             >
-              <Entypo name="paper-plane" size={24} color="orange" />
+              <Entypo
+                name="paper-plane"
+                size={24}
+                color={newMessage.trim() ? "orange" : "#ccc"}
+              />
             </TouchableOpacity>
           </View>
         </>

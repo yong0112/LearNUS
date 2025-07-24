@@ -110,9 +110,58 @@ const chatController = {
         });
       }
 
+      // Fetch participant details
+      const participantDetails = await Promise.all(
+        chat.participants
+          .filter((id) => id !== userId)
+          .map(async (participantId) => {
+            try {
+              // Fetch user data from Firestore
+              const userDoc = await db
+                .collection("users")
+                .doc(participantId)
+                .get();
+              if (!userDoc.exists) {
+                return {
+                  uid: participantId,
+                  displayName: "Unknown User",
+                  email: "",
+                  photoURL: "",
+                };
+              }
+              const userData = userDoc.data();
+
+              // Combine firstName and lastName for displayName
+              const displayName =
+                userData.firstName && userData.lastName
+                  ? `${userData.firstName} ${userData.lastName}`.trim()
+                  : userData.firstName || "Unknown User";
+
+              return {
+                uid: participantId,
+                email: userData.email || "",
+                displayName: displayName,
+                photoURL: userData.profilePicture || "",
+              };
+            } catch (error) {
+              console.error(
+                `Error fetching user data for ${participantId}:`,
+                error,
+              );
+              return {
+                uid: participantId,
+                displayName: "Unknown User",
+                email: "",
+                photoURL: "",
+              };
+            }
+          }),
+      );
+
       res.status(200).json({
         success: true,
         data: chat,
+        participantDetails: participantDetails,
       });
     } catch (error) {
       res.status(500).json({
