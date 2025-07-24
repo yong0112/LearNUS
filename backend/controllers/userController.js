@@ -117,10 +117,38 @@ const updateFavourites = async (req, res) => {
   }
 };
 
+const setOnboarding = async (req, res) => {
+  const { uid, major, teachingMode, budgetCap, profilePicture, onboarded } =
+    req.body;
+
+  if (!uid) return res.status(404).json({ error: "UID is required" });
+
+  try {
+    const updateData = {
+      ...(major && { major: major }),
+      ...(teachingMode && { teachingMode: teachingMode }),
+      ...(budgetCap && { budgetCap: budgetCap }),
+      ...(profilePicture && { profilePicture: profilePicture }),
+      ...(onboarded && { onboarded: onboarded }),
+      updatedAt: new Date(),
+    };
+
+    await updateUserProfile(uid, updateData);
+
+    res.status(200).json({ message: "User onboard successfully " });
+  } catch (err) {
+    res.status(500).json({
+      error: "User failed to onboard",
+      details: err.message,
+    });
+  }
+};
+
 module.exports = {
   fetchUserProfile,
   updateUserProfilePic,
   updateUserQR,
   updateRating,
   updateFavourites,
+  setOnboarding,
 };

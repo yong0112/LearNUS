@@ -83,8 +83,9 @@ export default function Signup() {
         email: email,
         createdAt: new Date(),
         profilePicture: "https://randomuser.me/api/portraits/lego/5.jpg",
-        ratings: null,
+        ratings: 0,
         emailVerified: false,
+        onboarded: false,
       });
       Alert.alert(
         "Success: Account created successfully! Verification email sent.",
@@ -93,7 +94,7 @@ export default function Signup() {
           {
             text: "OK",
             onPress: () => {
-              router.replace("/"); // Redirect to the login page after signup
+              router.replace("/login"); // Redirect to the login page after signup
             },
           },
         ],
