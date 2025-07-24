@@ -309,7 +309,7 @@ export default function tutoring() {
   const handleBooking = () => {
     if (!selectedTutor) return;
     router.push({
-      pathname: "/booking",
+      pathname: "/tutor_find/booking",
       params: {
         tutor: selectedTutor.tutor,
         course: selectedTutor.course,
@@ -363,10 +363,6 @@ export default function tutoring() {
         Alert.alert("Error", "An unknown error occurred");
       }
     }
-  };
-
-  const handleEditProfile = () => {
-    console.log("Editing");
   };
 
   function formatAvailability(dayOfWeek: Number, start: string, end: string) {
@@ -840,40 +836,7 @@ export default function tutoring() {
                         </Text>
                       </View>
                       {selectedTutor.tutor == auth.currentUser?.uid ? (
-                        <View
-                          style={{
-                            marginTop: 40,
-                            borderRadius: 10,
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "orange",
-                            alignSelf: "stretch",
-                          }}
-                        >
-                          <TouchableOpacity
-                            style={{
-                              borderRadius: 10,
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "orange",
-                              flexDirection: "row",
-                              paddingVertical: 8,
-                            }}
-                            onPress={handleEditProfile}
-                          >
-                            <Text
-                              style={{
-                                marginHorizontal: 4,
-                                fontSize: 28,
-                                fontWeight: "600",
-                                marginBottom: 2,
-                                color: "white",
-                              }}
-                            >
-                              Edit tutor profile
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
+                        <View />
                       ) : (
                         <View
                           style={{
@@ -891,7 +854,7 @@ export default function tutoring() {
                               justifyContent: "center",
                               backgroundColor: "orange",
                               flexDirection: "row",
-                              paddingVertical: 8,
+                              paddingVertical: 5,
                               alignSelf: "stretch",
                             }}
                             onPress={handleBooking}
@@ -899,7 +862,7 @@ export default function tutoring() {
                             <Text
                               style={{
                                 marginHorizontal: 4,
-                                fontSize: 28,
+                                fontSize: 20,
                                 fontWeight: "600",
                                 marginBottom: 2,
                                 color: "white",
@@ -916,7 +879,7 @@ export default function tutoring() {
                               backgroundColor: "white",
                               flexDirection: "row",
                               marginTop: 10,
-                              paddingVertical: 8,
+                              paddingVertical: 5,
                               alignSelf: "stretch",
                               borderWidth: 1,
                             }}
@@ -930,7 +893,7 @@ export default function tutoring() {
                             <Text
                               style={{
                                 marginHorizontal: 4,
-                                fontSize: 28,
+                                fontSize: 20,
                                 fontWeight: "600",
                                 marginBottom: 2,
                                 color: "black",

@@ -220,6 +220,7 @@ export default function Home() {
 
   const logoutUser = async () => {
     await AsyncStorage.removeItem("authToken");
+    await auth.signOut();
     router.replace("/login");
   };
 
@@ -267,7 +268,7 @@ export default function Home() {
   const handleBooking = () => {
     if (selectedTutor) {
       router.push({
-        pathname: "/booking",
+        pathname: "./tutor_find/booking",
         params: {
           tutor: selectedTutor.tutor,
           course: selectedTutor.course,
@@ -283,49 +284,8 @@ export default function Home() {
     }
   };
 
-  const handleContact = async () => {
-    if (!selectedTutor) return;
-    setContactLoading(true);
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        Alert.alert("Error", "You must be logged in to contact a tutor");
-        setContactLoading(false);
-        return;
-      }
-      const token = await currentUser.getIdToken();
-      const response = await fetch("http://192.168.1.5:5000/api/chat/tutor", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          tutorId: selectedTutor.tutor,
-          postId: selectedTutor.id,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create chat");
-      }
-      setContactLoading(false);
-      router.push({
-        pathname: "../chat/chatDetail",
-        params: { chatId: data.data.chatId },
-      });
-    } catch (error) {
-      setContactLoading(false);
-      if (error instanceof Error) {
-        Alert.alert("Error", error.message);
-      } else {
-        Alert.alert("Error", "An unknown error occurred");
-      }
-    }
-  };
-
-  const handleEditProfile = () => {
-    console.log("Editing");
+  const handleContact = () => {
+    Alert.alert("Sorry, feature under development");
   };
 
   function formatTime(date: string) {
@@ -854,40 +814,7 @@ export default function Home() {
                     </Text>
                   </View>
                   {selectedTutor.tutor == auth.currentUser?.uid ? (
-                    <View
-                      style={{
-                        marginTop: 40,
-                        borderRadius: 10,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: "orange",
-                        alignSelf: "stretch",
-                      }}
-                    >
-                      <TouchableOpacity
-                        style={{
-                          borderRadius: 10,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "orange",
-                          flexDirection: "row",
-                          paddingVertical: 8,
-                        }}
-                        onPress={handleEditProfile}
-                      >
-                        <Text
-                          style={{
-                            marginHorizontal: 4,
-                            fontSize: 28,
-                            fontWeight: "600",
-                            marginBottom: 2,
-                            color: "white",
-                          }}
-                        >
-                          Edit tutor profile
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                    <View />
                   ) : (
                     <View
                       style={{
@@ -905,7 +832,7 @@ export default function Home() {
                           justifyContent: "center",
                           backgroundColor: "orange",
                           flexDirection: "row",
-                          paddingVertical: 8,
+                          paddingVertical: 5,
                           alignSelf: "stretch",
                         }}
                         onPress={handleBooking}
@@ -913,7 +840,7 @@ export default function Home() {
                         <Text
                           style={{
                             marginHorizontal: 4,
-                            fontSize: 28,
+                            fontSize: 20,
                             fontWeight: "600",
                             marginBottom: 2,
                             color: "white",

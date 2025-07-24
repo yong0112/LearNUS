@@ -138,3 +138,19 @@ export interface Message {
   editedAt: string | null;
   reactions: { [emoji: string]: string[] };
 }
+
+export interface FAQ {
+  title: string;
+  ans: string;
+}
+
+export interface Major {
+  label: string;
+  value: string;
+  isHeader: boolean;
+  disable: boolean;
+}
+
+export interface CourseMap {
+  [key: string]: string;
+}

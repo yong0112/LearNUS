@@ -1,7 +1,7 @@
 import { auth, db } from "@/lib/firebase";
 import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { use, useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { use, useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -29,6 +29,7 @@ import SearchBar from "../../components/SearchBar";
 import { getTagColor } from "@/constants/tagColors";
 
 const screenHeight = Dimensions.get("window").height;
+const screenWidth = Dimensions.get("window").width;
 
 export default function Forum() {
   const router = useRouter();
@@ -46,6 +47,7 @@ export default function Forum() {
   );
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>([]);
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -61,117 +63,121 @@ export default function Forum() {
   const BASE_URL = "https://learnus.onrender.com";
 
   // Fetch posts and user profiles
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      if (currentUser) {
-        fetch("https://learnus.onrender.com/api/forum")
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch posts");
-            return res.json();
-          })
-          .then(async (data: ForumPost[]) => {
-            console.log("Posts:", data);
-            // Sort posts by createdDate (newest first)
-            const sortedPosts = data.sort(
-              (a: any, b: any) =>
-                new Date(
-                  b.createdAt._seconds * 1000 +
-                    b.createdAt._nanoseconds / 1000000,
-                ).getTime() -
-                new Date(
-                  a.createdAt._seconds * 1000 +
-                    a.createdAt._nanoseconds / 1000000,
-                ).getTime(),
-            );
-            setPosts(sortedPosts);
-            setFilteredPosts(sortedPosts);
+  const fetchData = useCallback(() => {
+    const currentUser = auth.currentUser;
 
-            const profiles: Record<string, any | undefined> = {};
-            await Promise.all(
-              sortedPosts.map(async (post: any) => {
-                try {
-                  const userRes = await fetch(
-                    `https://learnus.onrender.com/api/users/${post.author}`,
+    if (currentUser) {
+      fetch("https://learnus.onrender.com/api/forum")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch posts");
+          return res.json();
+        })
+        .then(async (data: ForumPost[]) => {
+          console.log("Posts:", data);
+          // Sort posts by createdDate (newest first)
+          const sortedPosts = data.sort(
+            (a: any, b: any) =>
+              new Date(
+                b.createdAt._seconds * 1000 +
+                  b.createdAt._nanoseconds / 1000000,
+              ).getTime() -
+              new Date(
+                a.createdAt._seconds * 1000 +
+                  a.createdAt._nanoseconds / 1000000,
+              ).getTime(),
+          );
+          setPosts(sortedPosts);
+          setFilteredPosts(sortedPosts);
+
+          const profiles: Record<string, any | undefined> = {};
+          await Promise.all(
+            sortedPosts.map(async (post: any) => {
+              try {
+                const userRes = await fetch(
+                  `https://learnus.onrender.com/api/users/${post.author}`,
+                );
+                if (!userRes.ok)
+                  throw new Error("Failed to fetch user profile");
+                const userData: UserProfile = await userRes.json();
+                profiles[post.author] = userData;
+              } catch (err) {
+                console.error(err);
+              }
+            }),
+          );
+          setUserProfiles(profiles);
+
+          // Fetch upvote status and comment counts
+          const upvoteStatus: Record<string, UpvoteStatus> = {};
+          const commentCounts: Record<string, number> = {};
+          await Promise.all(
+            sortedPosts.map(async (post: any) => {
+              try {
+                if (currentUser.uid) {
+                  const upvoteRes = await fetch(
+                    `${BASE_URL}/api/forum/${post.id}/upvote-status/${currentUser.uid}`,
                   );
-                  if (!userRes.ok)
-                    throw new Error("Failed to fetch user profile");
-                  const userData: UserProfile = await userRes.json();
-                  profiles[post.author] = userData;
-                } catch (err) {
-                  console.error(err);
-                }
-              }),
-            );
-            setUserProfiles(profiles);
-
-            // Fetch upvote status and comment counts
-            const upvoteStatus: Record<string, UpvoteStatus> = {};
-            const commentCounts: Record<string, number> = {};
-            await Promise.all(
-              sortedPosts.map(async (post: any) => {
-                try {
-                  if (currentUser.uid) {
-                    const upvoteRes = await fetch(
-                      `${BASE_URL}/api/forum/${post.id}/upvote-status/${currentUser.uid}`,
-                    );
-                    if (upvoteRes.ok) {
-                      upvoteStatus[post.id] = await upvoteRes.json();
-                    }
+                  if (upvoteRes.ok) {
+                    upvoteStatus[post.id] = await upvoteRes.json();
                   }
-
-                  const commentsRes = await fetch(
-                    `${BASE_URL}/api/forum/${post.id}/comments`,
-                  );
-                  if (commentsRes.ok) {
-                    const comments = await commentsRes.json();
-                    commentCounts[post.id] = comments.length;
-                  }
-                } catch (err) {
-                  console.error(err);
                 }
-              }),
-            );
-            setUpvoteStatus(upvoteStatus);
-            setCommentCounts(commentCounts);
-          })
-          .catch((err) => {
-            console.error(err);
-            setError(err.message);
-          });
 
-        //Fetch course from nusmods
-        fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch local courses");
-            return res.json();
-          })
-          .then((data) => {
-            return data.map(
-              (course: {
-                moduleCode: string;
-                title: string;
-                semesters: number[];
-              }) => ({
-                label: `${course.moduleCode} - ${course.title}`,
-                value: course.moduleCode,
-              }),
-            );
-          })
-          .then((data) => {
-            setCourseOptions(data);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      } else {
-        setPosts([]);
-        setFilteredPosts([]);
-        setCourseOptions([]);
-      }
-    });
+                const commentsRes = await fetch(
+                  `${BASE_URL}/api/forum/${post.id}/comments`,
+                );
+                if (commentsRes.ok) {
+                  const comments = await commentsRes.json();
+                  commentCounts[post.id] = comments.length;
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            }),
+          );
+          setUpvoteStatus(upvoteStatus);
+          setCommentCounts(commentCounts);
+        })
+        .catch((err) => {
+          console.error(err);
+          setError(err.message);
+        });
 
-    return () => unsubscribe();
+      //Fetch course from nusmods
+      fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch local courses");
+          return res.json();
+        })
+        .then((data) => {
+          return data.map(
+            (course: {
+              moduleCode: string;
+              title: string;
+              semesters: number[];
+            }) => ({
+              label: `${course.moduleCode} - ${course.title}`,
+              value: course.moduleCode,
+            }),
+          );
+        })
+        .then((data) => {
+          setCourseOptions(data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      setPosts([]);
+      setFilteredPosts([]);
+      setCourseOptions([]);
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData]),
+  );
 
   // Filter posts based on course tag
   useEffect(() => {
@@ -183,6 +189,12 @@ export default function Forum() {
       );
     });
     setFilteredPosts(filtered);
+
+    if (!selectedCourse) {
+      setIsFiltered(false);
+    } else {
+      setIsFiltered(true);
+    }
   }, [selectedCourse, posts]);
 
   // Handle upvote toggle
@@ -223,6 +235,7 @@ export default function Forum() {
       setFilteredPosts((prev) => prev.filter((post) => post.id !== postId));
       setMenuVisiblePostId(null); //Close menu after deletion
       Alert.alert("Post deleted successfully");
+      router.replace("/home/forum");
     } catch (err) {
       console.error(err);
       Alert.alert("Failed to delete post");
@@ -236,7 +249,7 @@ export default function Forum() {
 
   // Navigate to forum_post.tsx
   const handleNewPost = () => {
-    router.push("../forum_post");
+    router.push("/forum/forum_post");
   };
 
   // Handle search
@@ -246,13 +259,12 @@ export default function Forum() {
 
   // Handle filter button toggle
   const handleFilterToggle = () => {
-    setIsFilterVisible(!isFilterVisible);
-  };
-
-  // Handle clear filter
-  const handleClearFilter = () => {
-    setSelectedCourse("");
-    setIsFilterVisible(false);
+    if (isFiltered) {
+      setIsFiltered(false);
+      setSelectedCourse("");
+    } else {
+      setIsFilterVisible(true);
+    }
   };
 
   //Search and filter
@@ -293,6 +305,9 @@ export default function Forum() {
       justifyContent: "space-between",
       alignItems: "center",
       paddingHorizontal: 10,
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
       fontSize: 24,
@@ -302,6 +317,7 @@ export default function Forum() {
     },
     filterWrapper: {
       marginLeft: 8,
+      flex: 1,
     },
     searchBar: {
       paddingHorizontal: 10,
@@ -310,8 +326,6 @@ export default function Forum() {
       flexDirection: "row",
       alignItems: "center",
       marginLeft: 8,
-      marginTop: 12,
-      marginBottom: 12,
     },
     filterButton: {
       borderRadius: 10,
@@ -322,17 +336,26 @@ export default function Forum() {
       alignItems: "center",
       justifyContent: "center",
       marginHorizontal: 6,
-      borderColor: text,
+      borderColor: isFiltered ? "#b35d02ff" : "gray",
     },
     buttonText: {
       marginHorizontal: 4,
       fontSize: 14,
       fontWeight: "400",
       marginBottom: 2,
-      color: text,
+      color: isFiltered ? "#b35d02ff" : "gray",
+    },
+    buttonBadge: {
+      position: "absolute",
+      top: 4,
+      left: 23,
+      width: 10,
+      height: 10,
+      borderRadius: 20,
+      backgroundColor: "#b35d02ff",
     },
     dropdown: {
-      height: 50,
+      height: 40,
       flex: 1,
       paddingRight: 8,
     },
@@ -345,19 +368,6 @@ export default function Forum() {
       fontSize: 17,
       marginLeft: 10,
       color: "#222",
-    },
-    clearFilterContainer: {
-      marginTop: 12,
-      borderRadius: 10,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderWidth: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      marginHorizontal: 6,
-      alignSelf: "flex-start",
-      borderColor: text,
     },
     postCard: {
       marginBottom: 20,
@@ -373,11 +383,11 @@ export default function Forum() {
     },
     fab: {
       position: "absolute",
-      bottom: 30,
-      right: 30,
+      bottom: screenHeight * 0.05,
+      right: 20,
       backgroundColor: "orange",
-      width: 60,
-      height: 60,
+      width: 55,
+      height: 55,
       borderRadius: 30,
       alignItems: "center",
       justifyContent: "center",
@@ -390,7 +400,7 @@ export default function Forum() {
       fontWeight: "bold",
     },
     menuButton: {
-      padding: 8,
+      padding: 3,
     },
     deleteMenu: {
       position: "absolute",
@@ -456,7 +466,8 @@ export default function Forum() {
           style={{
             flexDirection: "row",
             justifyContent: "flex-start",
-            paddingVertical: 12,
+            paddingVertical: 5,
+            alignItems: "center",
           }}
         >
           <TouchableOpacity
@@ -466,52 +477,40 @@ export default function Forum() {
             <MaterialCommunityIcons
               name="filter-outline"
               size={20}
-              color={text}
+              color={isFiltered ? "#b35d02ff" : "gray"}
             />
+            {isFiltered && <View style={styles.buttonBadge} />}
             <Text style={styles.buttonText}>Filter</Text>
           </TouchableOpacity>
-        </View>
 
-        {/* Course Filter Dropdown */}
-        {isFilterVisible && (
-          <View style={styles.filterWrapper}>
-            <View style={styles.searchBar}>
-              <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                data={courseOptions}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder="Select a course tag"
-                value={selectedCourse}
-                onChange={(item) => {
-                  if (item.value === selectedCourse) {
-                    handleClearFilter(); // Reset if same course is selected
-                  } else {
+          {/* Course Filter Dropdown */}
+          {isFilterVisible && (
+            <View style={styles.filterWrapper}>
+              <View style={styles.searchBar}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  data={courseOptions}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select a course tag"
+                  value={selectedCourse}
+                  onChange={(item) => {
                     setSelectedCourse(item.value);
                     setIsFilterVisible(false);
-                  }
-                }}
-                renderLeftIcon={() => (
-                  <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
-                )}
-                search
-                searchPlaceholder="Search course"
-              />
+                  }}
+                  renderLeftIcon={() => (
+                    <Ionicons color={"#ffc04d"} name="search-sharp" size={30} />
+                  )}
+                  search
+                  searchPlaceholder="Search course"
+                />
+              </View>
             </View>
-            <TouchableOpacity
-              style={styles.clearFilterContainer}
-              onPress={() => {
-                handleClearFilter();
-              }}
-            >
-              <MaterialCommunityIcons name="close" size={20} color={text} />
-              <Text style={styles.buttonText}>Clear Filter</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          )}
+        </View>
 
         {/* Post List */}
         <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -565,24 +564,39 @@ export default function Forum() {
                     </Text>
                   </View>
 
-                  {/* Title */}
-                  <Text
-                    style={{ fontSize: 18, fontWeight: "800", color: text }}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
                   >
-                    {post.title}
-                  </Text>
-
-                  {/* Course Tag */}
-                  {post.courseTag && (
-                    <View
-                      style={[
-                        styles.courseTagContainer,
-                        { backgroundColor: getTagColor(post.courseTag) },
-                      ]}
+                    {/* Title */}
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "800",
+                        color: text,
+                        width: screenWidth * 0.7,
+                      }}
                     >
-                      <Text style={styles.courseTagText}>{post.courseTag}</Text>
-                    </View>
-                  )}
+                      {post.title}
+                    </Text>
+
+                    {/* Course Tag */}
+                    {post.courseTag && (
+                      <View
+                        style={[
+                          styles.courseTagContainer,
+                          { backgroundColor: getTagColor(post.courseTag) },
+                        ]}
+                      >
+                        <Text style={styles.courseTagText}>
+                          {post.courseTag}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
 
                   {/* Content */}
                   <Text
@@ -638,7 +652,7 @@ export default function Forum() {
 
                   {/* Three-Dot Menu */}
                   {auth.currentUser?.uid === post.author && (
-                    <View style={{ position: "absolute", top: 8, right: 8 }}>
+                    <View style={{ position: "absolute", top: 0, right: 0 }}>
                       <TouchableOpacity
                         style={styles.menuButton}
                         onPress={() =>

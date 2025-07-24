@@ -25,6 +25,7 @@ import {
 import { db, auth } from "../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedText } from "@/components/ThemedText";
+import { UserProfile } from "@/constants/types";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -70,9 +71,19 @@ export default function Login() {
         emailVerified: true,
       });
 
+      let onboarded = false;
+      await fetch(`https://learnus.onrender.com/api/users/${user.uid}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch user profile");
+          return res.json();
+        })
+        .then((data) => {
+          onboarded = data.onboarded;
+        });
+
       // Alert for successful login and redirect to home page
       Alert.alert("Success: Logged in successfully!");
-      router.replace("/(tabs)/home");
+      router.replace(onboarded ? "./(tabs)/home" : "./onboarding/welcome");
     } catch (error: any) {
       let errorMessage = "Unknown error occurred. Please try again.";
 
@@ -122,10 +133,20 @@ export default function Login() {
       borderWidth: 1,
       borderColor: "#ccc",
       padding: 10,
-      marginVertical: 10,
+      marginTop: 20,
       borderRadius: 5,
       opacity: 0.75,
       color: text,
+    },
+    forgotContainer: {
+      marginTop: 2,
+      marginBottom: 15,
+      alignSelf: "flex-end",
+    },
+    forgotText: {
+      fontSize: 12,
+      marginTop: 5,
+      color: "#666",
     },
     button: {
       justifyContent: "center",
@@ -191,6 +212,12 @@ export default function Login() {
             style={styles.input}
             placeholderTextColor={text}
           />
+          <TouchableOpacity
+            style={styles.forgotContainer}
+            onPress={() => router.push("./forgotPassword")}
+          >
+            <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Continue</Text>
           </TouchableOpacity>

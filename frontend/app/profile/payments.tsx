@@ -214,6 +214,9 @@ export default function payments() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
       fontSize: 24,
@@ -225,6 +228,7 @@ export default function payments() {
       fontSize: 20,
       fontWeight: "bold",
       marginBottom: 15,
+      marginTop: 20,
     },
     content: {
       flexDirection: "column",

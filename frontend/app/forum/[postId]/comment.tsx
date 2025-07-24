@@ -101,7 +101,7 @@ export default function Comment() {
       });
       if (!res.ok) throw new Error("Failed to post comment");
       Alert.alert("Comment posted!");
-      router.replace(`../../forum/${postId}`);
+      router.back();
     } catch (err) {
       console.error(err);
       alert("Failed to post comment");
