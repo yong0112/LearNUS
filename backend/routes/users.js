@@ -7,6 +7,7 @@ const {
   updateRating,
   updateFavourites,
   setOnboarding,
+  resetPassword,
 } = require("../controllers/userController");
 
 router.get("/users/:uid", fetchUserProfile);
@@ -15,5 +16,6 @@ router.post("/update-qr", updateUserQR);
 router.post("/update-rating", updateRating);
 router.post("/update-favourite", updateFavourites);
 router.post("/onboard", setOnboarding);
+router.post("/change-password", resetPassword);
 
 module.exports = router;

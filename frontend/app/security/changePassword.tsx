@@ -1,8 +1,12 @@
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "@firebase/auth";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -15,6 +19,7 @@ import {
 
 export default function changePassword() {
   const router = useRouter();
+  const [email, setEmail] = useState<string>("");
   const [oldPass, setOldPass] = useState<string>("");
   const [newPass, setNewPass] = useState<string>("");
   const [confirmPass, setConfirmPass] = useState<string>("");
@@ -23,8 +28,84 @@ export default function changePassword() {
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        await fetch(`https://learnus.onrender.com/api/users/${currentUser.uid}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to fetch user profile");
+            return res.json();
+          })
+          .then((data) => {
+            setEmail(data.email);
+          })
+          .catch((err) => {
+            console.log("Error", err);
+          });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const verifyOldPassword = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("No user signed in");
+
+    const credential = EmailAuthProvider.credential(email, oldPass);
+
+    try {
+      await reauthenticateWithCredential(currentUser, credential);
+      console.log("Old password is correct");
+      return true;
+    } catch (err) {
+      console.error("Old password input incorrect");
+      return false;
+    }
+  };
+
   const handleChangePassword = async () => {
-    console.log("Change password");
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("No user signed in");
+
+      if (newPass != confirmPass) {
+        Alert.alert(
+          "New password do not match. Please make sure you input the password correctly.",
+        );
+        return;
+      }
+
+      if (!verifyOldPassword()) {
+        Alert.alert("Incorrect old password.");
+        return;
+      }
+
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(
+        "https://learnus.onrender.com/api/change-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`, // Include token
+          },
+          body: JSON.stringify({
+            newPass: newPass,
+          }),
+        },
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to change password");
+      }
+
+      Alert.alert("Password updated successfully.");
+      router.back();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -53,7 +134,7 @@ export default function changePassword() {
       padding: 16,
       fontSize: 16,
       color: "#222",
-      textAlignVertical: "top",
+      marginBottom: 20,
     },
     button: {
       flexDirection: "row",
@@ -89,7 +170,7 @@ export default function changePassword() {
           style={styles.inputBox}
           placeholder="Enter old password"
           placeholderTextColor="#888"
-          multiline
+          secureTextEntry
           value={oldPass}
           onChangeText={setOldPass}
         />
@@ -97,7 +178,7 @@ export default function changePassword() {
           style={styles.inputBox}
           placeholder="Enter new password"
           placeholderTextColor="#888"
-          multiline
+          secureTextEntry
           value={newPass}
           onChangeText={setNewPass}
         />
@@ -105,7 +186,7 @@ export default function changePassword() {
           style={styles.inputBox}
           placeholder="Enter new password to confirm"
           placeholderTextColor="#888"
-          multiline
+          secureTextEntry
           value={confirmPass}
           onChangeText={setConfirmPass}
         />
