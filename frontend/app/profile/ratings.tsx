@@ -90,6 +90,9 @@ export default function ratings() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
       fontSize: 24,

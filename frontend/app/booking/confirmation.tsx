@@ -112,6 +112,9 @@ export default function confirmation() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      paddingTop: 10,
+      borderBottomColor: "gray",
+      borderBottomWidth: 0.5,
     },
     headerText: {
       fontSize: 24,
@@ -130,6 +133,7 @@ export default function confirmation() {
       alignItems: "center",
       paddingVertical: 10,
       marginVertical: 5,
+      borderRadius: 10,
     },
     image: {
       height: 300,
