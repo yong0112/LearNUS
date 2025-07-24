@@ -219,6 +219,7 @@ export default function Home() {
 
   const logoutUser = async () => {
     await AsyncStorage.removeItem("authToken");
+    await auth.signOut();
     router.replace("/login");
   };
 
