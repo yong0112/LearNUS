@@ -1,5 +1,6 @@
 const { getUserProfile, updateUserProfile } = require("../models/userModel");
 const { db } = require("../config/firebase");
+const { getAuth } = require("firebase-admin/auth");
 
 const fetchUserProfile = async (req, res) => {
   const uid = req.params.uid;
@@ -117,10 +118,58 @@ const updateFavourites = async (req, res) => {
   }
 };
 
+const setOnboarding = async (req, res) => {
+  const { uid, major, teachingMode, budgetCap, profilePicture, onboarded } =
+    req.body;
+
+  if (!uid) return res.status(404).json({ error: "UID is required" });
+
+  try {
+    const updateData = {
+      ...(major && { major: major }),
+      ...(teachingMode && { teachingMode: teachingMode }),
+      ...(budgetCap && { budgetCap: budgetCap }),
+      ...(profilePicture && { profilePicture: profilePicture }),
+      ...(onboarded && { onboarded: onboarded }),
+      updatedAt: new Date(),
+    };
+
+    await updateUserProfile(uid, updateData);
+
+    res.status(200).json({ message: "User onboard successfully " });
+  } catch (err) {
+    res.status(500).json({
+      error: "User failed to onboard",
+      details: err.message,
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).send("Missing or invalid authorization header");
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  const { newPass } = req.body;
+
+  try {
+    const decoded = await getAuth().verifyIdToken(idToken);
+    await getAuth().updateUser(decoded.uid, { password: newPass });
+    res.status(200).send("Password updated");
+  } catch (err) {
+    console.error(err);
+    res.status(401).send("Unauthorized or error detected");
+  }
+};
+
 module.exports = {
   fetchUserProfile,
   updateUserProfilePic,
   updateUserQR,
   updateRating,
   updateFavourites,
+  setOnboarding,
+  resetPassword,
 };

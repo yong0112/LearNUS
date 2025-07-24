@@ -72,6 +72,7 @@ export default function Profile() {
 
   const logoutUser = async () => {
     await AsyncStorage.removeItem("authToken");
+    await auth.signOut();
     router.replace("/login");
   };
 
