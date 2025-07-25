@@ -107,6 +107,7 @@ export default function BookingPage() {
             endedAt: new Date(
               computeEndTime(new Date(), dayOfWeek, endTime),
             ).toISOString(),
+            profile: profileId,
           }),
         },
       );
