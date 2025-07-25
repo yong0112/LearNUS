@@ -52,6 +52,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [contactLoading, setContactLoading] = useState(false);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -267,7 +268,7 @@ export default function Home() {
   const handleBooking = () => {
     if (selectedTutor) {
       router.push({
-        pathname: "/tutor_find/booking",
+        pathname: "./tutor_find/booking",
         params: {
           tutor: selectedTutor.tutor,
           course: selectedTutor.course,
@@ -283,8 +284,48 @@ export default function Home() {
     }
   };
 
-  const handleContact = () => {
-    Alert.alert("Sorry, feature under development");
+  const handleContact = async () => {
+    if (!selectedTutor) return;
+    setContactLoading(true);
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        Alert.alert("Error", "You must be logged in to contact a tutor");
+        setContactLoading(false);
+        return;
+      }
+      const token = await currentUser.getIdToken();
+      const response = await fetch(
+        "https://learnus.onrender.com/api/chat/tutor",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            tutorId: selectedTutor.tutor,
+            postId: selectedTutor.id,
+          }),
+        },
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create chat");
+      }
+      setContactLoading(false);
+      router.push({
+        pathname: "../chat/chatDetail",
+        params: { chatId: data.data.chatId },
+      });
+    } catch (error) {
+      setContactLoading(false);
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Error", "An unknown error occurred");
+      }
+    }
   };
 
   function formatTime(date: string) {
@@ -420,6 +461,25 @@ export default function Home() {
       height: 120,
       borderRadius: 50,
       alignSelf: "center",
+    },
+    contactButton: {
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "white",
+      flexDirection: "row",
+      marginTop: 10,
+      paddingVertical: 8,
+      alignSelf: "stretch",
+      borderWidth: 1,
+      opacity: contactLoading ? 0.5 : 1,
+    },
+    contactButtonText: {
+      marginHorizontal: 4,
+      fontSize: 28,
+      fontWeight: "600",
+      marginBottom: 2,
+      color: "black",
     },
   });
 
@@ -830,29 +890,12 @@ export default function Home() {
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={{
-                          borderRadius: 10,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "white",
-                          flexDirection: "row",
-                          marginTop: 10,
-                          paddingVertical: 5,
-                          alignSelf: "stretch",
-                          borderWidth: 1,
-                        }}
+                        style={styles.contactButton}
                         onPress={handleContact}
+                        disabled={contactLoading}
                       >
                         <Entypo name="old-phone" size={25} color={"black"} />
-                        <Text
-                          style={{
-                            marginHorizontal: 4,
-                            fontSize: 20,
-                            fontWeight: "600",
-                            marginBottom: 2,
-                            color: "black",
-                          }}
-                        >
+                        <Text style={styles.contactButtonText}>
                           Contact me!
                         </Text>
                       </TouchableOpacity>

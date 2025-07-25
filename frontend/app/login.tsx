@@ -83,7 +83,7 @@ export default function Login() {
 
       // Alert for successful login and redirect to home page
       Alert.alert("Success: Logged in successfully!");
-      router.replace(onboarded ? "/(tabs)/home" : "/onboarding/welcome");
+      router.replace(onboarded ? "./(tabs)/home" : "./onboarding/welcome");
     } catch (error: any) {
       let errorMessage = "Unknown error occurred. Please try again.";
 
@@ -214,7 +214,7 @@ export default function Login() {
           />
           <TouchableOpacity
             style={styles.forgotContainer}
-            onPress={() => router.push("/forgotPassword")}
+            onPress={() => router.push("./forgotPassword")}
           >
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
