@@ -2,6 +2,7 @@ const {
   getUserSession,
   updateUserSessionField,
 } = require("../models/sessionModel");
+const { getUserClasses } = require("../models/classesModel");
 
 const fetchUserSession = async (req, res) => {
   const uid = req.params.uid;
@@ -34,7 +35,13 @@ const updateSessionStatus = async (req, res) => {
     const updatedData = {
       ...(status && { status }),
     };
+    const session = await getUserSession(uid, cid);
+    const otherId = session.people;
+    const profileId = session.profile;
+    const classes = await getUserClasses(otherId);
+    const otherSessionId = classes.find((cls) => cls.profile == profileId).id;
     await updateUserSessionField(uid, cid, updatedData);
+    await updateUserSessionField(otherId, otherSessionId, updatedData);
     res.json({ message: "Session updated successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -53,8 +60,15 @@ const updatePaymentProof = async (req, res) => {
   try {
     const updatedData = {
       ...(paymentProof && { paymentProof: paymentProof }),
+      ...{ status: "Paid" },
     };
+    const session = await getUserSession(uid, cid);
+    const otherId = session.people;
+    const profileId = session.profile;
+    const classes = await getUserClasses(otherId);
+    const otherSessionId = classes.find((cls) => cls.profile == profileId).id;
     await updateUserSessionField(uid, cid, updatedData);
+    await updateUserSessionField(otherId, otherSessionId, updatedData);
     res.json({ message: "Payment proof posted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });

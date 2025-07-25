@@ -75,15 +75,20 @@ export default function Login() {
       await fetch(`https://learnus.onrender.com/api/users/${user.uid}`)
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch user profile");
+          console.log("I reach here");
           return res.json();
         })
         .then((data) => {
+          console.log(data);
           onboarded = data.onboarded;
+        })
+        .catch((err) => {
+          console.error(err);
         });
 
       // Alert for successful login and redirect to home page
       Alert.alert("Success: Logged in successfully!");
-      router.replace(onboarded ? "./(tabs)/home" : "./onboarding/welcome");
+      router.replace(onboarded ? "/(tabs)/home" : "/onboarding/welcome");
     } catch (error: any) {
       let errorMessage = "Unknown error occurred. Please try again.";
 

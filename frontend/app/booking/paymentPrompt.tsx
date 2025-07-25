@@ -27,6 +27,7 @@ export default function paymentPrompt() {
   const [profile, setProfile] = useState<UserProfile>();
   const [dayConstants, setDayConstants] = useState<Day[]>([]);
   const [selectedImage, setSelectedImage] = useState<Asset>();
+  const [selectedImageURL, setSelectedImageURL] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
@@ -148,35 +149,7 @@ export default function paymentPrompt() {
       if (response.ok) {
         const url = result.secure_url;
         console.log("Image URL", url);
-
-        try {
-          const response = await fetch(
-            `https://learnus.onrender.com/api/users/${currUser?.uid}/classes/${id}/update-payment`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                uid: currUser?.uid,
-                cid: id,
-                paymentProof: url,
-              }),
-            },
-          );
-
-          if (!response.ok) {
-            const text = await response.text();
-            console.log("Error");
-            return console.error("Error", text);
-          }
-          Alert.alert("Payment proof uploaded successfully");
-        } catch (err) {
-          console.error("Upload error", err);
-          Alert.alert("Error: Failed to upload database");
-        }
-
-        router.replace("/booking/bookingStatus");
+        setSelectedImageURL(url);
       } else {
         throw new Error(result.error.message || "Upload failed");
       }
@@ -185,6 +158,40 @@ export default function paymentPrompt() {
       Alert.alert("Error: Failed to upload payment");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      try {
+        const response = await fetch(
+          `http://192.168.0.107:5000/api/users/${currentUser?.uid}/classes/${id}/update-payment`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              uid: currentUser?.uid,
+              cid: id,
+              paymentProof:
+                "https://mustsharenews.com/wp-content/uploads/2023/09/paynow-screenshot.jpg",
+            }),
+          },
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.log("Error");
+          return console.error("Error", text);
+        }
+        Alert.alert("Payment proof uploaded successfully");
+        router.replace("/profile/history");
+      } catch (err) {
+        console.error("Upload error", err);
+        Alert.alert("Error: Failed to upload database");
+      }
     }
   };
 
@@ -256,12 +263,27 @@ export default function paymentPrompt() {
       justifyContent: "center",
       marginBottom: 10,
     },
+    uploadButton: {
+      marginTop: 8,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: selectedImageURL ? "#ecb34aff" : "orange",
+      marginHorizontal: 40,
+      paddingVertical: 5,
+    },
+    uploadButtonText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: selectedImageURL ? "#ffffffbd" : "white",
+    },
     button: {
       backgroundColor: "orange",
       borderRadius: 15,
       justifyContent: "center",
       alignItems: "center",
       paddingVertical: 10,
+      marginTop: 20,
     },
     buttonText: {
       fontSize: 20,
@@ -347,8 +369,13 @@ export default function paymentPrompt() {
       )}
 
       {/**Upload payment proof */}
-      <TouchableOpacity style={styles.button} onPress={handleUpload}>
-        <Text style={styles.buttonText}>Upload receipt</Text>
+      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+        <Text style={styles.uploadButtonText}>Upload receipt</Text>
+      </TouchableOpacity>
+
+      {/**Submit */}
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
     </ThemedView>
   );
