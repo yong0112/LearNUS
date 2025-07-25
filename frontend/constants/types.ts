@@ -52,6 +52,7 @@ export interface Class {
   profileId: string;
   createdAt: string;
   endedAt: string;
+  profile: string;
 }
 
 export interface Tutor {

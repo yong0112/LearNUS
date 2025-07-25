@@ -27,6 +27,7 @@ describe("addUserClasses Controller", () => {
       role: "Student",
       createdAt: new Date("2025-07-21T15:00:00.000Z").toISOString(),
       endedAt: new Date("2025-08-12T12:00:00.000Z").toISOString(),
+      profile: "tutorProfile123",
     };
     const studentClass = { id: "class1", ...input, user: uid, role: "Student" };
     const tutorClass = {
@@ -67,6 +68,7 @@ describe("addUserClasses Controller", () => {
       role: "Student",
       createdAt: input.createdAt,
       endedAt: input.endedAt,
+      profile: input.profile,
     });
     expect(postUserClasses).toHaveBeenCalledWith({
       user: input.people,
@@ -80,6 +82,7 @@ describe("addUserClasses Controller", () => {
       role: "Tutor",
       createdAt: input.createdAt,
       endedAt: input.endedAt,
+      profile: input.profile,
     });
   });
 
@@ -118,6 +121,7 @@ describe("addUserClasses Controller", () => {
       role: "Student",
       createdAt: new Date("2025-07-21T15:00:00.000Z").toISOString(),
       endedAt: new Date("2025-08-12T12:00:00.000Z").toISOString(),
+      profile: "tutorProfile123",
     };
     postUserClasses.mockRejectedValue(new Error("Database error"));
 
