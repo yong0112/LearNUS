@@ -24,6 +24,7 @@ const addUserClasses = async (req, res) => {
     role,
     createdAt,
     endedAt,
+    profile,
   } = req.body;
 
   if (
@@ -36,7 +37,8 @@ const addUserClasses = async (req, res) => {
     !status ||
     !role ||
     !createdAt ||
-    !endedAt
+    !endedAt ||
+    !profile
   ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -53,6 +55,7 @@ const addUserClasses = async (req, res) => {
     role: "Student",
     createdAt,
     endedAt,
+    profile,
   };
 
   const tutorData = {
@@ -67,6 +70,7 @@ const addUserClasses = async (req, res) => {
     role: "Tutor",
     createdAt,
     endedAt,
+    profile,
   };
 
   try {
