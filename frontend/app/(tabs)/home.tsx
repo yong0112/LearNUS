@@ -97,7 +97,7 @@ export default function Home() {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         setTutors([]);
-        await fetch(`http://192.168.0.107:5000/api/tutors/suggested`, {
+        await fetch(`https://learnus.onrender.com/api/tutors/suggested`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
