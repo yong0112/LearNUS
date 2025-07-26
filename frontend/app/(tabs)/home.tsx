@@ -75,6 +75,11 @@ export default function Home() {
           .then(async (data: Class[]) => {
             console.log("Classes:", data);
             setClasses(data);
+            const today = data.filter((cls: Class) => {
+              return cls.date == new Date().getDay();
+            });
+            console.log(today);
+            setTodayClass(today);
           })
           .catch((err) => {
             console.error(err);
@@ -89,52 +94,26 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const fetchClasses = async () => {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        try {
-          await fetch(
-            `https://learnus.onrender.com/api/users/${currentUser.uid}/classes`,
-          )
-            .then((res) => {
-              if (!res.ok) throw new Error("Failed to fetch user favourites");
-              return res.json();
-            })
-            .then((data) => {
-              const today = data.filter(
-                (cls: Class) => cls.date == new Date().getDay(),
-              );
-              console.log(today);
-              setTodayClass(today);
-            });
-        } catch (err) {
-          console.error(err);
-          setShortlisted([]);
-        }
-      }
-    };
-
-    fetchClasses();
-  }, [classes]);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         setTutors([]);
-        fetch(`https://learnus.onrender.com/api/tutors`)
+        await fetch(`http://192.168.0.107:5000/api/tutors/suggested`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ studentId: currentUser.uid }),
+        })
           .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch tutors");
+            if (!res.ok) throw new Error("Failed to fetch suggested tutors");
             return res.json();
           })
           .then(async (data: Tutor[]) => {
             console.log("Tutors:", data);
-            const filtered = data.filter((tutor) => {
-              return !tutor.booked;
-            });
-            setTutors(filtered);
+            setTutors(data);
             const tutorProfile: Record<string, UserProfile> = {};
             await Promise.all(
-              filtered.map(async (cls: Tutor) => {
+              data.map(async (cls: Tutor) => {
                 try {
                   const res = await fetch(
                     `https://learnus.onrender.com/api/users/${cls.tutor}`,
