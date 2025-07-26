@@ -197,18 +197,13 @@ export default function onboard() {
   };
 
   const handlePosting = () => {
-    if (!selectedMajor || !selectedLocation || !budget || !selectedImageURL) {
-      Alert.alert("Please provide valid input for every field");
-      return;
-    }
-
     router.push({
       pathname: "/onboarding/confirmation",
       params: {
         selectedMajor: selectedMajor,
         selectedLocation: selectedLocation,
         budget: budget,
-        selectedImageURL: selectedImageURL,
+        selectedImageURL: "https://randomuser.me/api/portraits/men/30.jpg",
       },
     });
   };

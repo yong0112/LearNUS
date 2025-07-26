@@ -1,5 +1,6 @@
 const { getTutors, postTutor, updateStatus } = require("../models/tutorModel");
-const { FORMATS } = require("../config/constants");
+const { getUserProfile } = require("../models/userModel");
+const { computeMatchScore } = require("../utils/suggestedTutor");
 
 const fetchTutors = async (req, res) => {
   console.log("Received POST");
@@ -80,4 +81,35 @@ const updateBooking = async (req, res) => {
   }
 };
 
-module.exports = { fetchTutors, addTutor, updateBooking };
+const filterSuggestedTutor = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    const student = await getUserProfile(studentId);
+    const tutors = await getTutors();
+    const filteredTutors = tutors.filter((tutor) => {
+      return !tutor.booked;
+    });
+
+    const scoredTutors = await Promise.all(
+      filteredTutors.map(async (tutor) => {
+        const tutorUserProfile = await getUserProfile(tutor.tutor);
+        return {
+          tutor: tutor,
+          score: computeMatchScore(student, tutorUserProfile, tutor),
+        };
+      }),
+    );
+
+    const topTutors = scoredTutors
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map((profile) => profile.tutor);
+
+    res.status(200).json(topTutors);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching suggested tutors" });
+  }
+};
+
+module.exports = { fetchTutors, addTutor, updateBooking, filterSuggestedTutor };

@@ -23,11 +23,18 @@ import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
-import { Session, Day, UserProfile, Major } from "../../constants/types";
+import {
+  Session,
+  Day,
+  UserProfile,
+  Major,
+  LocationOption,
+} from "../../constants/types";
 
 export default function BookingPage() {
   const router = useRouter();
   const [majorOptions, setMajorOptions] = useState<Major[]>([]);
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [tutorProfile, setTutorProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<any>();
   const { selectedMajor, selectedLocation, budget, selectedImageURL } =
@@ -46,6 +53,7 @@ export default function BookingPage() {
         })
         .then((data) => {
           setMajorOptions(data.MAJORS);
+          setLocationOptions(data.FORMATS);
         })
         .catch((err) => {
           console.error(err);
@@ -211,7 +219,13 @@ export default function BookingPage() {
                 name="chalkboard-teacher"
                 size={20}
               />
-              <Text style={styles.textStyle}>{selectedLocation}</Text>
+              <Text style={styles.textStyle}>
+                {
+                  locationOptions.find(
+                    (option) => option.value == selectedLocation,
+                  )?.label
+                }
+              </Text>
             </View>
           </View>
 
