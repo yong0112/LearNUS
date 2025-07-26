@@ -1,4 +1,5 @@
 const { db } = require("../config/firebase");
+const { convertTimeLocally } = require("../utils/timeConverter");
 
 const getForumPosts = async () => {
   const forumRef = await db.collection("forums").get();
@@ -22,7 +23,7 @@ const postForum = async ({ title, content, courseTag, author }) => {
       content,
       courseTag,
       author,
-      createdAt: new Date(),
+      createdAt: convertTimeLocally(new Date()),
       upvoteCount: 0,
     });
     const savedDoc = await docRef.get();
@@ -66,7 +67,7 @@ const postComment = async (postId, { content, author, authorName }) => {
       content,
       author,
       authorName,
-      createdAt: new Date(),
+      createdAt: convertTimeLocally(new Date()),
       upvoteCount: 0,
     });
     const savedDoc = await docRef.get();
