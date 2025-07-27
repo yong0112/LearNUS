@@ -76,7 +76,7 @@ export default function Home() {
             console.log("Classes:", data);
             setClasses(data);
             const today = data.filter((cls: Class) => {
-              return cls.date == new Date().getDay();
+              return cls.dayOfWeek == new Date().getDay();
             });
             console.log(today);
             setTodayClass(today);
