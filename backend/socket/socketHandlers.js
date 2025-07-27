@@ -234,6 +234,30 @@ class SocketHandlers {
       }
     });
 
+    // Handle message deletion
+    socket.on("delete_message", async (data) => {
+      try {
+        const { messageId, chatId } = data;
+        const userId = socket.userId;
+
+        if (!userId) {
+          socket.emit("error", { message: "Not authenticated" });
+          return;
+        }
+
+        // Emit delete event to chat room (HTTP DELETE already handled deletion)
+        this.io.to(chatId).emit("message_deleted", {
+          messageId,
+          chatId,
+          userId,
+          timestamp: new Date(),
+        });
+      } catch (error) {
+        console.error("Error processing delete message event:", error);
+        socket.emit("error", { message: "Failed to process message deletion" });
+      }
+    });
+
     // Handle disconnection
     socket.on("disconnect", () => {
       const userId = this.userSockets.get(socket.id);
