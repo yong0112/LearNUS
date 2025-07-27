@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   useColorScheme,
   Image,
+  Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { auth } from "../../lib/firebase";
@@ -33,6 +34,9 @@ export default function ChatDetail() {
   const [tutorProfiles, setTutorProfiles] = useState<
     Record<string, UserProfile>
   >({});
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [editedText, setEditedText] = useState("");
   const socketRef = useRef<any>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const flatListRef = useRef<FlatList>(null);
@@ -47,7 +51,7 @@ export default function ChatDetail() {
         const token = await currentUser.getIdToken();
         const userId = currentUser.uid;
 
-        const socket = io("https://learnus.onrender.com", {
+        const socket = io("http://192.168.1.3:5000", {
           transports: ["websocket"],
         });
 
@@ -93,6 +97,13 @@ export default function ChatDetail() {
             reject(new Error("Failed to connect to socket server"));
           });
 
+          socket.on("message_deleted", ({ messageId, chatId }) => {
+            setMessages((prevMessages) =>
+              prevMessages.filter((msg) => msg.id !== messageId),
+            );
+            fetchChatDetails();
+          });
+
           socket.on("error", (err) => {
             console.error("Socket error:", err);
             reject(new Error(err.message || "Socket error occurred"));
@@ -103,7 +114,7 @@ export default function ChatDetail() {
       }
     };
 
-    const fetchChatAndMessages = async () => {
+    const fetchChatDetails = async () => {
       try {
         const currentUser = auth.currentUser;
         if (!currentUser) {
@@ -111,33 +122,20 @@ export default function ChatDetail() {
         }
         const token = await currentUser.getIdToken();
 
-        // Fetch chat details
         const chatResponse = await fetch(
-          `https://learnus.onrender.com/api/chat/${chatId}`,
+          `http://192.168.1.3:5000/api/chat/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
         );
         const chatData = await chatResponse.json();
-        console.log("Chat data:", chatData);
         if (!chatResponse.ok || !chatData.success) {
-          if (chatResponse.status === 403) {
-            throw new Error("You do not have access to this chat");
-          } else if (chatResponse.status === 404) {
-            throw new Error("Chat not found");
-          }
           throw new Error(chatData.message || "Failed to fetch chat");
         }
-        if (!chatData.data) {
-          throw new Error("Chat data is missing");
-        }
         setChat(chatData.data);
-        console.log("Chat details:", chatData.data);
 
-        // Fetch user profiles
         const profiles: Record<string, UserProfile> = {};
         const participantDetails = chatData.participantDetails || [];
-        console.log("Participant details:", participantDetails);
         participantDetails.forEach((participant: any) => {
           profiles[participant.uid] = {
             uid: participant.uid,
@@ -154,17 +152,30 @@ export default function ChatDetail() {
           };
         });
         setTutorProfiles(profiles);
-        console.log("Tutor profiles:", tutorProfiles);
+      } catch (error) {
+        console.error("Error fetching chat details:", error);
+      }
+    };
+
+    const fetchChatAndMessages = async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          throw new Error("You must be logged in to view chats");
+        }
+        const token = await currentUser.getIdToken();
+
+        // Fetch chat details
+        await fetchChatDetails();
 
         // Fetch messages
         const messagesResponse = await fetch(
-          `https://learnus.onrender.com/api/message/${chatId}`,
+          `http://192.168.1.3:5000/api/message/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
         );
         const messagesData = await messagesResponse.json();
-        console.log("Messages data:", messagesData);
         if (!messagesResponse.ok) {
           throw new Error(messagesData.message || "Failed to fetch messages");
         }
@@ -218,7 +229,6 @@ export default function ChatDetail() {
       readBy: [auth.currentUser.uid],
       edited: false,
       editedAt: null,
-      reactions: {},
     };
 
     setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
@@ -232,6 +242,125 @@ export default function ChatDetail() {
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!auth.currentUser || !socketRef.current) return;
+
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch(
+        `http://192.168.1.3:5000/api/message/${messageId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to delete message");
+      }
+
+      socketRef.current.emit("delete_message", { messageId, chatId });
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Failed to delete message",
+      );
+      console.error("Delete message error:", error);
+    }
+  };
+
+  const handleEditMessage = async (messageId: string, newMessage: string) => {
+    if (!auth.currentUser || !socketRef.current || !newMessage.trim()) return;
+
+    try {
+      // Optimistically update the message in the UI
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                message: newMessage,
+                edited: true,
+                editedAt: new Date().toISOString(),
+              }
+            : msg,
+        ),
+      );
+
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch(
+        `http://192.168.1.3:5000/api/message/${messageId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: newMessage }),
+        },
+      );
+
+      const text = await response.text();
+      console.log("Raw edit response:", text);
+
+      socketRef.current.emit("edit_message", {
+        messageId,
+        newMessage,
+        chatId,
+      });
+    } catch (error) {
+      console.error("Edit message error:", error);
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Failed to edit message",
+      );
+    }
+  };
+
+  const handleLongPress = (message: Message) => {
+    if (message.senderId !== auth.currentUser?.uid) return;
+
+    Alert.alert(
+      "Message Options",
+      "Choose an action for this message:",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Edit",
+          onPress: () => {
+            setEditingMessage(message);
+            setEditedText(message.message);
+            setEditModalVisible(true);
+          },
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => handleDeleteMessage(message.id),
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const handleSaveEdit = () => {
+    if (editingMessage && editedText.trim()) {
+      handleEditMessage(editingMessage.id, editedText);
+      setEditModalVisible(false);
+      setEditingMessage(null);
+      setEditedText("");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditModalVisible(false);
+    setEditingMessage(null);
+    setEditedText("");
   };
 
   const handleTyping = (text: string) => {
@@ -268,36 +397,66 @@ export default function ChatDetail() {
     }
 
     return (
-      <View
-        style={[
-          styles.messageContainer,
-          isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage,
-        ]}
+      <TouchableOpacity
+        onLongPress={() => handleLongPress(item)}
+        disabled={!isCurrentUser}
       >
-        <View style={styles.messageRow}>
-          <Text
-            style={[
-              styles.messageText,
-              { color: isCurrentUser ? "white" : text },
-            ]}
-          >
-            {item.message}
-          </Text>
-          <Text
-            style={[
-              styles.timestamp,
-              { color: isCurrentUser ? "#ddd" : isDarkMode ? "#888" : "#666" },
-            ]}
-          >
-            {timestamp
-              ? timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : ""}
-          </Text>
+        <View
+          style={[
+            styles.messageContainer,
+            isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage,
+          ]}
+        >
+          <View style={styles.messageRow}>
+            <Text
+              style={[
+                styles.messageText,
+                { color: isCurrentUser ? "white" : text },
+              ]}
+            >
+              {item.message}
+            </Text>
+            <View style={styles.messageMeta}>
+              {item.edited && (
+                <Text
+                  style={[
+                    styles.editedLabel,
+                    {
+                      color: isCurrentUser
+                        ? "#ddd"
+                        : isDarkMode
+                          ? "#888"
+                          : "#666",
+                    },
+                  ]}
+                >
+                  Edited
+                </Text>
+              )}
+              <Text
+                style={[
+                  styles.timestamp,
+                  {
+                    color: isCurrentUser
+                      ? "#ddd"
+                      : isDarkMode
+                        ? "#888"
+                        : "#666",
+                  },
+                ]}
+              >
+                {timestamp
+                  ? timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "Asia/Singapore",
+                    })
+                  : ""}
+              </Text>
+            </View>
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -367,6 +526,15 @@ export default function ChatDetail() {
       alignItems: "flex-end",
       justifyContent: "space-between",
     },
+    messageMeta: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+    },
+    editedLabel: {
+      fontSize: 12,
+      fontStyle: "italic",
+      marginRight: 5,
+    },
     timestamp: {
       fontSize: 12,
       fontStyle: "italic",
@@ -396,6 +564,55 @@ export default function ChatDetail() {
       fontStyle: "italic",
       color: isDarkMode ? "#888" : "#666",
       marginBottom: 5,
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+      backgroundColor: bg,
+      borderRadius: 10,
+      padding: 20,
+      width: "80%",
+      alignItems: "center",
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: text,
+      marginBottom: 15,
+    },
+    modalInput: {
+      width: "100%",
+      borderWidth: 1,
+      borderColor: isDarkMode ? "#444" : "#ddd",
+      borderRadius: 10,
+      padding: 10,
+      marginBottom: 15,
+      color: text,
+    },
+    modalButtonContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    modalButton: {
+      padding: 10,
+      borderRadius: 5,
+      width: "45%",
+      alignItems: "center",
+    },
+    modalSaveButton: {
+      backgroundColor: "orange",
+    },
+    modalCancelButton: {
+      backgroundColor: isDarkMode ? "#444" : "#ddd",
+    },
+    modalButtonText: {
+      fontSize: 16,
+      color: text,
     },
   });
 
@@ -448,6 +665,43 @@ export default function ChatDetail() {
           </View>
         </>
       )}
+      <Modal
+        visible={editModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCancelEdit}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit Message</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={editedText}
+              onChangeText={setEditedText}
+              placeholder="Enter new message text..."
+              placeholderTextColor={isDarkMode ? "#888" : "#666"}
+              multiline
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={handleCancelEdit}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalSaveButton]}
+                onPress={handleSaveEdit}
+                disabled={!editedText.trim()}
+              >
+                <Text style={[styles.modalButtonText, { color: "white" }]}>
+                  Save
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

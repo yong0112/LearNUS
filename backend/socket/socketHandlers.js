@@ -176,41 +176,7 @@ class SocketHandlers {
           return;
         }
 
-        // Get message and verify ownership
-        const messageRef = await db.collection("messages").doc(messageId).get();
-
-        if (!messageRef.exists) {
-          socket.emit("error", { message: "Message not found" });
-          return;
-        }
-
-        const messageData = messageRef.data();
-
-        if (messageData.senderId !== userId) {
-          socket.emit("error", { message: "Access denied" });
-          return;
-        }
-
-        const message = new Message({ id: messageId, ...messageData });
-        const chat = await Chat.getById(chatId);
-
-        // Check if this is the last message
-        let isLastMessage = false;
-        if (chat.lastMessage && chat.lastMessage.timestamp && messageData.timestamp) {
-          isLastMessage = chat.lastMessage.timestamp.toMillis() === messageData.timestamp.toMillis();
-        }
-
-        // Delete the message
-        await message.delete();
-
-        // If deleted message was the last message, update chat's last message
-        if (isLastMessage) {
-          const recentMessages = await Message.getChatMessages(chatId, 1);
-          const newLastMessage = recentMessages.length > 0 ? recentMessages[0] : null;
-          await chat.updateLastMessage(newLastMessage || { message: "", senderId: "", timestamp: null, type: "text" });
-        }
-
-        // Emit delete event to chat room
+        // Emit delete event to chat room (HTTP DELETE already handled deletion)
         this.io.to(chatId).emit("message_deleted", {
           messageId,
           chatId,
@@ -218,8 +184,8 @@ class SocketHandlers {
           timestamp: new Date(),
         });
       } catch (error) {
-        console.error("Error deleting message:", error);
-        socket.emit("error", { message: "Failed to delete message" });
+        console.error("Error processing delete message event:", error);
+        socket.emit("error", { message: "Failed to process message deletion" });
       }
     });
 
