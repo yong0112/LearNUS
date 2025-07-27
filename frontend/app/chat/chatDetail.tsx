@@ -51,7 +51,7 @@ export default function ChatDetail() {
         const token = await currentUser.getIdToken();
         const userId = currentUser.uid;
 
-        const socket = io("http://192.168.1.3:5000", {
+        const socket = io("https://learnus.onrender.com", {
           transports: ["websocket"],
         });
 
@@ -123,7 +123,7 @@ export default function ChatDetail() {
         const token = await currentUser.getIdToken();
 
         const chatResponse = await fetch(
-          `http://192.168.1.3:5000/api/chat/${chatId}`,
+          `https://learnus.onrender.com/api/chat/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -170,7 +170,7 @@ export default function ChatDetail() {
 
         // Fetch messages
         const messagesResponse = await fetch(
-          `http://192.168.1.3:5000/api/message/${chatId}`,
+          `https://learnus.onrender.com/api/message/${chatId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -250,7 +250,7 @@ export default function ChatDetail() {
     try {
       const token = await auth.currentUser.getIdToken();
       const response = await fetch(
-        `http://192.168.1.3:5000/api/message/${messageId}`,
+        `https://learnus.onrender.com/api/message/${messageId}`,
         {
           method: "DELETE",
           headers: {
@@ -294,7 +294,7 @@ export default function ChatDetail() {
 
       const token = await auth.currentUser.getIdToken();
       const response = await fetch(
-        `http://192.168.1.3:5000/api/message/${messageId}`,
+        `https://learnus.onrender.com/api/message/${messageId}`,
         {
           method: "PUT",
           headers: {
