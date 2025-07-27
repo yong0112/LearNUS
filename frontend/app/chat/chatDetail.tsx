@@ -646,7 +646,10 @@ export default function ChatDetail() {
             >
               <Entypo name="chevron-left" size={30} color="orange" />
             </TouchableOpacity>
-            <Image style={styles.headerImage} source={{ uri: profilePicture }} />
+            <Image
+              style={styles.headerImage}
+              source={{ uri: profilePicture }}
+            />
             <Text style={styles.headerText}>{otherParticipantName}</Text>
           </View>
           {loading ? (

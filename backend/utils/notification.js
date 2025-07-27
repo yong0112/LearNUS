@@ -1,5 +1,5 @@
 const { Expo } = require("expo-server-sdk");
-const { db } = require("./config/firebase");
+const { db } = require("../config/firebase");
 
 const expo = new Expo();
 

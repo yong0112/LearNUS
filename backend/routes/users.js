@@ -18,6 +18,6 @@ router.post("/update-rating", updateRating);
 router.post("/update-favourite", updateFavourites);
 router.post("/onboard", setOnboarding);
 router.post("/change-password", resetPassword);
-router.post("/users/:uid/push-token", updatePushToken)
+router.post("/users/:uid/push-token", updatePushToken);
 
 module.exports = router;
