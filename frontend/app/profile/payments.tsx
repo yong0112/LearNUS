@@ -207,7 +207,8 @@ export default function payments() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -229,6 +230,7 @@ export default function payments() {
       fontWeight: "bold",
       marginBottom: 15,
       marginTop: 20,
+      color: text,
     },
     content: {
       flexDirection: "column",
@@ -250,6 +252,7 @@ export default function payments() {
     paymentDetail: {
       fontSize: 15,
       marginLeft: 5,
+      color: text,
     },
     avatar: {
       width: 50,
@@ -277,11 +280,13 @@ export default function payments() {
     },
     paymentMethodText: {
       fontSize: 15,
+      color: text,
     },
     subtitle: {
       fontSize: 16,
       fontWeight: "bold",
       marginTop: 5,
+      color: text,
     },
     qr: {
       alignSelf: "center",
@@ -297,6 +302,7 @@ export default function payments() {
       fontSize: 18,
       fontWeight: "700",
       marginBottom: 10,
+      color: text,
     },
     button: {
       justifyContent: "center",
@@ -320,7 +326,7 @@ export default function payments() {
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Finance</Text>
         <View style={{ width: 40 }} />

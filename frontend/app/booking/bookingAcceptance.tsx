@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  useColorScheme,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -13,12 +14,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { auth, db } from "@/lib/firebase";
 import { Day, Class, UserProfile } from "@/constants/types";
 import { doc, updateDoc } from "firebase/firestore";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function bookingAcceptance() {
   const router = useRouter();
   const [session, setSession] = useState<Class>();
   const [profile, setProfile] = useState<UserProfile>();
   const [dayConstants, setDayConstants] = useState<Day[]>([]);
+  const { isDarkMode } = useTheme();
+  const bg = useThemeColor({}, "background");
+  const text = useThemeColor({}, "text");
   const { id } = useLocalSearchParams();
 
   useEffect(() => {
@@ -168,7 +174,8 @@ export default function bookingAcceptance() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     image: {
@@ -182,6 +189,7 @@ export default function bookingAcceptance() {
       fontSize: 18,
       fontWeight: "semibold",
       marginVertical: 30,
+      color: text,
     },
     details: {
       fontSize: 20,
@@ -189,6 +197,7 @@ export default function bookingAcceptance() {
       textAlign: "center",
       alignSelf: "center",
       marginBottom: 10,
+      color: text,
     },
     responseBar: {
       flexDirection: "row",
@@ -218,12 +227,9 @@ export default function bookingAcceptance() {
     <ThemedView style={styles.container}>
       {/**Header */}
       <View>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="orange"
-          onPress={() => router.back()}
-        />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
+        </TouchableOpacity>
       </View>
 
       {/**Booking details */}

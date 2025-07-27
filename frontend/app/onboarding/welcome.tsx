@@ -26,14 +26,14 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedText } from "@/components/ThemedText";
 import { UserProfile } from "@/constants/types";
 import { useFonts } from "expo-font";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const navigation = useNavigation();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const [fontLoaded] = useFonts({

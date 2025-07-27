@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { LocationOption } from "../../constants/types";
+import { useTheme } from "@/components/ThemedContext";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -22,8 +24,7 @@ export default function TutorFilter() {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [ratings, setRatings] = useState<number[]>();
   const [rate, setRate] = useState([0, 100]);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -66,7 +67,8 @@ export default function TutorFilter() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
       justifyContent: "flex-start",
     },
@@ -146,11 +148,11 @@ export default function TutorFilter() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Filter</Text>
           <View style={{ width: 40 }} />
@@ -273,7 +275,7 @@ export default function TutorFilter() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </ThemedView>
   );
 }

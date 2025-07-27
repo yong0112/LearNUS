@@ -35,6 +35,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Class, Tutor, UserProfile, Day } from "../../constants/types";
 import { useFonts } from "expo-font";
+import { useTheme } from "@/components/ThemedContext";
 
 const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
@@ -53,8 +54,7 @@ export default function Home() {
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const [fontLoaded] = useFonts({
@@ -338,7 +338,8 @@ export default function Home() {
     container: {
       flexDirection: "column",
       paddingHorizontal: 20,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       opacity: modalVisible ? 0.1 : 1,
     },
     notificationBadge: {
@@ -426,7 +427,6 @@ export default function Home() {
       backgroundColor: isDarkMode ? "#999999" : "white",
       borderRadius: 20,
       padding: 15,
-      alignItems: "flex-start",
       overflow: "hidden",
       elevation: 10,
       shadowColor: "#444444",
@@ -450,7 +450,7 @@ export default function Home() {
       marginTop: 10,
       paddingVertical: 5,
       alignSelf: "stretch",
-      borderWidth: 1,
+      borderWidth: isDarkMode ? 0 : 1,
       opacity: contactLoading ? 0.5 : 1,
     },
     contactButtonText: {
@@ -477,7 +477,7 @@ export default function Home() {
             <TouchableOpacity
               onPress={() => router.push("/home/notifications")}
             >
-              <MaterialIcons name="notifications-none" size={30} />
+              <MaterialIcons name="notifications-none" size={30} color={text} />
             </TouchableOpacity>
             <View style={styles.notificationBadge} />
             <View />
@@ -504,6 +504,7 @@ export default function Home() {
                 name="hearto"
                 size={28}
                 style={{ marginRight: 10, alignSelf: "center" }}
+                color={text}
               />
             </TouchableOpacity>
             <Menu onSelect={handleSettings}>
@@ -689,7 +690,7 @@ export default function Home() {
           onRequestClose={closeModal}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
+            <ScrollView style={styles.modalContent}>
               {selectedTutor && (
                 <>
                   <View
@@ -882,7 +883,7 @@ export default function Home() {
                   )}
                 </>
               )}
-            </View>
+            </ScrollView>
           </View>
         </Modal>
       </View>

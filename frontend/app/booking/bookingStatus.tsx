@@ -12,6 +12,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function bookingStatus() {
   const router = useRouter();
@@ -25,8 +26,7 @@ export default function bookingStatus() {
   ];
   const [session, setSession] = useState<Class>();
   const [curr, setCurr] = useState<number>();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const { id } = useLocalSearchParams();
@@ -100,7 +100,9 @@ export default function bookingStatus() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
     },
     header: {
       flexDirection: "row",
@@ -123,27 +125,26 @@ export default function bookingStatus() {
     },
     wrappingBar: {
       flexDirection: "column",
+      borderTopWidth: 1,
+      borderTopColor: "gray",
     },
     statusBarDone: {
       flexDirection: "row",
       paddingHorizontal: 25,
       paddingVertical: 8,
-      backgroundColor: "white",
-      borderTopWidth: 1,
-      borderTopColor: "gray",
+      backgroundColor: bg,
     },
     statusBarUndone: {
       flexDirection: "row",
       paddingHorizontal: 25,
       paddingVertical: 8,
-      backgroundColor: "#c5c6c7",
-      borderTopWidth: 1,
-      borderTopColor: "gray",
+      backgroundColor: isDarkMode ? "#494949ff" : "#c5c6c7",
     },
     statusBarTextDone: {
       fontSize: 16,
       fontWeight: "semibold",
       marginLeft: 10,
+      color: text,
     },
     statusBarTextUndone: {
       fontSize: 16,
@@ -154,7 +155,7 @@ export default function bookingStatus() {
     actionBar: {
       flexDirection: "row",
       justifyContent: "flex-end",
-      backgroundColor: "#c5c6c7",
+      backgroundColor: isDarkMode ? "#494949ff" : "#c5c6c7",
     },
     actionButton: {
       flexDirection: "row",
@@ -173,7 +174,7 @@ export default function bookingStatus() {
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Booking status</Text>
         <View style={{ width: 40 }} />
@@ -183,11 +184,13 @@ export default function bookingStatus() {
       <View style={styles.body}>
         {curr != undefined && curr >= 0 ? (
           curr > 0 ? (
-            <View style={styles.statusBarDone}>
-              <AntDesign name="checkcircle" color={"green"} size={20} />
-              <Text style={styles.statusBarTextDone}>
-                Booking is accepted by tutor.
-              </Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <AntDesign name="checkcircle" color={"green"} size={20} />
+                <Text style={styles.statusBarTextDone}>
+                  Booking is accepted by tutor.
+                </Text>
+              </View>
             </View>
           ) : (
             <View style={styles.wrappingBar}>
@@ -221,11 +224,13 @@ export default function bookingStatus() {
         )}
         {curr != undefined && curr >= 0 ? (
           curr > 1 ? (
-            <View style={styles.statusBarDone}>
-              <AntDesign name="checkcircle" color={"green"} size={20} />
-              <Text style={styles.statusBarTextDone}>
-                Payment has been made by student.
-              </Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <AntDesign name="checkcircle" color={"green"} size={20} />
+                <Text style={styles.statusBarTextDone}>
+                  Payment has been made by student.
+                </Text>
+              </View>
             </View>
           ) : (
             <View style={styles.wrappingBar}>
@@ -259,11 +264,13 @@ export default function bookingStatus() {
         )}
         {curr != undefined && curr >= 0 ? (
           curr > 2 ? (
-            <View style={styles.statusBarDone}>
-              <AntDesign name="checkcircle" color={"green"} size={20} />
-              <Text style={styles.statusBarTextDone}>
-                Payment received by tutor.
-              </Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <AntDesign name="checkcircle" color={"green"} size={20} />
+                <Text style={styles.statusBarTextDone}>
+                  Payment received by tutor.
+                </Text>
+              </View>
             </View>
           ) : (
             <View style={styles.wrappingBar}>
@@ -297,18 +304,22 @@ export default function bookingStatus() {
         )}
         {curr != undefined && curr >= 0 ? (
           curr > 2 ? (
-            <View style={styles.statusBarDone}>
-              <AntDesign name="checkcircle" color={"green"} size={20} />
-              <Text style={styles.statusBarTextDone}>
-                Booking is confirmed.
-              </Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <AntDesign name="checkcircle" color={"green"} size={20} />
+                <Text style={styles.statusBarTextDone}>
+                  Booking is confirmed.
+                </Text>
+              </View>
             </View>
           ) : (
-            <View style={styles.statusBarUndone}>
-              <AntDesign name="checkcircle" color={"gray"} size={20} />
-              <Text style={styles.statusBarTextUndone}>
-                Booking is not confirmed.
-              </Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarUndone}>
+                <AntDesign name="checkcircle" color={"gray"} size={20} />
+                <Text style={styles.statusBarTextUndone}>
+                  Booking is not confirmed.
+                </Text>
+              </View>
             </View>
           )
         ) : (
@@ -325,11 +336,13 @@ export default function bookingStatus() {
               </View>
             </View>
           ) : (
-            <View style={styles.statusBarUndone}>
-              <AntDesign name="checkcircle" color={"gray"} size={20} />
-              <Text style={styles.statusBarTextUndone}>
-                Session in progress.
-              </Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarUndone}>
+                <AntDesign name="checkcircle" color={"gray"} size={20} />
+                <Text style={styles.statusBarTextUndone}>
+                  Session in progress.
+                </Text>
+              </View>
             </View>
           )
         ) : (
@@ -337,9 +350,13 @@ export default function bookingStatus() {
         )}
         {curr != undefined && curr >= 0 ? (
           curr > 4 ? (
-            <View style={styles.statusBarDone}>
-              <AntDesign name="checkcircle" color={"green"} size={20} />
-              <Text style={styles.statusBarTextDone}>Session is reviewed.</Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <AntDesign name="checkcircle" color={"green"} size={20} />
+                <Text style={styles.statusBarTextDone}>
+                  Session is reviewed.
+                </Text>
+              </View>
             </View>
           ) : (
             <View style={styles.wrappingBar}>
@@ -375,11 +392,13 @@ export default function bookingStatus() {
         {/**Rejected */}
         {curr != undefined ? (
           curr < 0 ? (
-            <View style={styles.statusBarDone}>
-              <Entypo name="circle-with-cross" color={"red"} size={20} />
-              <Text style={styles.statusBarTextDone}>
-                Booking is rejected by tutor.
-              </Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <Entypo name="circle-with-cross" color={"red"} size={20} />
+                <Text style={styles.statusBarTextDone}>
+                  Booking is rejected by tutor.
+                </Text>
+              </View>
             </View>
           ) : (
             <View />
@@ -389,9 +408,11 @@ export default function bookingStatus() {
         )}
         {curr != undefined ? (
           curr < 0 ? (
-            <View style={styles.statusBarDone}>
-              <Entypo name="circle-with-cross" color={"red"} size={20} />
-              <Text style={styles.statusBarTextDone}>Booking cancelled.</Text>
+            <View style={styles.wrappingBar}>
+              <View style={styles.statusBarDone}>
+                <Entypo name="circle-with-cross" color={"red"} size={20} />
+                <Text style={styles.statusBarTextDone}>Booking cancelled.</Text>
+              </View>
             </View>
           ) : (
             <View />

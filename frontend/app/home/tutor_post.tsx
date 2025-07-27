@@ -23,6 +23,7 @@ import {
 import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { CourseOption, LocationOption, Day } from "../../constants/types";
+import { useTheme } from "@/components/ThemedContext";
 
 function convertTimeLocally(current: Date) {
   const newDate = new Date();
@@ -47,8 +48,7 @@ export default function TutorPost() {
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
   const [rate, setRate] = useState<string>("");
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -180,7 +180,8 @@ export default function TutorPost() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -270,7 +271,7 @@ export default function TutorPost() {
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Tutor Posting</Text>
         <View style={{ width: 40 }} />
@@ -370,13 +371,16 @@ export default function TutorPost() {
                   searchPlaceholder="Select a day"
                 />
               </View>
-              <View
+              <ScrollView
+                horizontal
                 style={{
-                  flexDirection: "row",
                   paddingHorizontal: 10,
                   marginTop: 10,
+                }}
+                contentContainerStyle={{
                   justifyContent: "center",
                   alignItems: "center",
+                  flexDirection: "row",
                 }}
               >
                 <TouchableOpacity
@@ -426,7 +430,7 @@ export default function TutorPost() {
                     }}
                   />
                 )}
-              </View>
+              </ScrollView>
             </View>
           </View>
           <View style={{ paddingHorizontal: 5, paddingVertical: 20 }}>

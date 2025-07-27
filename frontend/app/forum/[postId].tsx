@@ -23,6 +23,7 @@ import {
   UpvoteStatus,
 } from "../../constants/types";
 import { getTagColor } from "@/constants/tagColors";
+import { useTheme } from "@/components/ThemedContext";
 
 const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
@@ -46,8 +47,7 @@ export default function ForumPostDetails() {
   const [commentMenuVisibleId, setCommentMenuVisibleId] = useState<
     string | null
   >(null);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -278,7 +278,8 @@ export default function ForumPostDetails() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 10,
     },
     background: {

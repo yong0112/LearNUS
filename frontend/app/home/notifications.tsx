@@ -22,12 +22,12 @@ import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
+import { useTheme } from "@/components/ThemedContext";
 const screenHeight = Dimensions.get("window").height;
 
 export default function notifications() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -59,7 +59,7 @@ export default function notifications() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Notifications</Text>
           <View style={{ width: 40 }} />

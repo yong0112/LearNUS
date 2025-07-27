@@ -217,7 +217,12 @@ export default function Details() {
   };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    container: {
+      flex: 1,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
+    },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -268,7 +273,7 @@ export default function Details() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Personal Details</Text>
           <View style={{ width: 40 }} />

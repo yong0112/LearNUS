@@ -1,14 +1,11 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { View } from "react-native";
+import { ThemeProvider } from "@/components/ThemedContext";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { MenuProvider } from "react-native-popup-menu";
@@ -26,7 +23,7 @@ export default function RootLayout() {
 
   return (
     <MenuProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider>
         <Stack screenOptions={{ headerShown: false }} />
         <StatusBar style="auto" />
       </ThemeProvider>

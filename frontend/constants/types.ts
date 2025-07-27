@@ -137,6 +137,7 @@ export interface Message {
   readBy: string[];
   edited: boolean;
   editedAt: string | null;
+  reactions: { [emoji: string]: string[] };
 }
 
 export interface FAQ {
@@ -153,4 +154,11 @@ export interface Major {
 
 export interface CourseMap {
   [key: string]: string;
+}
+
+export interface Event {
+  title: string;
+  startTime: string;
+  endTime: string;
+  date: string;
 }
