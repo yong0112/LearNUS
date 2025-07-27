@@ -1,4 +1,5 @@
 const { getUserClasses, postUserClasses } = require("../models/classesModel");
+const { sendBookingNotification } = require("../utils/notification");
 
 const fetchUserClasses = async (req, res) => {
   const uid = req.params.uid;
