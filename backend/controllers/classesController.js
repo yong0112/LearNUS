@@ -76,6 +76,11 @@ const addUserClasses = async (req, res) => {
   try {
     const studentClass = await postUserClasses(studentData);
     const tutorClass = await postUserClasses(tutorData);
+
+    if (status === "Pending") {
+      await sendBookingNotification(tutorData, status, people, tutorClass.id);
+    }
+
     res.status(201).json({ message: "Class added", studentClass, tutorClass });
   } catch (err) {
     console.error(err);
