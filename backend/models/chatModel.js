@@ -1,5 +1,4 @@
 const { db, admin } = require("../config/firebase");
-const { convertTimeLocally } = require("../utils/timeConverter");
 
 class Chat {
   constructor(data) {
@@ -20,9 +19,7 @@ class Chat {
         type: chatData.type || "direct",
         lastMessage: null,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
-
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-
         metadata: chatData.metadata || {},
       };
 

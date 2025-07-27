@@ -88,7 +88,7 @@ export default function Login() {
   return (
     <View style={styles.container}>
       <Image
-        source={require("@/assets/images/logo.jpg")}
+        source={require("@/assets/images/logo.png")}
         style={styles.image}
       />
       <Text style={styles.text}>Welcome to LearNUS</Text>

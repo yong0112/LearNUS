@@ -166,7 +166,7 @@ export default function paymentPrompt() {
     if (currentUser) {
       try {
         const response = await fetch(
-          `http://192.168.0.107:5000/api/users/${currentUser?.uid}/classes/${id}/update-payment`,
+          `https://learnus.onrender.com/api/users/${currentUser?.uid}/classes/${id}/update-payment`,
           {
             method: "POST",
             headers: {
@@ -175,8 +175,7 @@ export default function paymentPrompt() {
             body: JSON.stringify({
               uid: currentUser?.uid,
               cid: id,
-              paymentProof:
-                "https://mustsharenews.com/wp-content/uploads/2023/09/paynow-screenshot.jpg",
+              paymentProof: selectedImageURL,
             }),
           },
         );
@@ -333,7 +332,7 @@ export default function paymentPrompt() {
               <View>
                 <Text style={styles.detailText}>
                   {formatAvailability(
-                    session?.date,
+                    session?.dayOfWeek,
                     session?.startTime,
                     session?.endTime,
                   )}
