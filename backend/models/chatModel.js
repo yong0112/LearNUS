@@ -1,5 +1,4 @@
 const { db, admin } = require("../config/firebase");
-const { convertTimeLocally } = require("../utils/timeConverter");
 
 class Chat {
   constructor(data) {
@@ -19,12 +18,8 @@ class Chat {
         participants: chatData.participants,
         type: chatData.type || "direct",
         lastMessage: null,
-        createdAt: convertTimeLocally(
-          admin.firestore.FieldValue.serverTimestamp(),
-        ),
-        updatedAt: convertTimeLocally(
-          admin.firestore.FieldValue.serverTimestamp(),
-        ),
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         metadata: chatData.metadata || {},
       };
 
@@ -108,9 +103,7 @@ class Chat {
             timestamp: messageData.timestamp,
             type: messageData.type,
           },
-          updatedAt: convertTimeLocally(
-            admin.firestore.FieldValue.serverTimestamp(),
-          ),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
     } catch (error) {
       throw new Error(`Error updating last message: ${error.message}`);

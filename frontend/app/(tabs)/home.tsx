@@ -247,7 +247,7 @@ export default function Home() {
   const handleBooking = () => {
     if (selectedTutor) {
       router.push({
-        pathname: "./tutor_find/booking",
+        pathname: "/tutor_find/booking",
         params: {
           tutor: selectedTutor.tutor,
           course: selectedTutor.course,
@@ -448,14 +448,14 @@ export default function Home() {
       backgroundColor: "white",
       flexDirection: "row",
       marginTop: 10,
-      paddingVertical: 8,
+      paddingVertical: 5,
       alignSelf: "stretch",
       borderWidth: 1,
       opacity: contactLoading ? 0.5 : 1,
     },
     contactButtonText: {
       marginHorizontal: 4,
-      fontSize: 28,
+      fontSize: 20,
       fontWeight: "600",
       marginBottom: 2,
       color: "black",

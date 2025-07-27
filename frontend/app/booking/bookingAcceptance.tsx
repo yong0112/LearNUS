@@ -240,7 +240,7 @@ export default function bookingAcceptance() {
           <Text style={styles.details}>{session?.course}</Text>
           <Text style={styles.details}>
             {formatAvailability(
-              session?.date,
+              session?.dayOfWeek,
               session?.startTime,
               session?.endTime,
             )}

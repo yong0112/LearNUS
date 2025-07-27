@@ -203,7 +203,7 @@ export default function onboard() {
         selectedMajor: selectedMajor,
         selectedLocation: selectedLocation,
         budget: budget,
-        selectedImageURL: "https://randomuser.me/api/portraits/men/30.jpg",
+        selectedImageURL: selectedImageURL,
       },
     });
   };
