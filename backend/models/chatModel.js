@@ -1,5 +1,4 @@
 const { db, admin } = require("../config/firebase");
-const { convertTimeLocally } = require("../utils/timeConverter");
 
 class Chat {
   constructor(data) {

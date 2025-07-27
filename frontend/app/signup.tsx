@@ -209,7 +209,7 @@ export default function Signup() {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Image
-              source={require("../assets/images/logo.jpg")}
+              source={require("../assets/images/logo.png")}
               style={styles.image}
             />
             <Text style={styles.title}>Welcome to LearNUS!</Text>
