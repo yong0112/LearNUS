@@ -168,8 +168,14 @@ const messageController = {
 
       // Check if this is the last message
       let isLastMessage = false;
-      if (chat.lastMessage && chat.lastMessage.timestamp && messageData.timestamp) {
-        isLastMessage = chat.lastMessage.timestamp.toMillis() === messageData.timestamp.toMillis();
+      if (
+        chat.lastMessage &&
+        chat.lastMessage.timestamp &&
+        messageData.timestamp
+      ) {
+        isLastMessage =
+          chat.lastMessage.timestamp.toMillis() ===
+          messageData.timestamp.toMillis();
       }
 
       // Delete the message
@@ -177,9 +183,20 @@ const messageController = {
 
       // If deleted message was the last message, update chat's last message
       if (isLastMessage) {
-        const recentMessages = await Message.getChatMessages(messageData.chatId, 1);
-        const newLastMessage = recentMessages.length > 0 ? recentMessages[0] : null;
-        await chat.updateLastMessage(newLastMessage || { message: "", senderId: "", timestamp: null, type: "text" });
+        const recentMessages = await Message.getChatMessages(
+          messageData.chatId,
+          1,
+        );
+        const newLastMessage =
+          recentMessages.length > 0 ? recentMessages[0] : null;
+        await chat.updateLastMessage(
+          newLastMessage || {
+            message: "",
+            senderId: "",
+            timestamp: null,
+            type: "text",
+          },
+        );
       }
 
       res.status(200).json({

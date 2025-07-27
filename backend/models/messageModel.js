@@ -22,9 +22,7 @@ class Message {
         senderId: messageData.senderId,
         message: messageData.message,
         type: "text",
-        timestamp: convertTimeLocally(
-          admin.firestore.FieldValue.serverTimestamp(),
-        ),
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
         readBy: [messageData.senderId],
         edited: false,
       };
@@ -85,16 +83,11 @@ class Message {
   // Edit message
   async edit(newMessage) {
     try {
-      await db
-        .collection("messages")
-        .doc(this.id)
-        .update({
-          message: newMessage,
-          edited: true,
-          editedAt: convertTimeLocally(
-            admin.firestore.FieldValue.serverTimestamp(),
-          ),
-        });
+      await db.collection("messages").doc(this.id).update({
+        message: newMessage,
+        edited: true,
+        editedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
 
       this.message = newMessage;
       this.edited = true;
@@ -109,30 +102,6 @@ class Message {
       await db.collection("messages").doc(this.id).delete();
     } catch (error) {
       throw new Error(`Error deleting message: ${error.message}`);
-    }
-  }
-
-static async getLatestMessage(chatId, excludeMessageId = null) {
-    try {
-      let query = db
-        .collection("messages")
-        .where("chatId", "==", chatId)
-        .orderBy("timestamp", "desc")
-        .limit(1);
-
-      if (excludeMessageId) {
-        query = query.where(admin.firestore.FieldPath.documentId(), "!=", excludeMessageId);
-      }
-
-      const snapshot = await query.get();
-      if (snapshot.empty) {
-        return null;
-      }
-
-      const doc = snapshot.docs[0];
-      return new Message({ id: doc.id, ...doc.data() });
-    } catch (error) {
-      throw new Error(`Error getting latest message: ${error.message}`);
     }
   }
 }
