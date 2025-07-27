@@ -155,3 +155,10 @@ export interface Major {
 export interface CourseMap {
   [key: string]: string;
 }
+
+export interface Event {
+  title: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+}

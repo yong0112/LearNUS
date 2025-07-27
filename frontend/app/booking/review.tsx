@@ -16,6 +16,7 @@ import { auth } from "@/lib/firebase";
 import { Day, Class, UserProfile } from "@/constants/types";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { AirbnbRating, Rating } from "react-native-ratings";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function review() {
   const router = useRouter();
@@ -25,8 +26,7 @@ export default function review() {
   const [rating, setRating] = useState<number>();
   const [review, setReview] = useState<string>("");
   const [charCount, setCharCount] = useState<number>(0);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const { id } = useLocalSearchParams();
@@ -211,7 +211,8 @@ export default function review() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -236,6 +237,7 @@ export default function review() {
       marginBottom: 5,
       fontSize: 20,
       fontWeight: "bold",
+      color: text,
     },
     reviewContainer: {
       height: 400,
@@ -276,7 +278,7 @@ export default function review() {
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Feedback</Text>
         <View style={{ width: 40 }} />
@@ -290,8 +292,10 @@ export default function review() {
           ratingCount={5}
           startingValue={0}
           showRating={false}
+          tintColor={bg}
           fractions={0}
           imageSize={40}
+          ratingBackgroundColor={isDarkMode ? "black" : "white"}
           onFinishRating={handleCompleteRating}
         />
       </View>

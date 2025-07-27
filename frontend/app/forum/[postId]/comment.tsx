@@ -1,3 +1,4 @@
+import { useTheme } from "@/components/ThemedContext";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth, db } from "@/lib/firebase";
@@ -30,8 +31,7 @@ export default function Comment() {
   const [commentContent, setCommentContent] = useState("");
   const [charCount, setCharCount] = useState(0);
   const [authorName, setAuthorName] = useState<string | null>(null);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -117,7 +117,8 @@ export default function Comment() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {

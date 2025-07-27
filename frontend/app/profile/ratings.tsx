@@ -16,6 +16,7 @@ import { auth } from "../../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
 import { Review, UserProfile } from "@/constants/types";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function ratings() {
   const router = useRouter();
@@ -23,8 +24,7 @@ export default function ratings() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewers, setReviewers] = useState<Record<string, UserProfile>>({});
   const [error, setError] = useState(null);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -85,7 +85,12 @@ export default function ratings() {
   }, []);
 
   const styles = StyleSheet.create({
-    container: { paddingVertical: 40, paddingHorizontal: 20 },
+    container: {
+      flex: 1,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
+    },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -121,7 +126,7 @@ export default function ratings() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Ratings & Reviews</Text>
           <View style={{ width: 40 }} />
@@ -151,7 +156,8 @@ export default function ratings() {
             readonly
             imageSize={40}
             ratingColor="#FFD700"
-            ratingBackgroundColor={bg}
+            ratingBackgroundColor={isDarkMode ? "black" : "white"}
+            tintColor={bg}
             fractions={10}
           />
           <Text
@@ -166,7 +172,7 @@ export default function ratings() {
           </Text>
         </View>
 
-        <ScrollView>
+        <ScrollView style={{ paddingBottom: 30 }}>
           {!reviews ? (
             <Text
               style={{

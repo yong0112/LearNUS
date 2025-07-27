@@ -30,6 +30,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
 import { Day, Session, Tutor, UserProfile } from "@/constants/types";
 import { Image } from "react-native";
+import { useTheme } from "@/components/ThemedContext";
 const screenHeight = Dimensions.get("window").height;
 
 export default function favourites() {
@@ -41,8 +42,7 @@ export default function favourites() {
   const [selectedTutor, setSelectedTutor] = useState<Tutor>();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [shortlisted, setShortlisted] = useState<string[]>();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -246,6 +246,7 @@ export default function favourites() {
       paddingVertical: 10,
       borderBottomWidth: 1,
       borderBottomColor: "gray",
+      justifyContent: "space-between",
     },
     detail: {
       flexDirection: "column",
@@ -259,6 +260,7 @@ export default function favourites() {
     name: {
       fontSize: 20,
       fontWeight: "bold",
+      color: text,
     },
     detailText: {
       fontSize: 16,
@@ -272,6 +274,7 @@ export default function favourites() {
     rating: {
       fontSize: 18,
       fontWeight: "bold",
+      color: text,
     },
     icon: {
       flexDirection: "column",
@@ -324,7 +327,7 @@ export default function favourites() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Favourites</Text>
           <View style={{ width: 40 }} />
@@ -339,23 +342,25 @@ export default function favourites() {
                 style={styles.profileCard}
                 onPress={() => handleTutorProfile(session)}
               >
-                <Image
-                  style={styles.image}
-                  source={{ uri: profiles[session.tutor].profilePicture }}
-                />
-                <View style={styles.detail}>
-                  <Text style={styles.name}>
-                    {profiles[session.tutor].firstName}{" "}
-                    {profiles[session.tutor].lastName}
-                  </Text>
-                  <Text style={styles.detailText}>{session.course}</Text>
-                  <Text style={styles.detailText}>
-                    {formatAvailability(
-                      session.dayOfWeek,
-                      session.startTime,
-                      session.endTime,
-                    )}
-                  </Text>
+                <View style={{ flexDirection: "row" }}>
+                  <Image
+                    style={styles.image}
+                    source={{ uri: profiles[session.tutor].profilePicture }}
+                  />
+                  <View style={styles.detail}>
+                    <Text style={styles.name}>
+                      {profiles[session.tutor].firstName}{" "}
+                      {profiles[session.tutor].lastName}
+                    </Text>
+                    <Text style={styles.detailText}>{session.course}</Text>
+                    <Text style={styles.detailText}>
+                      {formatAvailability(
+                        session.dayOfWeek,
+                        session.startTime,
+                        session.endTime,
+                      )}
+                    </Text>
+                  </View>
                 </View>
                 <View style={styles.icon}>
                   <View style={styles.ratingContainer}>

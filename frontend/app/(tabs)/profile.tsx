@@ -21,13 +21,13 @@ import {
 import { auth } from "../../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function Profile() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any | undefined>(null);
   const [error, setError] = useState(null);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -232,7 +232,11 @@ export default function Profile() {
                 style={styles.menuItem}
                 onPress={() => router.push(item.route as any)}
               >
-                <MaterialCommunityIcons name={item.icon as any} size={30} />
+                <MaterialCommunityIcons
+                  name={item.icon as any}
+                  size={30}
+                  color={text}
+                />
                 <Text style={styles.menuText}>{item.label}</Text>
               </TouchableOpacity>
 

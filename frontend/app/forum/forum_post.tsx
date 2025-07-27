@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { CourseOption } from "../../constants/types";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function ForumPost() {
   const router = useRouter();
@@ -28,8 +29,7 @@ export default function ForumPost() {
   const [selectedCourse, setSelectedCourse] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -88,7 +88,8 @@ export default function ForumPost() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -165,7 +166,7 @@ export default function ForumPost() {
       color: text,
     },
     postButton: {
-      marginTop: 20,
+      marginTop: 35,
       borderRadius: 10,
       alignItems: "center",
       justifyContent: "center",
@@ -186,7 +187,7 @@ export default function ForumPost() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Create a post</Text>
           <View style={{ width: 40 }} />

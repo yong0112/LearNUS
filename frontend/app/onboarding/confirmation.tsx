@@ -12,6 +12,7 @@ import {
   Alert,
   Button,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -30,6 +31,7 @@ import {
   Major,
   LocationOption,
 } from "../../constants/types";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function BookingPage() {
   const router = useRouter();
@@ -39,8 +41,7 @@ export default function BookingPage() {
   const [error, setError] = useState<any>();
   const { selectedMajor, selectedLocation, budget, selectedImageURL } =
     useLocalSearchParams() as any;
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -179,7 +180,7 @@ export default function BookingPage() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -241,7 +242,7 @@ export default function BookingPage() {
             <Text style={styles.buttonText}>Confirm</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </ThemedView>
   );
 }
