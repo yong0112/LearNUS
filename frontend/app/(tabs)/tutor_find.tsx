@@ -309,7 +309,7 @@ export default function tutoring() {
   const handleBooking = () => {
     if (!selectedTutor) return;
     router.push({
-      pathname: "./tutor_find/booking",
+      pathname: "/tutor_find/booking",
       params: {
         tutor: selectedTutor.tutor,
         course: selectedTutor.course,
@@ -642,7 +642,7 @@ export default function tutoring() {
                           color: text,
                         }}
                       >
-                        {profile.ratings ?? "N/A"}
+                        {profile.ratings == 0 ? "New Tutor" : profile.ratings}
                       </Text>
                     </View>
                   </View>
@@ -885,6 +885,7 @@ export default function tutoring() {
                               paddingVertical: 5,
                               alignSelf: "stretch",
                               borderWidth: 1,
+                              opacity: contactLoading ? 0.5 : 1,
                             }}
                             onPress={handleContact}
                           >

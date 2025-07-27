@@ -34,11 +34,12 @@ import {
   MediaType,
   PhotoQuality,
 } from "react-native-image-picker";
-import { UserProfile } from "@/constants/types";
+import { Major, UserProfile } from "@/constants/types";
 
 export default function Details() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<UserProfile>();
+  const [majorOptions, setMajorOptions] = useState<Major[]>([]);
   const [selectedImage, setSelectedImage] = useState<Asset>();
   const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState(null);
@@ -68,6 +69,21 @@ export default function Details() {
       }
     });
 
+    const fetchConstants = async () => {
+      try {
+        const response = await fetch(
+          "https://learnus.onrender.com/api/constants",
+        );
+        if (!response.ok) throw new Error("Failed to fetch constants");
+        const data = await response.json();
+        setMajorOptions(data.MAJORS || []);
+      } catch (err) {
+        console.error(err);
+        setMajorOptions([]);
+      }
+    };
+
+    fetchConstants();
     return () => unsubscribe();
   }, []);
 
@@ -311,7 +327,12 @@ export default function Details() {
           </View>
           <View style={{ paddingBottom: 35 }}>
             <Text style={styles.label}>Major</Text>
-            <Text style={styles.field}>{userProfile?.major}</Text>
+            <Text style={styles.field}>
+              {
+                majorOptions.find((mjr) => mjr.value == userProfile?.major)
+                  ?.label
+              }
+            </Text>
           </View>
           <View style={{ paddingBottom: 35 }}>
             <Text style={styles.label}>Preferred Teaching mode</Text>

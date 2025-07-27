@@ -193,7 +193,7 @@ export default function Login() {
       >
         <View>
           <Image
-            source={require("../assets/images/logo.jpg")}
+            source={require("../assets/images/logo.png")}
             style={styles.image}
           />
           <Text style={styles.title}>Welcome to LearNUS!</Text>
