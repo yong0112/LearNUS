@@ -1,8 +1,10 @@
 const { addUserClasses } = require("../../../controllers/classesController");
 const { postUserClasses } = require("../../../models/classesModel");
+const { sendBookingNotification } = require("../../../utils/notification");
 
 // Mock the model
 jest.mock("../../../models/classesModel");
+jest.mock("../../../utils/notification");
 
 describe("addUserClasses Controller", () => {
   beforeEach(() => {
@@ -37,9 +39,24 @@ describe("addUserClasses Controller", () => {
       people: uid,
       role: "Tutor",
     };
+    const tutorData = {
+      user: input.people,
+      people: uid,
+      course: input.course,
+      dayOfWeek: input.dayOfWeek,
+      startTime: input.startTime,
+      endTime: input.endTime,
+      rate: input.rate,
+      status: input.status,
+      role: "Tutor",
+      createdAt: input.createdAt,
+      endedAt: input.endedAt,
+      profile: input.profile,
+    };
     postUserClasses
       .mockResolvedValueOnce(studentClass)
       .mockResolvedValueOnce(tutorClass);
+    sendBookingNotification.mockResolvedValue();
 
     const req = { params: { uid }, body: input };
     const res = {
@@ -84,6 +101,13 @@ describe("addUserClasses Controller", () => {
       endedAt: input.endedAt,
       profile: input.profile,
     });
+    expect(sendBookingNotification).toHaveBeenCalledTimes(1);
+    expect(sendBookingNotification).toHaveBeenCalledWith(
+      tutorData, // Use tutorData instead of tutorClass
+      "Pending",
+      input.people,
+      tutorClass.id,
+    );
   });
 
   it("returns 400 for missing required fields", async () => {
@@ -106,6 +130,7 @@ describe("addUserClasses Controller", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: "Missing required fields" });
     expect(postUserClasses).not.toHaveBeenCalled();
+    expect(sendBookingNotification).not.toHaveBeenCalled();
   });
 
   it("returns 500 for server error", async () => {
@@ -124,6 +149,7 @@ describe("addUserClasses Controller", () => {
       profile: "tutorProfile123",
     };
     postUserClasses.mockRejectedValue(new Error("Database error"));
+    sendBookingNotification.mockResolvedValue();
 
     const req = { params: { uid }, body: input };
     const res = {
@@ -136,5 +162,6 @@ describe("addUserClasses Controller", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
     expect(postUserClasses).toHaveBeenCalledTimes(1);
+    expect(sendBookingNotification).not.toHaveBeenCalled();
   });
 });
