@@ -27,6 +27,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
 import SearchBar from "../../components/SearchBar";
 import { getTagColor } from "@/constants/tagColors";
+import { useTheme } from "@/components/ThemedContext";
 
 const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
@@ -55,8 +56,7 @@ export default function Forum() {
   const [menuVisiblePostId, setMenuVisiblePostId] = useState<string | null>(
     null,
   );
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -296,7 +296,8 @@ export default function Forum() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 10,
       justifyContent: "flex-start",
     },
@@ -445,7 +446,7 @@ export default function Forum() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Discussion Forum</Text>
           <View style={{ width: 40 }} />
@@ -569,6 +570,7 @@ export default function Forum() {
                       flexDirection: "row",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      paddingRight: 10,
                     }}
                   >
                     {/* Title */}

@@ -47,6 +47,7 @@ import {
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
+import { useTheme } from "@/components/ThemedContext";
 const screenWidth = Dimensions.get("window").width;
 
 function convertTimeLocally(current: Date) {
@@ -66,8 +67,7 @@ export default function onboard() {
   const [selectedImage, setSelectedImage] = useState<Asset>();
   const [selectedImageURL, setSelectedImageURL] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -213,7 +213,8 @@ export default function onboard() {
       StyleSheet.create({
         container: {
           flex: 1,
-          paddingVertical: 40,
+          paddingTop: 40,
+          paddingBottom: 50,
           paddingHorizontal: 20,
         },
         header: {
@@ -315,7 +316,7 @@ export default function onboard() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Onboarding</Text>
@@ -344,7 +345,12 @@ export default function onboard() {
                 placeholder={"Select your major"}
                 value={selectedMajor}
                 onChange={(item) => {
-                  setSelectedMajor(item.value);
+                  if (!item.isHeader) {
+                    setSelectedMajor(item.value);
+                  } else {
+                    Alert.alert("Choose a major instead of a faculty");
+                    router.reload();
+                  }
                 }}
                 renderLeftIcon={() => (
                   <Ionicons color={"gray"} name="search-sharp" size={20} />
@@ -457,6 +463,6 @@ export default function onboard() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }

@@ -14,6 +14,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -191,7 +192,7 @@ export default function Login() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         enabled
       >
-        <View>
+        <ScrollView>
           <Image
             source={require("../assets/images/logo.png")}
             style={styles.image}
@@ -249,7 +250,7 @@ export default function Login() {
               <Text style={styles.signUpLink}>Join Now</Text>
             </Link>
           </Text>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );

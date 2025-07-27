@@ -60,7 +60,8 @@ export default function TutorPost() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -90,6 +91,7 @@ export default function TutorPost() {
       fontWeight: "semibold",
       textAlign: "center",
       marginBottom: 15,
+      color: text,
     },
     input: {
       borderWidth: 1,
@@ -122,7 +124,7 @@ export default function TutorPost() {
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Reset Password</Text>
         <View style={{ width: 40 }} />

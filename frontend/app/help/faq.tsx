@@ -1,9 +1,12 @@
+import { useTheme } from "@/components/ThemedContext";
+import { ThemedView } from "@/components/ThemedView";
 import { FAQ } from "@/constants/types";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,8 +20,7 @@ export default function faq() {
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>(
     {},
   );
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -48,7 +50,12 @@ export default function faq() {
   };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    container: {
+      flex: 1,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
+    },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -67,6 +74,7 @@ export default function faq() {
       fontSize: 24,
       fontWeight: 600,
       marginVertical: 10,
+      color: text,
     },
     questionContainer: {
       paddingVertical: 10,
@@ -83,27 +91,28 @@ export default function faq() {
     titleText: {
       fontSize: 18,
       fontWeight: "bold",
+      color: text,
     },
     ansText: {
       fontSize: 16,
       fontWeight: "semibold",
-      color: "#0e66beff",
+      color: "#05488bff",
     },
   });
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>FAQs</Text>
         <View style={{ width: 40 }} />
       </View>
 
       {/**Body */}
-      <View>
+      <ScrollView>
         <Text style={styles.headings}>Frequently Asked Questions</Text>
         {faq && faq.length > 0 ? (
           faq.map((ques: FAQ, index: number) => {
@@ -116,9 +125,9 @@ export default function faq() {
                 >
                   <Text style={styles.titleText}>{ques.title}</Text>
                   {isExtended ? (
-                    <AntDesign name="up" size={25} />
+                    <AntDesign name="up" size={25} color={text} />
                   ) : (
-                    <AntDesign name="down" size={25} />
+                    <AntDesign name="down" size={25} color={text} />
                   )}
                 </TouchableOpacity>
                 {isExtended ? (
@@ -134,7 +143,7 @@ export default function faq() {
         ) : (
           <View />
         )}
-      </View>
-    </View>
+      </ScrollView>
+    </ThemedView>
   );
 }

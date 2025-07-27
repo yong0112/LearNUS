@@ -23,24 +23,34 @@ import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
+import { useTheme } from "@/components/ThemedContext";
 const screenHeight = Dimensions.get("window").height;
 
 export default function settings() {
   const router = useRouter();
-  const [isDarkEnabled, setIsDarkEnabled] = useState<boolean>(false);
+  const { themeMode, setThemeMode, isDarkMode } = useTheme();
+  const [isDarkEnabled, setIsDarkEnabled] = useState<boolean>(
+    isDarkMode ? true : false,
+  );
   const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
   const toggleDarkSwitch = () => {
-    setIsDarkEnabled(!isDarkEnabled);
+    if (isDarkMode) {
+      setIsDarkEnabled(false);
+      setThemeMode("light");
+    } else {
+      setIsDarkEnabled(true);
+      setThemeMode("dark");
+    }
   };
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -77,6 +87,7 @@ export default function settings() {
     title: {
       fontSize: 17,
       fontWeight: "600",
+      color: text,
     },
     subtitle: {
       fontSize: 16,
@@ -91,7 +102,7 @@ export default function settings() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>App Settings</Text>
           <View style={{ width: 40 }} />

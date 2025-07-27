@@ -1,3 +1,4 @@
+import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
@@ -109,7 +110,12 @@ export default function changePassword() {
   };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    container: {
+      flex: 1,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
+    },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -154,11 +160,11 @@ export default function changePassword() {
   });
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Change password</Text>
         <View style={{ width: 40 }} />
@@ -196,6 +202,6 @@ export default function changePassword() {
       <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
         <Text style={styles.buttonText}>Change password</Text>
       </TouchableOpacity>
-    </View>
+    </ThemedView>
   );
 }

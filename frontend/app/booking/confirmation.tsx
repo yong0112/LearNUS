@@ -14,14 +14,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { auth } from "@/lib/firebase";
 import { Class, UserProfile } from "@/constants/types";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function confirmation() {
   const router = useRouter();
   const [session, setSession] = useState<Class>();
   const [profile, setProfile] = useState<UserProfile>();
   const { id } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -105,7 +105,8 @@ export default function confirmation() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -143,11 +144,13 @@ export default function confirmation() {
       fontSize: 18,
       fontWeight: "semibold",
       marginTop: 30,
+      color: text,
     },
     confirmText: {
       fontSize: 18,
       fontWeight: "bold",
       marginTop: 10,
+      color: text,
     },
     responseBar: {
       flexDirection: "column",
@@ -178,12 +181,9 @@ export default function confirmation() {
     <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
-        <Ionicons
-          name="arrow-back-circle"
-          size={40}
-          color="orange"
-          onPress={() => router.back()}
-        />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Payment Confirmation</Text>
         <View style={{ width: 40 }} />
       </View>

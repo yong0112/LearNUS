@@ -1,3 +1,4 @@
+import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import {
   AntDesign,
@@ -25,7 +26,12 @@ export default function help() {
   const text = useThemeColor({}, "text");
 
   const styles = StyleSheet.create({
-    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    container: {
+      flex: 1,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
+    },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -55,15 +61,16 @@ export default function help() {
       fontSize: 18,
       fontWeight: "600",
       marginLeft: 15,
+      color: text,
     },
   });
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Help & Support</Text>
         <View style={{ width: 40 }} />
@@ -77,10 +84,14 @@ export default function help() {
           onPress={() => router.push("/help/faq")}
         >
           <View style={styles.icon}>
-            <MaterialCommunityIcons name="comment-question-outline" size={25} />
+            <MaterialCommunityIcons
+              name="comment-question-outline"
+              size={25}
+              color={text}
+            />
             <Text style={styles.title}>FAQs</Text>
           </View>
-          <AntDesign name="arrowright" size={20} />
+          <AntDesign name="arrowright" size={20} color={text} />
         </TouchableOpacity>
 
         {/**Report issue */}
@@ -89,10 +100,10 @@ export default function help() {
           onPress={() => router.push("/help/report")}
         >
           <View style={styles.icon}>
-            <MaterialIcons name="report" size={25} />
+            <MaterialIcons name="report" size={25} color={text} />
             <Text style={styles.title}>Report an issue</Text>
           </View>
-          <AntDesign name="arrowright" size={20} />
+          <AntDesign name="arrowright" size={20} color={text} />
         </TouchableOpacity>
 
         {/**Contact Us */}
@@ -101,12 +112,12 @@ export default function help() {
           onPress={() => router.push("/help/contact")}
         >
           <View style={styles.icon}>
-            <Fontisto name="email" size={25} />
+            <Fontisto name="email" size={25} color={text} />
             <Text style={styles.title}>Contact Us</Text>
           </View>
-          <AntDesign name="arrowright" size={20} />
+          <AntDesign name="arrowright" size={20} color={text} />
         </TouchableOpacity>
       </View>
-    </View>
+    </ThemedView>
   );
 }
