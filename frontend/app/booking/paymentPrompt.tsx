@@ -6,6 +6,7 @@ import {
   Image,
   useColorScheme,
   Alert,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -20,6 +21,7 @@ import {
   MediaType,
   PhotoQuality,
 } from "react-native-image-picker";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function paymentPrompt() {
   const router = useRouter();
@@ -29,8 +31,7 @@ export default function paymentPrompt() {
   const [selectedImage, setSelectedImage] = useState<Asset>();
   const [selectedImageURL, setSelectedImageURL] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const { id } = useLocalSearchParams();
@@ -216,7 +217,8 @@ export default function paymentPrompt() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
     },
     header: {
@@ -241,6 +243,7 @@ export default function paymentPrompt() {
       fontSize: 20,
       fontWeight: "bold",
       marginBottom: 10,
+      color: text,
     },
     detailBox: {
       flexDirection: "row",
@@ -296,86 +299,88 @@ export default function paymentPrompt() {
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Payment</Text>
         <View style={{ width: 40 }} />
       </View>
 
       {/**Class details */}
-      {session ? (
-        <View>
-          <View style={styles.classDetails}>
-            <Text style={styles.subHeaderText}>Class Details</Text>
-            <View style={styles.detailBox}>
-              <View>
-                <Text style={styles.titleText}>Tutor name</Text>
+      <ScrollView>
+        {session ? (
+          <View>
+            <View style={styles.classDetails}>
+              <Text style={styles.subHeaderText}>Class Details</Text>
+              <View style={styles.detailBox}>
+                <View>
+                  <Text style={styles.titleText}>Tutor name</Text>
+                </View>
+                <View>
+                  <Text style={styles.detailText}>
+                    {profile?.firstName} {profile?.lastName}
+                  </Text>
+                </View>
               </View>
-              <View>
-                <Text style={styles.detailText}>
-                  {profile?.firstName} {profile?.lastName}
-                </Text>
+              <View style={styles.detailBox}>
+                <View>
+                  <Text style={styles.titleText}>Course code</Text>
+                </View>
+                <View>
+                  <Text style={styles.detailText}>{session?.course}</Text>
+                </View>
+              </View>
+              <View style={styles.detailBox}>
+                <View>
+                  <Text style={styles.titleText}>Time slot</Text>
+                </View>
+                <View>
+                  <Text style={styles.detailText}>
+                    {formatAvailability(
+                      session?.dayOfWeek,
+                      session?.startTime,
+                      session?.endTime,
+                    )}
+                  </Text>
+                </View>
               </View>
             </View>
-            <View style={styles.detailBox}>
-              <View>
-                <Text style={styles.titleText}>Course code</Text>
+
+            {/**Payment Details */}
+            <View style={styles.classDetails}>
+              <Text style={styles.subHeaderText}>Payment Details</Text>
+              <View style={styles.qr}>
+                <Image
+                  source={
+                    profile?.QR
+                      ? { uri: profile.QR }
+                      : require("../../assets/images/fakeQR.jpg")
+                  }
+                />
               </View>
-              <View>
-                <Text style={styles.detailText}>{session?.course}</Text>
-              </View>
-            </View>
-            <View style={styles.detailBox}>
-              <View>
-                <Text style={styles.titleText}>Time slot</Text>
-              </View>
-              <View>
-                <Text style={styles.detailText}>
-                  {formatAvailability(
-                    session?.dayOfWeek,
-                    session?.startTime,
-                    session?.endTime,
-                  )}
-                </Text>
+              <View style={styles.detailBox}>
+                <View>
+                  <Text style={styles.titleText}>Amount to pay (in S$)</Text>
+                </View>
+                <View>
+                  <Text style={styles.detailText}>{session.rate}</Text>
+                </View>
               </View>
             </View>
           </View>
+        ) : (
+          <View />
+        )}
 
-          {/**Payment Details */}
-          <View style={styles.classDetails}>
-            <Text style={styles.subHeaderText}>Payment Details</Text>
-            <View style={styles.qr}>
-              <Image
-                source={
-                  profile?.QR
-                    ? { uri: profile.QR }
-                    : require("../../assets/images/fakeQR.jpg")
-                }
-              />
-            </View>
-            <View style={styles.detailBox}>
-              <View>
-                <Text style={styles.titleText}>Amount to pay (in S$)</Text>
-              </View>
-              <View>
-                <Text style={styles.detailText}>{session.rate}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      ) : (
-        <View />
-      )}
+        {/**Upload payment proof */}
+        <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+          <Text style={styles.uploadButtonText}>Upload receipt</Text>
+        </TouchableOpacity>
 
-      {/**Upload payment proof */}
-      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-        <Text style={styles.uploadButtonText}>Upload receipt</Text>
-      </TouchableOpacity>
-
-      {/**Submit */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
+        {/**Submit */}
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </ThemedView>
   );
 }

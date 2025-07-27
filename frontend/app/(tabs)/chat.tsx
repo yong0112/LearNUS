@@ -15,11 +15,11 @@ import {
 import { useRouter } from "expo-router";
 import { auth } from "../../lib/firebase";
 import { Chat, UserProfile } from "../../constants/types";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function ChatMessage() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const [chats, setChats] = useState<Chat[]>([]);

@@ -39,6 +39,7 @@ import {
   Session,
 } from "../../constants/types";
 import SearchBar from "../../components/SearchBar";
+import { useTheme } from "@/components/ThemedContext";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -60,8 +61,7 @@ export default function tutoring() {
   const [modalVisible, setModalVisible] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
   const { location, ratings, minRate, maxRate } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -678,7 +678,7 @@ export default function tutoring() {
           onRequestClose={closeModal}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
+            <ScrollView style={styles.modalContent}>
               {selectedTutor &&
                 (() => {
                   const profile = tutorProfile[selectedTutor.tutor];
@@ -911,7 +911,7 @@ export default function tutoring() {
                     </>
                   );
                 })()}
-            </View>
+            </ScrollView>
           </View>
         </Modal>
       </View>

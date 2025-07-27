@@ -179,7 +179,12 @@ export default function history() {
   }
 
   const styles = StyleSheet.create({
-    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    container: {
+      flex: 1,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
+    },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -187,6 +192,7 @@ export default function history() {
       paddingTop: 10,
       borderBottomColor: "gray",
       borderBottomWidth: 0.5,
+      marginBottom: 10,
     },
     headerText: {
       fontSize: 24,
@@ -203,6 +209,7 @@ export default function history() {
       fontSize: 20,
       fontWeight: "bold",
       marginLeft: 10,
+      color: text,
     },
     classCard: {
       marginBottom: 20,
@@ -211,11 +218,11 @@ export default function history() {
       flexDirection: "row",
       justifyContent: "space-between",
       shadowColor: "#777575ff",
-      shadowOffset: { width: 0, height: 8 },
+      shadowOffset: { width: 4, height: 8 },
       shadowOpacity: 0.12,
       shadowRadius: 24,
       elevation: 12,
-      backgroundColor: "white",
+      backgroundColor: bg,
     },
     subject: {
       fontSize: 18,
@@ -237,6 +244,7 @@ export default function history() {
     noClassText: {
       fontSize: 20,
       fontWeight: "700",
+      color: text,
     },
   });
 
@@ -246,7 +254,7 @@ export default function history() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} />
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Classes</Text>
           <View style={{ width: 40 }} />

@@ -11,6 +11,11 @@ import {
   ActivityIndicator,
   useColorScheme,
   Image,
+  TouchableWithoutFeedback,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -18,12 +23,12 @@ import { auth } from "../../lib/firebase";
 import { Chat, Message, UserProfile } from "../../constants/types";
 import { io } from "socket.io-client";
 import { Entypo } from "@expo/vector-icons";
+import { useTheme } from "@/components/ThemedContext";
 
 export default function ChatDetail() {
   const { chatId } = useLocalSearchParams();
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === "dark";
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -485,7 +490,8 @@ export default function ChatDetail() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 40,
+      paddingTop: 40,
+      paddingBottom: 50,
       paddingHorizontal: 20,
       backgroundColor: bg,
     },
@@ -625,91 +631,100 @@ export default function ChatDetail() {
   });
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push("/chat")}
-        >
-          <Entypo name="chevron-left" size={30} color="orange" />
-        </TouchableOpacity>
-        <Image style={styles.headerImage} source={{ uri: profilePicture }} />
-        <Text style={styles.headerText}>{otherParticipantName}</Text>
-      </View>
-      {loading ? (
-        <ActivityIndicator size="large" color="orange" />
-      ) : (
-        <>
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={(item) => item.id}
-          />
-          {typing && (
-            <Text style={styles.typingIndicator}>
-              {otherParticipantName} is typing...
-            </Text>
-          )}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              value={newMessage}
-              onChangeText={handleTyping}
-              placeholder="Type a message..."
-              placeholderTextColor={isDarkMode ? "#888" : "#666"}
-            />
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={handleSendMessage}
-              disabled={!newMessage.trim()}
-            >
-              <Entypo
-                name="paper-plane"
-                size={24}
-                color={newMessage.trim() ? "orange" : "#ccc"}
-              />
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-      <Modal
-        visible={editModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={handleCancelEdit}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: bg }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        enabled
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Message</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={editedText}
-              onChangeText={setEditedText}
-              placeholder="Enter new message text..."
-              placeholderTextColor={isDarkMode ? "#888" : "#666"}
-              multiline
-            />
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalCancelButton]}
-                onPress={handleCancelEdit}
-              >
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalSaveButton]}
-                onPress={handleSaveEdit}
-                disabled={!editedText.trim()}
-              >
-                <Text style={[styles.modalButtonText, { color: "white" }]}>
-                  Save
-                </Text>
-              </TouchableOpacity>
-            </View>
+        <View style={styles.container}>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.push("/chat")}
+            >
+              <Entypo name="chevron-left" size={30} color="orange" />
+            </TouchableOpacity>
+            <Image style={styles.headerImage} source={{ uri: profilePicture }} />
+            <Text style={styles.headerText}>{otherParticipantName}</Text>
           </View>
+          {loading ? (
+            <ActivityIndicator size="large" color="orange" />
+          ) : (
+            <>
+              <FlatList
+                ref={flatListRef}
+                data={messages}
+                renderItem={renderMessage}
+                keyExtractor={(item) => item.id}
+              />
+              {typing && (
+                <Text style={styles.typingIndicator}>
+                  {otherParticipantName} is typing...
+                </Text>
+              )}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  value={newMessage}
+                  onChangeText={handleTyping}
+                  placeholder="Type a message..."
+                  placeholderTextColor={isDarkMode ? "#888" : "#666"}
+                />
+                <TouchableOpacity
+                  style={styles.sendButton}
+                  onPress={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                >
+                  <Entypo
+                    name="paper-plane"
+                    size={24}
+                    color={newMessage.trim() ? "orange" : "#ccc"}
+                  />
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+          <Modal
+            visible={editModalVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={handleCancelEdit}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Edit Message</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editedText}
+                  onChangeText={setEditedText}
+                  placeholder="Enter new message text..."
+                  placeholderTextColor={isDarkMode ? "#888" : "#666"}
+                  multiline
+                />
+                <View style={styles.modalButtonContainer}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.modalCancelButton]}
+                    onPress={handleCancelEdit}
+                  >
+                    <Text style={styles.modalButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.modalSaveButton]}
+                    onPress={handleSaveEdit}
+                    disabled={!editedText.trim()}
+                  >
+                    <Text style={[styles.modalButtonText, { color: "white" }]}>
+                      Save
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </View>
-      </Modal>
-    </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }

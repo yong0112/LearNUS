@@ -165,10 +165,10 @@ class SocketHandlers {
       }
     });
 
-    // Handle message deletion
-    socket.on("delete_message", async (data) => {
+    // Handle message reactions
+    socket.on("toggle_reaction", async (data) => {
       try {
-        const { messageId, chatId } = data;
+        const { messageId, emoji, chatId } = data;
         const userId = socket.userId;
 
         if (!userId) {
@@ -176,16 +176,20 @@ class SocketHandlers {
           return;
         }
 
-        // Emit delete event to chat room (HTTP DELETE already handled deletion)
-        this.io.to(chatId).emit("message_deleted", {
+        const reactions = await Message.toggleReaction(
           messageId,
-          chatId,
           userId,
-          timestamp: new Date(),
+          emoji,
+        );
+
+        // Emit reaction update to chat room
+        this.io.to(chatId).emit("reaction_updated", {
+          messageId,
+          reactions,
+          userId,
         });
       } catch (error) {
-        console.error("Error processing delete message event:", error);
-        socket.emit("error", { message: "Failed to process message deletion" });
+        console.error("Error toggling reaction:", error);
       }
     });
 

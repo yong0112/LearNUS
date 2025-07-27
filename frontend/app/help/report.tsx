@@ -1,3 +1,5 @@
+import { useTheme } from "@/components/ThemedContext";
+import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,11 +18,10 @@ import {
 export default function report() {
   const router = useRouter();
   const [title, setTitle] = useState<string>("");
-  const [titleCount, setTitleCount] = useState<number>();
+  const [titleCount, setTitleCount] = useState<number>(0);
   const [content, setContent] = useState<string>("");
-  const [contentCount, setContentCount] = useState<number>();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme == "dark";
+  const [contentCount, setContentCount] = useState<number>(0);
+  const { isDarkMode } = useTheme();
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
   const TITLE_MAX = 30;
@@ -75,7 +76,12 @@ export default function report() {
   };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, paddingVertical: 40, paddingHorizontal: 20 },
+    container: {
+      flex: 1,
+      paddingTop: 40,
+      paddingBottom: 50,
+      paddingHorizontal: 20,
+    },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -103,7 +109,7 @@ export default function report() {
       textAlignVertical: "top",
     },
     contentInput: {
-      height: 500,
+      height: 300,
       borderRadius: 10,
       backgroundColor: "#d1d5db",
       padding: 16,
@@ -135,11 +141,11 @@ export default function report() {
   });
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       {/**Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} />
+          <Ionicons name="arrow-back-outline" size={20} color={text} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Report an issue</Text>
         <View style={{ width: 40 }} />
@@ -181,6 +187,6 @@ export default function report() {
       <TouchableOpacity style={styles.button} onPress={handleReport}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
-    </View>
+    </ThemedView>
   );
 }
