@@ -10,6 +10,6 @@ router.get("/:chatId", messageController.getChatMessages);
 router.post("/", messageController.sendMessage);
 router.put("/read", messageController.markAsRead);
 router.put("/:messageId", messageController.editMessage);
-router.post("/:messageId/reaction", messageController.toggleReaction);
+router.post("/:messageId", messageController.deleteMessage);
 
 module.exports = router;
