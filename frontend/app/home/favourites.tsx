@@ -30,7 +30,6 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { ThemedView } from "@/components/ThemedView";
 import { Day, Session, Tutor, UserProfile } from "@/constants/types";
 import { Image } from "react-native";
-import { useTheme } from "@/components/ThemedContext";
 const screenHeight = Dimensions.get("window").height;
 
 export default function favourites() {
@@ -42,7 +41,8 @@ export default function favourites() {
   const [selectedTutor, setSelectedTutor] = useState<Tutor>();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [shortlisted, setShortlisted] = useState<string[]>();
-  const { isDarkMode } = useTheme();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
   const text = useThemeColor({}, "text");
 
@@ -101,7 +101,7 @@ export default function favourites() {
             .then(async (data: UserProfile) => {
               console.log(data);
               const filtered = tutors?.filter((tutor: Tutor) => {
-                return data.favourites?.includes(tutor.id);
+                return Array.isArray(data.favourites) && data.favourites.includes(tutor.id);
               });
               console.log("Favourites", filtered);
               setFavTutor(filtered);
@@ -185,7 +185,7 @@ export default function favourites() {
   const handleBooking = () => {
     if (selectedTutor) {
       router.push({
-        pathname: "/tutor_find/booking",
+        pathname: "../tutor_find/booking",
         params: {
           tutor: selectedTutor.tutor,
           course: selectedTutor.course,
@@ -246,7 +246,6 @@ export default function favourites() {
       paddingVertical: 10,
       borderBottomWidth: 1,
       borderBottomColor: "gray",
-      justifyContent: "space-between",
     },
     detail: {
       flexDirection: "column",
@@ -260,7 +259,6 @@ export default function favourites() {
     name: {
       fontSize: 20,
       fontWeight: "bold",
-      color: text,
     },
     detailText: {
       fontSize: 16,
@@ -274,7 +272,6 @@ export default function favourites() {
     rating: {
       fontSize: 18,
       fontWeight: "bold",
-      color: text,
     },
     icon: {
       flexDirection: "column",
@@ -327,7 +324,7 @@ export default function favourites() {
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back-outline" size={20} color={text} />
+            <Ionicons name="arrow-back-outline" size={20} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Favourites</Text>
           <View style={{ width: 40 }} />
@@ -342,25 +339,23 @@ export default function favourites() {
                 style={styles.profileCard}
                 onPress={() => handleTutorProfile(session)}
               >
-                <View style={{ flexDirection: "row" }}>
-                  <Image
-                    style={styles.image}
-                    source={{ uri: profiles[session.tutor].profilePicture }}
-                  />
-                  <View style={styles.detail}>
-                    <Text style={styles.name}>
-                      {profiles[session.tutor].firstName}{" "}
-                      {profiles[session.tutor].lastName}
-                    </Text>
-                    <Text style={styles.detailText}>{session.course}</Text>
-                    <Text style={styles.detailText}>
-                      {formatAvailability(
-                        session.dayOfWeek,
-                        session.startTime,
-                        session.endTime,
-                      )}
-                    </Text>
-                  </View>
+                <Image
+                  style={styles.image}
+                  source={{ uri: profiles[session.tutor].profilePicture }}
+                />
+                <View style={styles.detail}>
+                  <Text style={styles.name}>
+                    {profiles[session.tutor].firstName}{" "}
+                    {profiles[session.tutor].lastName}
+                  </Text>
+                  <Text style={styles.detailText}>{session.course}</Text>
+                  <Text style={styles.detailText}>
+                    {formatAvailability(
+                      session.dayOfWeek,
+                      session.startTime,
+                      session.endTime,
+                    )}
+                  </Text>
                 </View>
                 <View style={styles.icon}>
                   <View style={styles.ratingContainer}>
