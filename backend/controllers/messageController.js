@@ -139,18 +139,52 @@ const messageController = {
     }
   },
 
-  // Toggle reaction
-  toggleReaction: async (req, res) => {
+  deleteMessage: async (req, res) => {
     try {
       const { messageId } = req.params;
-      const { emoji } = req.body;
       const userId = req.user.uid;
 
-      const reactions = await Message.toggleReaction(messageId, userId, emoji);
+      // Get message and verify ownership
+      const messageRef = await db.collection("messages").doc(messageId).get();
+
+      if (!messageRef.exists) {
+        return res.status(404).json({
+          success: false,
+          message: "Message not found",
+        });
+      }
+
+      const messageData = messageRef.data();
+
+      if (messageData.senderId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied",
+        });
+      }
+
+      const message = new Message({ id: messageId, ...messageData });
+      const chat = await Chat.getById(messageData.chatId);
+
+      // Check if this is the last message
+      let isLastMessage = false;
+      if (chat.lastMessage && chat.lastMessage.timestamp && messageData.timestamp) {
+        isLastMessage = chat.lastMessage.timestamp.toMillis() === messageData.timestamp.toMillis();
+      }
+
+      // Delete the message
+      await message.delete();
+
+      // If deleted message was the last message, update chat's last message
+      if (isLastMessage) {
+        const recentMessages = await Message.getChatMessages(messageData.chatId, 1);
+        const newLastMessage = recentMessages.length > 0 ? recentMessages[0] : null;
+        await chat.updateLastMessage(newLastMessage || { message: "", senderId: "", timestamp: null, type: "text" });
+      }
 
       res.status(200).json({
         success: true,
-        data: { reactions },
+        message: "Message deleted successfully",
       });
     } catch (error) {
       res.status(500).json({

@@ -12,7 +12,6 @@ class Message {
     this.readBy = data.readBy || [];
     this.edited = data.edited || false;
     this.editedAt = data.editedAt || null;
-    this.reactions = data.reactions || {};
   }
 
   // Send a new message
@@ -28,7 +27,6 @@ class Message {
         ),
         readBy: [messageData.senderId],
         edited: false,
-        reactions: {},
       };
 
       const messageRef = await db.collection("messages").add(newMessage);
@@ -105,46 +103,36 @@ class Message {
     }
   }
 
-  // Add/remove reaction
-  static async toggleReaction(messageId, userId, emoji) {
-    try {
-      const messageRef = db.collection("messages").doc(messageId);
-      const messageDoc = await messageRef.get();
-
-      if (!messageDoc.exists) {
-        throw new Error("Message not found");
-      }
-
-      const messageData = messageDoc.data();
-      const reactions = messageData.reactions || {};
-
-      if (!reactions[emoji]) {
-        reactions[emoji] = [];
-      }
-
-      const userIndex = reactions[emoji].indexOf(userId);
-      if (userIndex > -1) {
-        reactions[emoji].splice(userIndex, 1);
-        if (reactions[emoji].length === 0) {
-          delete reactions[emoji];
-        }
-      } else {
-        reactions[emoji].push(userId);
-      }
-
-      await messageRef.update({ reactions });
-      return reactions;
-    } catch (error) {
-      throw new Error(`Error toggling reaction: ${error.message}`);
-    }
-  }
-
   // Delete message
   async delete() {
     try {
       await db.collection("messages").doc(this.id).delete();
     } catch (error) {
       throw new Error(`Error deleting message: ${error.message}`);
+    }
+  }
+
+static async getLatestMessage(chatId, excludeMessageId = null) {
+    try {
+      let query = db
+        .collection("messages")
+        .where("chatId", "==", chatId)
+        .orderBy("timestamp", "desc")
+        .limit(1);
+
+      if (excludeMessageId) {
+        query = query.where(admin.firestore.FieldPath.documentId(), "!=", excludeMessageId);
+      }
+
+      const snapshot = await query.get();
+      if (snapshot.empty) {
+        return null;
+      }
+
+      const doc = snapshot.docs[0];
+      return new Message({ id: doc.id, ...doc.data() });
+    } catch (error) {
+      throw new Error(`Error getting latest message: ${error.message}`);
     }
   }
 }
