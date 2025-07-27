@@ -11,6 +11,7 @@ import * as Notifications from "expo-notifications";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { MenuProvider } from "react-native-popup-menu";
 import { registerForPushNotificationsAsync } from "@/lib/notification";
+import "../lib/firebase.ts";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -20,9 +21,6 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    // Register for push notifications
-    registerForPushNotificationsAsync();
-
     // Handle notifications received while app is in foreground
     const subscription = Notifications.addNotificationReceivedListener(
       (notification) => {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "421199311744",
+    "project_id": "learnus-c408d",
+    "storage_bucket": "learnus-c408d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:421199311744:android:9cabc9ff3871581fbd0765",
+        "android_client_info": {
+          "package_name": "com.learnus.learnus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9s6JfKzwqqtU5FEo1Rv2XusaFwXQEQbg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

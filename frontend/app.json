@@ -2,7 +2,7 @@
   "expo": {
     "name": "LearNUS",
     "slug": "LearNUS",
-    "owner": "jayyy25",
+    "owner": "yong1611",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -19,7 +19,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.LearNUS"
+      "googleServicesFile": "./google-services.json",
+      "package": "com.learnus.learnus"
     },
     "web": {
       "bundler": "metro",
@@ -45,7 +46,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "892e4cf3-3b4c-4ffc-bba2-3360b1913b70"
+        "projectId": "7a1182ce-21a3-4365-818c-25a0011f9235"
       }
     }
   }
