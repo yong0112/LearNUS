@@ -3,6 +3,7 @@ const {
   updateUserSessionField,
 } = require("../models/sessionModel");
 const { getUserClasses } = require("../models/classesModel");
+const { sendBookingNotification } = require("../utils/notification");
 
 const fetchUserSession = async (req, res) => {
   const uid = req.params.uid;
@@ -42,6 +43,9 @@ const updateSessionStatus = async (req, res) => {
     const otherSessionId = classes.find((cls) => cls.profile == profileId).id;
     await updateUserSessionField(uid, cid, updatedData);
     await updateUserSessionField(otherId, otherSessionId, updatedData);
+
+    await sendBookingNotification(session, status, uid, cid);
+
     res.json({ message: "Session updated successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -69,6 +73,9 @@ const updatePaymentProof = async (req, res) => {
     const otherSessionId = classes.find((cls) => cls.profile == profileId).id;
     await updateUserSessionField(uid, cid, updatedData);
     await updateUserSessionField(otherId, otherSessionId, updatedData);
+
+    await sendBookingNotification(session, "Paid", uid, cid);
+
     res.json({ message: "Payment proof posted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
