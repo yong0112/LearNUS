@@ -23,9 +23,7 @@ class Message {
         senderId: messageData.senderId,
         message: messageData.message,
         type: "text",
-        timestamp: convertTimeLocally(
-          admin.firestore.FieldValue.serverTimestamp(),
-        ),
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
         readBy: [messageData.senderId],
         edited: false,
         reactions: {},
@@ -87,16 +85,11 @@ class Message {
   // Edit message
   async edit(newMessage) {
     try {
-      await db
-        .collection("messages")
-        .doc(this.id)
-        .update({
-          message: newMessage,
-          edited: true,
-          editedAt: convertTimeLocally(
-            admin.firestore.FieldValue.serverTimestamp(),
-          ),
-        });
+      await db.collection("messages").doc(this.id).update({
+        message: newMessage,
+        edited: true,
+        editedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
 
       this.message = newMessage;
       this.edited = true;

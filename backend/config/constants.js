@@ -14,11 +14,13 @@ module.exports = {
     { label: "Sunday", value: 0 },
   ],
   FAQ: [
-    { title: "Test", ans: "Testing" },
-    { title: "Test2", ans: "HAHA, stupid" },
     {
-      title: "Test3",
-      ans: "wejcbwecbewicewicewucebwuicewucewuicewuicewuicewbuicwebcuiwecuiewbcuebceucbuicbui",
+      title: "How to track booking status?",
+      ans: "After you have booked a session, a session card would appear under Profile -> Classes, where you could see all classes you had. Click on any session card, you will see booking status, where green tick indicates past status, Action required indicates you need to do some actions.",
+    },
+    {
+      title: "How to delete post if I had accidentally post on forum wrongly?",
+      ans: "On the forum browsing page and search for your post with title, or click onto your post, obseve the three dots on top right corner, click on that and choose Delete post to permanently delete your posting.",
     },
   ],
   MAJORS: [

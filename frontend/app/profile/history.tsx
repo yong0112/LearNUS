@@ -296,7 +296,7 @@ export default function history() {
                               {cls.course} ({cls.role})
                             </Text>
                             <Text style={{ fontSize: 16, color: text }}>
-                              {formatDate(cls.date, cls.startTime)}
+                              {formatDate(cls.dayOfWeek, cls.startTime)}
                             </Text>
                             <Text style={{ fontSize: 16, color: text }}>
                               Status: {cls.status}
@@ -346,7 +346,7 @@ export default function history() {
                               {cls.course} ({cls.role})
                             </Text>
                             <Text style={{ fontSize: 18, color: text }}>
-                              {formatDate(cls.date, cls.startTime)}
+                              {formatDate(cls.dayOfWeek, cls.startTime)}
                             </Text>
                             <Text style={{ fontSize: 18, color: text }}>
                               Status: {cls.status}
@@ -398,7 +398,7 @@ export default function history() {
                               {cls.course} ({cls.role})
                             </Text>
                             <Text style={{ fontSize: 18, color: text }}>
-                              {formatDate(cls.date, cls.startTime)}
+                              {formatDate(cls.dayOfWeek, cls.startTime)}
                             </Text>
                             <Text style={{ fontSize: 18, color: text }}>
                               Status: {cls.status}

@@ -40,7 +40,7 @@ export interface UpvoteStatus {
 export interface Class {
   id: string;
   course: string;
-  date: number;
+  dayOfWeek: number;
   role: string;
   startTime: string;
   endTime: string;

@@ -263,8 +263,16 @@ export default function ChatDetail() {
     ) {
       // Convert Firestore Timestamp to Date
       const ts = item.timestamp as { _seconds: number; _nanoseconds: number };
-      timestamp = new Date(ts._seconds * 1000 + ts._nanoseconds / 1000000);
+      timestamp = convertTimeLocally(
+        new Date(ts._seconds * 1000 + ts._nanoseconds / 1000000),
+      );
       console.log("timestamp:", ts._seconds * 1000 + ts._nanoseconds / 1000000);
+    }
+
+    function convertTimeLocally(current: Date) {
+      const newDate = new Date();
+      const formatted = newDate.setHours(current.getHours() + 8);
+      return new Date(formatted);
     }
 
     return (
