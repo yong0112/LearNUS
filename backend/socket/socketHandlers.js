@@ -165,34 +165,6 @@ class SocketHandlers {
       }
     });
 
-    // Handle message reactions
-    socket.on("toggle_reaction", async (data) => {
-      try {
-        const { messageId, emoji, chatId } = data;
-        const userId = socket.userId;
-
-        if (!userId) {
-          socket.emit("error", { message: "Not authenticated" });
-          return;
-        }
-
-        const reactions = await Message.toggleReaction(
-          messageId,
-          userId,
-          emoji,
-        );
-
-        // Emit reaction update to chat room
-        this.io.to(chatId).emit("reaction_updated", {
-          messageId,
-          reactions,
-          userId,
-        });
-      } catch (error) {
-        console.error("Error toggling reaction:", error);
-      }
-    });
-
     // Handle message editing
     socket.on("edit_message", async (data) => {
       try {
