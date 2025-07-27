@@ -101,7 +101,6 @@ export default function BookingPage() {
       flex: 1,
       paddingVertical: 40,
       paddingHorizontal: 20,
-      justifyContent: "flex-start",
     },
     header: {
       flexDirection: "row",
@@ -180,7 +179,10 @@ export default function BookingPage() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ justifyContent: "flex-start" }}
+      >
         {/**Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
