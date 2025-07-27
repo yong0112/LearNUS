@@ -164,6 +164,29 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const updatePushToken = async (req, res) => {
+  const { uid, pushToken } = req.body;
+
+  if (!uid || !pushToken) {
+    return res.status(400).json({ error: "Missing uid or pushToken" });
+  }
+
+  try {
+    const updateData = {
+      pushToken,
+      updatedAt: new Date(),
+    };
+
+    await updateUserProfile(uid, updateData);
+    res.status(200).json({ message: "Push token updated successfully" });
+  } catch (err) {
+    res.status(500).json({
+      error: "Failed to update push token",
+      details: err.message,
+    });
+  }
+};
+
 module.exports = {
   fetchUserProfile,
   updateUserProfilePic,
@@ -172,4 +195,5 @@ module.exports = {
   updateFavourites,
   setOnboarding,
   resetPassword,
+  updatePushToken,
 };
