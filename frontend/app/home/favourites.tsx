@@ -101,7 +101,10 @@ export default function favourites() {
             .then(async (data: UserProfile) => {
               console.log(data);
               const filtered = tutors?.filter((tutor: Tutor) => {
-                return Array.isArray(data.favourites) && data.favourites.includes(tutor.id);
+                return (
+                  Array.isArray(data.favourites) &&
+                  data.favourites.includes(tutor.id)
+                );
               });
               console.log("Favourites", filtered);
               setFavTutor(filtered);
