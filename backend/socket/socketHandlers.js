@@ -165,10 +165,10 @@ class SocketHandlers {
       }
     });
 
-    // Handle message reactions
-    socket.on("toggle_reaction", async (data) => {
+    // Handle message deletion
+    socket.on("delete_message", async (data) => {
       try {
-        const { messageId, emoji, chatId } = data;
+        const { messageId, chatId } = data;
         const userId = socket.userId;
 
         if (!userId) {
@@ -176,20 +176,50 @@ class SocketHandlers {
           return;
         }
 
-        const reactions = await Message.toggleReaction(
-          messageId,
-          userId,
-          emoji,
-        );
+        // Get message and verify ownership
+        const messageRef = await db.collection("messages").doc(messageId).get();
 
-        // Emit reaction update to chat room
-        this.io.to(chatId).emit("reaction_updated", {
+        if (!messageRef.exists) {
+          socket.emit("error", { message: "Message not found" });
+          return;
+        }
+
+        const messageData = messageRef.data();
+
+        if (messageData.senderId !== userId) {
+          socket.emit("error", { message: "Access denied" });
+          return;
+        }
+
+        const message = new Message({ id: messageId, ...messageData });
+        const chat = await Chat.getById(chatId);
+
+        // Check if this is the last message
+        let isLastMessage = false;
+        if (chat.lastMessage && chat.lastMessage.timestamp && messageData.timestamp) {
+          isLastMessage = chat.lastMessage.timestamp.toMillis() === messageData.timestamp.toMillis();
+        }
+
+        // Delete the message
+        await message.delete();
+
+        // If deleted message was the last message, update chat's last message
+        if (isLastMessage) {
+          const recentMessages = await Message.getChatMessages(chatId, 1);
+          const newLastMessage = recentMessages.length > 0 ? recentMessages[0] : null;
+          await chat.updateLastMessage(newLastMessage || { message: "", senderId: "", timestamp: null, type: "text" });
+        }
+
+        // Emit delete event to chat room
+        this.io.to(chatId).emit("message_deleted", {
           messageId,
-          reactions,
+          chatId,
           userId,
+          timestamp: new Date(),
         });
       } catch (error) {
-        console.error("Error toggling reaction:", error);
+        console.error("Error deleting message:", error);
+        socket.emit("error", { message: "Failed to delete message" });
       }
     });
 
