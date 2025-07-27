@@ -132,7 +132,13 @@ export default function TutorPost() {
       return;
     }
 
-    if (typeof rate != "number" || rate < 0) {
+    const diff = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+    if (diff < 30) {
+      Alert.alert("Session must be at least 30 minutes long");
+      return;
+    }
+
+    if (isNaN(parseFloat(rate)) || parseFloat(rate) < 0) {
       Alert.alert("Please provide valid hourly rate");
       return;
     }
@@ -152,7 +158,8 @@ export default function TutorPost() {
           dayOfWeek: day,
           startTime: startTime,
           endTime: endTime,
-          rate: rate,
+          rate: parseFloat(rate),
+          booked: false,
         }),
       });
 
