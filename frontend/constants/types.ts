@@ -137,7 +137,6 @@ export interface Message {
   readBy: string[];
   edited: boolean;
   editedAt: string | null;
-  reactions: { [emoji: string]: string[] };
 }
 
 export interface FAQ {
