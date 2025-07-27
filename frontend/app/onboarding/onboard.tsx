@@ -31,7 +31,6 @@ import {
   Day,
   Major,
 } from "../../constants/types";
-import SectionedMultiSelect from "react-native-sectioned-multi-select";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import {
   launchCamera,

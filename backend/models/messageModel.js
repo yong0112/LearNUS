@@ -12,7 +12,6 @@ class Message {
     this.readBy = data.readBy || [];
     this.edited = data.edited || false;
     this.editedAt = data.editedAt || null;
-    this.reactions = data.reactions || {};
   }
 
   // Send a new message
@@ -26,7 +25,6 @@ class Message {
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
         readBy: [messageData.senderId],
         edited: false,
-        reactions: {},
       };
 
       const messageRef = await db.collection("messages").add(newMessage);
@@ -95,40 +93,6 @@ class Message {
       this.edited = true;
     } catch (error) {
       throw new Error(`Error editing message: ${error.message}`);
-    }
-  }
-
-  // Add/remove reaction
-  static async toggleReaction(messageId, userId, emoji) {
-    try {
-      const messageRef = db.collection("messages").doc(messageId);
-      const messageDoc = await messageRef.get();
-
-      if (!messageDoc.exists) {
-        throw new Error("Message not found");
-      }
-
-      const messageData = messageDoc.data();
-      const reactions = messageData.reactions || {};
-
-      if (!reactions[emoji]) {
-        reactions[emoji] = [];
-      }
-
-      const userIndex = reactions[emoji].indexOf(userId);
-      if (userIndex > -1) {
-        reactions[emoji].splice(userIndex, 1);
-        if (reactions[emoji].length === 0) {
-          delete reactions[emoji];
-        }
-      } else {
-        reactions[emoji].push(userId);
-      }
-
-      await messageRef.update({ reactions });
-      return reactions;
-    } catch (error) {
-      throw new Error(`Error toggling reaction: ${error.message}`);
     }
   }
 
