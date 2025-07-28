@@ -134,7 +134,7 @@ export default function paymentPrompt() {
         } as any);
       }
       formData.append("upload_preset", "payment_proof");
-      formData.append("public_id", `classes_${session?.id}_qr`);
+      formData.append("public_id", `classes_${session?.id}_qr_${Date.now()}`);
 
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/difdq7lmt/image/upload`,

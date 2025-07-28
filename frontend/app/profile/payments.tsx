@@ -149,7 +149,7 @@ export default function payments() {
         } as any);
       }
       formData.append("upload_preset", "paynow_qr");
-      formData.append("public_id", `user_${currUser?.uid}_qr`);
+      formData.append("public_id", `user_${currUser?.uid}_qr_${Date.now()}`);
 
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/difdq7lmt/image/upload`,
