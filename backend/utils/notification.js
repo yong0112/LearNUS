@@ -20,6 +20,8 @@ const sendBookingNotification = async (session, status, uid, cid) => {
     // Define notification messages based on status
     switch (status) {
       case "Pending":
+        recipientToken = tutorToken;
+        recipientType = "tutor";
         if (tutorToken && Expo.isExpoPushToken(tutorToken)) {
           messages.push({
             to: tutorToken,
@@ -98,9 +100,14 @@ const sendBookingNotification = async (session, status, uid, cid) => {
         break;
     }
 
+    console.log("Recipient type:", recipientType);
+    console.log("Recipient token:", recipientToken ? "EXISTS" : "MISSING");
+    console.log("Messages to send:", messages.length);
+
     // Send notifications
     if (messages.length > 0) {
       const chunks = expo.chunkPushNotifications(messages);
+      console.log("Number of chunks:", chunks.length);
       for (const chunk of chunks) {
         try {
           await expo.sendPushNotificationsAsync(chunk);
