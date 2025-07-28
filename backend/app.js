@@ -45,6 +45,7 @@ app.use("/api/chat", chat);
 app.use("/api/message", message);
 const SessionCleanUpJob = require("./jobs/sessionEnded");
 const sessionCleanupJob = new SessionCleanUpJob();
+sessionCleanupJob.start();
 
 // Initialize Socket.IO handlers
 const socketHandlers = new SocketHandlers(io);
