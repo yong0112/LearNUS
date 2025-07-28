@@ -33,7 +33,13 @@ import {
 import { auth } from "../../lib/firebase";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Class, Tutor, UserProfile, Day } from "../../constants/types";
+import {
+  Class,
+  Tutor,
+  UserProfile,
+  Day,
+  Notification,
+} from "../../constants/types";
 import { useFonts } from "expo-font";
 import { useTheme } from "@/components/ThemedContext";
 
@@ -46,6 +52,7 @@ export default function Home() {
   const [todayClass, setTodayClass] = useState<Class[]>([]);
   const [tutors, setTutors] = useState<Tutor[]>([]);
   const [shortlisted, setShortlisted] = useState<string[]>();
+  const [hasNoti, setHasNoti] = useState<boolean>(false);
   const [dayOptions, setDayOptions] = useState<Day[]>([]);
   const [tutorProfiles, setTutorProfiles] = useState<
     Record<string, UserProfile>
@@ -159,6 +166,31 @@ export default function Home() {
       }
     };
 
+    const fetchNotification = async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        try {
+          await fetch(
+            `https://learnus.onrender.com/api/users/${currentUser.uid}/fetchNoti`,
+          )
+            .then((res) => {
+              if (!res.ok)
+                throw new Error("Failed to fetch user notifications");
+              return res.json();
+            })
+            .then((data) => {
+              const notiCount = data.filter(
+                (noti: Notification) => !noti.isRead,
+              );
+              setHasNoti(notiCount == 0 ? false : true);
+            });
+        } catch (err) {
+          console.error(err);
+          setShortlisted([]);
+        }
+      }
+    };
+
     const fetchConstants = async () => {
       fetch("https://learnus.onrender.com/api/constants")
         .then((res) => {
@@ -174,6 +206,7 @@ export default function Home() {
     };
 
     fetchFavourite();
+    fetchNotification();
     fetchConstants();
     return () => unsubscribe();
   }, []);
@@ -479,7 +512,7 @@ export default function Home() {
             >
               <MaterialIcons name="notifications-none" size={30} color={text} />
             </TouchableOpacity>
-            <View style={styles.notificationBadge} />
+            {hasNoti && <View style={styles.notificationBadge} />}
             <View />
           </View>
           <View
