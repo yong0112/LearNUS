@@ -122,4 +122,34 @@ const sendBookingNotification = async (session, status, uid, cid) => {
   }
 };
 
-module.exports = { sendBookingNotification };
+function convertTitle(status, name, course, slot) {
+  let title = "";
+  let message = "";
+
+  if (status == "Pending") {
+    title = "Session booked";
+    message = `${name} has booked your session ${course} on ${slot}`;
+  } else if (status == "Accepted") {
+    title = "Booking accepted";
+    message = `${name} have accepted your booking for ${course} on ${slot}`;
+  } else if (status == "Rejected") {
+    title = "Booking rejected";
+    message = `${name} have rejected your booking for ${course} on ${slot}`;
+  } else if (status == "Paid") {
+    title = "Payment made";
+    message = `${name} has paid for session ${course} on ${slot}`;
+  } else if (status == "Confirmed") {
+    title = "Session confirmed";
+    message = `Your session with ${name} for ${course} on ${slot} is confirmed, session get started!`;
+  } else if (status == "Completed") {
+    title = "Session completed";
+    message = `Your session with ${name} for ${course} on ${slot} is completed, please proceed to provide feedback`;
+  } else if (status == "Reviewed") {
+    title = "Session reviewed";
+    message = `${name} has reviewed your session for ${course} on ${slot}, check under your profile`;
+  }
+
+  return { title, message };
+}
+
+module.exports = { sendBookingNotification, convertTitle };

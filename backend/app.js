@@ -29,6 +29,8 @@ const reviewsRoutes = require("./routes/reviews");
 app.use("/api/users", reviewsRoutes);
 const sessionRoutes = require("./routes/session");
 app.use("/api/users", sessionRoutes);
+const notificationRoutes = require("./routes/notifications");
+app.use("/api/users", notificationRoutes);
 const tutorRoutes = require("./routes/tutors");
 app.use("/api/tutors", tutorRoutes);
 const constantRoutes = require("./routes/constants");
@@ -43,7 +45,6 @@ app.use("/api/chat", chat);
 app.use("/api/message", message);
 const SessionCleanUpJob = require("./jobs/sessionEnded");
 const sessionCleanupJob = new SessionCleanUpJob();
-sessionCleanupJob.start();
 
 // Initialize Socket.IO handlers
 const socketHandlers = new SocketHandlers(io);

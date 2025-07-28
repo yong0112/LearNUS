@@ -25,7 +25,6 @@ import {
 } from "react-native";
 import { db, auth } from "../lib/firebase";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { registerForPushNotificationsAsync } from "@/lib/notification";
 import { ThemedText } from "@/components/ThemedText";
 import { UserProfile } from "@/constants/types";
 
@@ -67,8 +66,6 @@ export default function Login() {
         );
         return;
       }
-
-      await registerForPushNotificationsAsync();
 
       // Update firestore doc
       await updateDoc(doc(db, "users", user.uid), {
