@@ -11,7 +11,7 @@ class SessionCleanupJob {
     // Run every minute: '* * * * *'
     // Run every hour: '0 * * * *'
 
-    cron.schedule("* * * * *", async () => {
+    cron.schedule("*/5 * * * *", async () => {
       if (this.isRunning) {
         console.log("Session cleanup job already running, skipping...");
         return;

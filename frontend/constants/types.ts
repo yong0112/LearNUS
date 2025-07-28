@@ -161,3 +161,12 @@ export interface Event {
   endTime: string;
   date: string;
 }
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  userId: string;
+  sessionId: string;
+  isRead: boolean;
+}
