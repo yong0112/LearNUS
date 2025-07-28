@@ -1,27 +1,50 @@
 const cron = require("node-cron");
-const admin = require("firebase-admin");
-const db = admin.firestore();
+const { updateExpiredSessions } = require("../models/sessionModel");
 
-cron.schedule("0 * * * *", async () => {
-  try {
-    const now = new Date();
-    const snapshot = await db
-      .collectionGroup("classes")
-      .where("endedAt", "<=", now)
-      .get();
+class SessionCleanupJob {
+  constructor() {
+    this.isRunning = false;
+  }
 
-    const updatePromises = [];
+  start() {
+    // Run every 5 minutes: '*/5 * * * *'
+    // Run every minute: '* * * * *'
+    // Run every hour: '0 * * * *'
 
-    snapshot.forEach((doc) => {
-      const session = doc.data();
+    cron.schedule("* * * * *", async () => {
+      if (this.isRunning) {
+        console.log("Session cleanup job already running, skipping...");
+        return;
+      }
 
-      if (session.status != "Completed") {
-        const updatePromise = doc.ref.update({ status: "Completed" });
-        updatePromises.push(updatePromise);
-        console.log(`Session ${doc.id} is marked as completed`);
+      this.isRunning = true;
+
+      try {
+        console.log("Starting session cleanup job...");
+        const result = await updateExpiredSessions();
+        console.log("Session cleanup job completed:", result);
+      } catch (error) {
+        console.error("Session cleanup job failed:", error);
+      } finally {
+        this.isRunning = false;
       }
     });
-  } catch (err) {
-    console.error("Error updating session statuses:", err);
+
+    console.log("Session cleanup job scheduled successfully");
   }
-});
+
+  // Method to run cleanup manually
+  async runNow() {
+    try {
+      console.log("Running session cleanup manually...");
+      const result = await updateExpiredSessions();
+      console.log("Manual session cleanup completed:", result);
+      return result;
+    } catch (error) {
+      console.error("Manual session cleanup failed:", error);
+      throw error;
+    }
+  }
+}
+
+module.exports = SessionCleanupJob;

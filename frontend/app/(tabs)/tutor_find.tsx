@@ -484,7 +484,6 @@ export default function tutoring() {
       backgroundColor: isDarkMode ? "#999999" : "white",
       borderRadius: 20,
       padding: 15,
-      alignItems: "flex-start",
       overflow: "hidden",
       elevation: 10,
       shadowColor: "#999999",
@@ -678,7 +677,10 @@ export default function tutoring() {
           onRequestClose={closeModal}
         >
           <View style={styles.modalOverlay}>
-            <ScrollView style={styles.modalContent}>
+            <ScrollView
+              style={styles.modalContent}
+              contentContainerStyle={{ alignItems: "flex-start" }}
+            >
               {selectedTutor &&
                 (() => {
                   const profile = tutorProfile[selectedTutor.tutor];
