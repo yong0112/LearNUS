@@ -5,7 +5,7 @@ import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { View } from "react-native";
+import { View, Platform } from "react-native";
 import { ThemeProvider } from "@/components/ThemedContext";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -21,6 +21,17 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "Booking Notifications",
+        importance: Notifications.AndroidImportance.MAX, // This is crucial!
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+        sound: "default",
+        enableVibrate: true,
+        showBadge: true,
+      });
+    }
     // Handle notifications received while app is in foreground
     const subscription = Notifications.addNotificationReceivedListener(
       (notification) => {
