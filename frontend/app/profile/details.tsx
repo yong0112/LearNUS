@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -124,15 +125,26 @@ export default function Details() {
       maxHeight: 1000,
     };
 
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel || response.errorMessage) return;
+    const mockAsset: Asset = {
+      uri: "https://randomuser.me/api/portraits/men/23.jpg",
+      type: "image/jpeg",
+      fileName: "test_image.jpg",
+      fileSize: 204800, // in bytes
+      width: 640,
+      height: 480,
+    };
+    setSelectedImage(mockAsset);
+    uploadToCloud(mockAsset);
 
-      if (response.assets && response.assets[0]) {
-        const imageFile = response.assets[0];
-        setSelectedImage(imageFile);
-        uploadToCloud(imageFile);
-      }
-    });
+    // launchImageLibrary(options, (response) => {
+    //   if (response.didCancel || response.errorMessage) return;
+
+    //   if (response.assets && response.assets[0]) {
+    //     const imageFile = response.assets[0];
+    //     setSelectedImage(imageFile);
+    //     uploadToCloud(imageFile);
+    //   }
+    // });
   };
 
   const uploadToCloud = async (imageFile: Asset) => {
@@ -150,7 +162,7 @@ export default function Details() {
         } as any);
       }
       formData.append("upload_preset", "profile_pictures");
-      formData.append("public_id", `user_${currUser?.uid}`);
+      formData.append("public_id", `user_${currUser?.uid}_${Date.now()}`);
 
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/difdq7lmt/image/upload`,
@@ -362,6 +374,22 @@ export default function Details() {
           </View>
         </ScrollView>
       </View>
+
+      <Modal transparent visible={uploading}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "black",
+            justifyContent: "center",
+            alignItems: "center",
+            opacity: 0.7,
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: text }}>
+            Loading...
+          </Text>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
