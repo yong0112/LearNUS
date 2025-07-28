@@ -5,7 +5,13 @@ const {
   getUserSessionWithExpirationCheck,
 } = require("../models/sessionModel");
 const { getUserClasses } = require("../models/classesModel");
-const { sendBookingNotification } = require("../utils/notification");
+const {
+  sendBookingNotification,
+  convertTitle,
+} = require("../utils/notification");
+const { sendNoti } = require("../models/notificationModel");
+const { getUserProfile } = require("../models/userModel");
+const { formatAvailability } = require("../utils/timeConverter");
 
 const fetchUserSession = async (req, res) => {
   const uid = req.params.uid;
@@ -46,7 +52,24 @@ const updateSessionStatus = async (req, res) => {
     await updateUserSessionField(uid, cid, updatedData);
     await updateUserSessionField(otherId, otherSessionId, updatedData);
 
-    await sendBookingNotification(session, status, uid, cid);
+    const profile = await getUserProfile(uid);
+    const name = profile.firstName + " " + profile.lastName;
+    const course = session.course;
+    const slot = formatAvailability(
+      session.dayOfWeek,
+      session.startTime,
+      session.endTime,
+    );
+    const noti = convertTitle(status, name, course, slot);
+
+    const notificationResult = await sendNoti(
+      otherId,
+      noti.title,
+      noti.message,
+      uid,
+      otherSessionId,
+    );
+    console.log("Notification created:", notificationResult);
 
     res.json({ message: "Session updated successfully" });
   } catch (err) {
@@ -76,7 +99,24 @@ const updatePaymentProof = async (req, res) => {
     await updateUserSessionField(uid, cid, updatedData);
     await updateUserSessionField(otherId, otherSessionId, updatedData);
 
-    await sendBookingNotification(session, "Paid", uid, cid);
+    const profile = await getUserProfile(uid);
+    const name = profile.firstName + " " + profile.lastName;
+    const course = session.course;
+    const slot = formatAvailability(
+      session.dayOfWeek,
+      session.startTime,
+      session.endTime,
+    );
+    const noti = convertTitle("Paid", name, course, slot);
+
+    const notificationResult = await sendNoti(
+      otherId,
+      noti.title,
+      noti.message,
+      uid,
+      otherSessionId,
+    );
+    console.log("Notification created:", notificationResult);
 
     res.json({ message: "Payment proof posted successfully" });
   } catch (err) {

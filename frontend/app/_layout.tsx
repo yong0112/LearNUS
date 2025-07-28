@@ -7,10 +7,8 @@ import "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { View, Platform } from "react-native";
 import { ThemeProvider } from "@/components/ThemedContext";
-import * as Notifications from "expo-notifications";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { MenuProvider } from "react-native-popup-menu";
-import { registerForPushNotificationsAsync } from "@/lib/notification";
 import "../lib/firebase.ts";
 
 export default function RootLayout() {
@@ -19,41 +17,6 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const router = useRouter();
-
-  useEffect(() => {
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "Booking Notifications",
-        importance: Notifications.AndroidImportance.MAX, // This is crucial!
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-        sound: "default",
-        enableVibrate: true,
-        showBadge: true,
-      });
-    }
-    // Handle notifications received while app is in foreground
-    const subscription = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        console.log("Notification received:", notification);
-      },
-    );
-
-    // Handle notification tapped (foreground or background)
-    const responseSubscription =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        const { cid } = response.notification.request.content.data;
-        if (cid) {
-          router.push(`/booking/bookingStatus?id=${cid}`);
-        }
-      });
-
-    // Clean up listeners on unmount
-    return () => {
-      subscription.remove();
-      responseSubscription.remove();
-    };
-  }, []);
 
   if (!loaded) {
     // Async font loading only occurs in development.
