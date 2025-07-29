@@ -22,6 +22,40 @@ module.exports = {
       title: "How to delete post if I had accidentally post on forum wrongly?",
       ans: "On the forum browsing page and search for your post with title, or click onto your post, obseve the three dots on top right corner, click on that and choose Delete post to permanently delete your posting.",
     },
+    {
+      title: "How do I become a tutor?",
+      ans: "To become a tutor, sign up and complete onboarding first. Then, go to the Tutor Posting page, select the code of course you want to teach, your teaching mode (online/physical), short description about your class, your available time slots, and hourly rate. Once submitted, your tutor profile will be visible for other users to discover and book.",
+    },
+    {
+      title: "What happens after I book a tutoring session?",
+      ans: "After submitting a booking request, the tutor will be notified. If they accept, you will be prompted to upload a PayNow payment proof. Once the tutor confirms receipt, your session will appear in your calendar. All booking status updates are visible under Profile -> Classes -> Tap on class card.",
+    },
+    {
+      title: "Is my payment secure on LearNUS?",
+      ans: "LearNUS does not process or hold any payments directly. All transactions happen externally via PayNow using the tutor QR code. After payment, students are required to upload proof (e.g. a screenshot), which is stored securely and shown to the tutor for manual confirmation. Please note: LearNUS does not intervene in payment disputes or refunds. It is the responsibility of both students and tutors to communicate clearly and settle any disagreements. Our platform only facilitates the session workflow, not the financial transaction.",
+    },
+    {
+      title:
+        "Can LearNUS help if there's a disagreement between a student and tutor?",
+      ans: "LearNUS is a neutral platform designed to help students and tutors connect. We do not mediate or resolve disputes between users. All communication, expectations, and agreements (including rescheduling, refunds, and lesson conduct) should be handled directly between the tutor and student via in-app messaging.",
+    },
+    {
+      title:
+        "What happens if I accidentally book the wrong tutor or time slot?",
+      ans: "If a mistake happens, please reach out to the tutor immediately through in-app chat to request a cancellation or change. Tutors are free to accept or reject rescheduling requests.",
+    },
+    {
+      title: " Will I get notified when booking status get updates?",
+      ans: "Yes — LearNUS uses in-app notification prompts for key events like new booking requests, payment reminders, or session confirmations. These appear inside the app (not as push notifications) on Home page, please take note the notifications icon on the top left corner.",
+    },
+    {
+      title: "What is the purpose of the Forum section?",
+      ans: "The Forum is a space for open academic discussion. Users can post questions, share knowledge, and reply to others — optionally tagging their post with a specific course. It’s designed to support peer learning beyond 1-to-1 tutoring. Please note that LearNUS does not moderate or guarantee the accuracy of posts. Users should use their judgment when interacting and upvoting.",
+    },
+    {
+      title: "How do I report an issue with a user or a session?",
+      ans: "If you encounter inappropriate behaviour, suspicious activity, or any violation of platform guidelines, you can report it via the Help & Support section under your Profile tab. Please provide a clear description of the issue — including names, session details, or post details if applicable.",
+    },
   ],
   MAJORS: [
     {

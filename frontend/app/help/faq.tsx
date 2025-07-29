@@ -87,11 +87,13 @@ export default function faq() {
       paddingHorizontal: 5,
       justifyContent: "space-between",
       marginVertical: 5,
+      flex: 1,
     },
     titleText: {
       fontSize: 18,
       fontWeight: "bold",
       color: text,
+      flex: 1,
     },
     ansText: {
       fontSize: 16,

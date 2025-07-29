@@ -1,3 +1,4 @@
+import { ThemedView } from "@/components/ThemedView";
 import { Class, UserProfile } from "@/constants/types";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { auth } from "@/lib/firebase";
@@ -7,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,7 +31,7 @@ export default function payments() {
     useState<Record<string, UserProfile>>();
   const [filteredClasses, setFilteredClasses] = useState<Class[]>();
   const [selectedImage, setSelectedImage] = useState<Asset>();
-  const [uploading, setUploading] = useState<boolean>();
+  const [uploading, setUploading] = useState<boolean>(false);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme == "dark";
   const bg = useThemeColor({}, "background");
@@ -322,94 +324,112 @@ export default function payments() {
   });
 
   return (
-    <View style={styles.container}>
-      {/**Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} color={text} />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Finance</Text>
-        <View style={{ width: 40 }} />
-      </View>
+    <ThemedView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Finance</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      {/**Transaction History */}
-      <View>
-        <Text style={styles.title}>Transaction History</Text>
-        <ScrollView style={styles.content}>
-          {filteredClasses && otherProfiles && filteredClasses.length ? (
-            filteredClasses.map((cls: Class) => {
-              if (cls.role == "Student") {
-                return (
-                  <View key={cls.id} style={styles.detailBox}>
-                    <View style={styles.paymentDetailContainer}>
-                      <Image
-                        style={styles.avatar}
-                        source={{
-                          uri: otherProfiles[cls.people].profilePicture,
-                        }}
-                      />
-                      <Text style={styles.paymentDetail}>
-                        Payment made to {otherProfiles[cls.people].firstName}{" "}
-                        {otherProfiles[cls.people].lastName}
-                      </Text>
+        {/**Transaction History */}
+        <View>
+          <Text style={styles.title}>Transaction History</Text>
+          <ScrollView style={styles.content}>
+            {filteredClasses && otherProfiles && filteredClasses.length ? (
+              filteredClasses.map((cls: Class) => {
+                if (cls.role == "Student") {
+                  return (
+                    <View key={cls.id} style={styles.detailBox}>
+                      <View style={styles.paymentDetailContainer}>
+                        <Image
+                          style={styles.avatar}
+                          source={{
+                            uri: otherProfiles[cls.people].profilePicture,
+                          }}
+                        />
+                        <Text style={styles.paymentDetail}>
+                          Payment made to {otherProfiles[cls.people].firstName}{" "}
+                          {otherProfiles[cls.people].lastName}
+                        </Text>
+                      </View>
+                      <Text style={styles.amountPaid}>-S${cls.rate}</Text>
                     </View>
-                    <Text style={styles.amountPaid}>-S${cls.rate}</Text>
-                  </View>
-                );
-              } else {
-                return (
-                  <View key={cls.id} style={styles.detailBox}>
-                    <View style={styles.paymentDetailContainer}>
-                      <Image
-                        style={styles.avatar}
-                        source={{
-                          uri: otherProfiles[cls.people].profilePicture,
-                        }}
-                      />
-                      <Text style={styles.paymentDetail}>
-                        Payment received from{" "}
-                        {otherProfiles[cls.people].firstName}{" "}
-                        {otherProfiles[cls.people].lastName}
-                      </Text>
+                  );
+                } else {
+                  return (
+                    <View key={cls.id} style={styles.detailBox}>
+                      <View style={styles.paymentDetailContainer}>
+                        <Image
+                          style={styles.avatar}
+                          source={{
+                            uri: otherProfiles[cls.people].profilePicture,
+                          }}
+                        />
+                        <Text style={styles.paymentDetail}>
+                          Payment received from{" "}
+                          {otherProfiles[cls.people].firstName}{" "}
+                          {otherProfiles[cls.people].lastName}
+                        </Text>
+                      </View>
+                      <Text style={styles.amountReceived}>+S${cls.rate}</Text>
                     </View>
-                    <Text style={styles.amountReceived}>+S${cls.rate}</Text>
-                  </View>
-                );
-              }
-            })
-          ) : (
-            <View style={styles.noQR}>
-              <Text style={styles.noQRText}>No transactions yet.</Text>
-            </View>
-          )}
-        </ScrollView>
-      </View>
-
-      {/**QR */}
-      <View>
-        <Text style={styles.title}>Payment Method</Text>
-        <View style={styles.content}>
-          <View style={styles.paymentMethod}>
-            <Text style={styles.paymentMethodText}>PayNow QR code</Text>
-            <MaterialIcons name="qr-code-2" size={30} color={"black"} />
-          </View>
-          <Text style={styles.subtitle}>QR code</Text>
-          <View style={styles.qr}>
-            {profile && profile.QR ? (
-              <Image style={styles.qr} source={{ uri: profile.QR }} />
+                  );
+                }
+              })
             ) : (
               <View style={styles.noQR}>
-                <Text style={styles.noQRText}>
-                  No PayNow QR code uploaded yet.
-                </Text>
+                <Text style={styles.noQRText}>No transactions yet.</Text>
               </View>
             )}
+          </ScrollView>
+        </View>
+
+        {/**QR */}
+        <View>
+          <Text style={styles.title}>Payment Method</Text>
+          <View style={styles.content}>
+            <View style={styles.paymentMethod}>
+              <Text style={styles.paymentMethodText}>PayNow QR code</Text>
+              <MaterialIcons name="qr-code-2" size={30} color={text} />
+            </View>
+            <Text style={styles.subtitle}>QR code</Text>
+            <View style={styles.qr}>
+              {profile && profile.QR ? (
+                <Image style={styles.qr} source={{ uri: profile.QR }} />
+              ) : (
+                <View style={styles.noQR}>
+                  <Text style={styles.noQRText}>
+                    No PayNow QR code uploaded yet.
+                  </Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity style={styles.button} onPress={handleUpload}>
+              <Text style={styles.buttonText}>Upload QR Code</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.button} onPress={handleUpload}>
-            <Text style={styles.buttonText}>Upload QR Code</Text>
-          </TouchableOpacity>
         </View>
       </View>
-    </View>
+
+      <Modal transparent visible={uploading}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "black",
+            justifyContent: "center",
+            alignItems: "center",
+            opacity: 0.7,
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: text }}>
+            Loading...
+          </Text>
+        </View>
+      </Modal>
+    </ThemedView>
   );
 }
