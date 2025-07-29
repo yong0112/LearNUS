@@ -55,38 +55,33 @@ export default function TutorPost() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        fetch("https://api.nusmods.com/v2/2024-2025/moduleList.json")
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch local courses");
-            return res.json();
-          })
-          .then((data) => {
-            return data.map(
-              (course: {
-                moduleCode: string;
-                title: string;
-                semesters: number[];
-              }) => ({
-                label: `${course.moduleCode} - ${course.title}`,
-                value: course.moduleCode,
-              }),
-            );
-          })
-          .then((data) => {
-            setCourseOptions(data);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
+        const res = await fetch(
+          "https://api.nusmods.com/v2/2025-2026/moduleList.json",
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch from NUS Mods API");
+
+        const data = await res.json();
+        const formattedData = data.map(
+          (course: {
+            moduleCode: string;
+            title: string;
+            semesters: number[];
+          }) => ({
+            label: `${course.moduleCode} - ${course.title}`,
+            value: course.moduleCode,
+          }),
+        );
+        setCourseOptions(formattedData);
       } catch (error) {
         console.warn("Using local data due to error: ", error);
-        fetch("https://learnus.onrender.com/api/courses")
+        fetch("https://learnus.onrender.com/api/constants/module")
           .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch local courses");
             return res.json();
           })
           .then((data) => {
-            return data.map(
+            return data.modules.map(
               (course: {
                 moduleCode: string;
                 title: string;

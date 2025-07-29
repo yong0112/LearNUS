@@ -7,6 +7,7 @@ import {
   useColorScheme,
   Alert,
   ScrollView,
+  Modal,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -295,92 +296,110 @@ export default function paymentPrompt() {
   });
 
   return (
-    <ThemedView style={styles.container}>
-      {/**Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={20} color={text} />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Payment</Text>
-        <View style={{ width: 40 }} />
+    <ThemedView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/**Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-outline" size={20} color={text} />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Payment</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        {/**Class details */}
+        <ScrollView>
+          {session ? (
+            <View>
+              <View style={styles.classDetails}>
+                <Text style={styles.subHeaderText}>Class Details</Text>
+                <View style={styles.detailBox}>
+                  <View>
+                    <Text style={styles.titleText}>Tutor name</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.detailText}>
+                      {profile?.firstName} {profile?.lastName}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.detailBox}>
+                  <View>
+                    <Text style={styles.titleText}>Course code</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.detailText}>{session?.course}</Text>
+                  </View>
+                </View>
+                <View style={styles.detailBox}>
+                  <View>
+                    <Text style={styles.titleText}>Time slot</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.detailText}>
+                      {formatAvailability(
+                        session?.dayOfWeek,
+                        session?.startTime,
+                        session?.endTime,
+                      )}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/**Payment Details */}
+              <View style={styles.classDetails}>
+                <Text style={styles.subHeaderText}>Payment Details</Text>
+                <View style={styles.qr}>
+                  <Image
+                    source={
+                      profile?.QR
+                        ? { uri: profile.QR }
+                        : require("../../assets/images/fakeQR.jpg")
+                    }
+                  />
+                </View>
+                <View style={styles.detailBox}>
+                  <View>
+                    <Text style={styles.titleText}>Amount to pay (in S$)</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.detailText}>{session.rate}</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View />
+          )}
+
+          {/**Upload payment proof */}
+          <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+            <Text style={styles.uploadButtonText}>Upload receipt</Text>
+          </TouchableOpacity>
+
+          {/**Submit */}
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
-      {/**Class details */}
-      <ScrollView>
-        {session ? (
-          <View>
-            <View style={styles.classDetails}>
-              <Text style={styles.subHeaderText}>Class Details</Text>
-              <View style={styles.detailBox}>
-                <View>
-                  <Text style={styles.titleText}>Tutor name</Text>
-                </View>
-                <View>
-                  <Text style={styles.detailText}>
-                    {profile?.firstName} {profile?.lastName}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.detailBox}>
-                <View>
-                  <Text style={styles.titleText}>Course code</Text>
-                </View>
-                <View>
-                  <Text style={styles.detailText}>{session?.course}</Text>
-                </View>
-              </View>
-              <View style={styles.detailBox}>
-                <View>
-                  <Text style={styles.titleText}>Time slot</Text>
-                </View>
-                <View>
-                  <Text style={styles.detailText}>
-                    {formatAvailability(
-                      session?.dayOfWeek,
-                      session?.startTime,
-                      session?.endTime,
-                    )}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/**Payment Details */}
-            <View style={styles.classDetails}>
-              <Text style={styles.subHeaderText}>Payment Details</Text>
-              <View style={styles.qr}>
-                <Image
-                  source={
-                    profile?.QR
-                      ? { uri: profile.QR }
-                      : require("../../assets/images/fakeQR.jpg")
-                  }
-                />
-              </View>
-              <View style={styles.detailBox}>
-                <View>
-                  <Text style={styles.titleText}>Amount to pay (in S$)</Text>
-                </View>
-                <View>
-                  <Text style={styles.detailText}>{session.rate}</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        ) : (
-          <View />
-        )}
-
-        {/**Upload payment proof */}
-        <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-          <Text style={styles.uploadButtonText}>Upload receipt</Text>
-        </TouchableOpacity>
-
-        {/**Submit */}
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      <Modal transparent visible={uploading}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "black",
+            justifyContent: "center",
+            alignItems: "center",
+            opacity: 0.7,
+          }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: "600", color: text }}>
+            Loading...
+          </Text>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }

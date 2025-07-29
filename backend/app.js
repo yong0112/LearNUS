@@ -43,17 +43,21 @@ const eventRoutes = require("./routes/events");
 app.use("/api/users", eventRoutes);
 app.use("/api/chat", chat);
 app.use("/api/message", message);
+const reportRoutes = require("./routes/reports");
+app.use("/api/reports", reportRoutes);
+
 const SessionCleanUpJob = require("./jobs/sessionEnded");
 const sessionCleanupJob = new SessionCleanUpJob();
 sessionCleanupJob.start();
+const FetchModulesJob = require("./jobs/updateModuleList");
+const fetchModulesJob = new FetchModulesJob();
+fetchModulesJob.start();
 
 // Initialize Socket.IO handlers
 const socketHandlers = new SocketHandlers(io);
 io.on("connection", (socket) => {
   socketHandlers.handleConnection(socket);
 });
-const reportRoutes = require("./routes/reports");
-app.use("/api/reports", reportRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is working~~");
