@@ -125,26 +125,15 @@ export default function Details() {
       maxHeight: 1000,
     };
 
-    const mockAsset: Asset = {
-      uri: "https://randomuser.me/api/portraits/men/23.jpg",
-      type: "image/jpeg",
-      fileName: "test_image.jpg",
-      fileSize: 204800, // in bytes
-      width: 640,
-      height: 480,
-    };
-    setSelectedImage(mockAsset);
-    uploadToCloud(mockAsset);
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel || response.errorMessage) return;
 
-    // launchImageLibrary(options, (response) => {
-    //   if (response.didCancel || response.errorMessage) return;
-
-    //   if (response.assets && response.assets[0]) {
-    //     const imageFile = response.assets[0];
-    //     setSelectedImage(imageFile);
-    //     uploadToCloud(imageFile);
-    //   }
-    // });
+      if (response.assets && response.assets[0]) {
+        const imageFile = response.assets[0];
+        setSelectedImage(imageFile);
+        uploadToCloud(imageFile);
+      }
+    });
   };
 
   const uploadToCloud = async (imageFile: Asset) => {
